@@ -1,14 +1,26 @@
 <?php
-    include '../../conexion.php'; 
+include '../../conexion.php'; 
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        // Recogemos los datos del formulario
-        $nombre_hamburguesa = $_POST['nombre_hamburguesa'];
-        $descripcion = $_POST['descripcion'];
-        $precio = $_POST['precio'];
-        $ingredientes = $_POST['ingredientes']; // Array de ingredientes con cantidades
-        $aderezos = $_POST['aderezos']; // Array de aderezos
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Recogemos los datos del formulario
+    $nombre_hamburguesa = $_POST['nombre_hamburguesa'];
+    $descripcion = $_POST['descripcion'];
+    $precio = $_POST['precio'];
+    $ingredientes = $_POST['ingredientes']; // Array de ingredientes con cantidades
+    $aderezos = isset($_POST['aderezos']) ? $_POST['aderezos'] : []; // Array de aderezos, vacío si no se selecciona ninguno
 
+    // Validamos que haya al menos un ingrediente con cantidad mayor a 0
+    $tiene_ingredientes = false;
+    foreach ($ingredientes as $cantidad) {
+        if ($cantidad > 0) {
+            $tiene_ingredientes = true;
+            break;
+        }
+    }
+
+    if (!$tiene_ingredientes) {
+        echo "<div class='alert alert-danger' role='alert'>Debes agregar al menos un ingrediente con cantidad mayor a 0.</div>";
+    } else {
         // Insertamos la nueva hamburguesa en la tabla Hamburguesa
         $sql = "INSERT INTO hamburguesa (nombre_hamburguesa, descripcion, precio) 
                 VALUES (?, ?, ?)";
@@ -29,21 +41,35 @@
                 }
             }
 
-            // Insertamos cada aderezo en la tabla Hamburguesa_Aderezo
-            foreach ($aderezos as $id_aderezo) {
-                $sql_aderezo = "INSERT INTO hamburguesa_aderezo (id_hamburguesa, id_aderezo)
-                                VALUES (?, ?)";
-                $stmt_aderezo = $conexion->prepare($sql_aderezo);
-                $stmt_aderezo->bind_param("ii", $id_hamburguesa, $id_aderezo); // "ii" para int, int
-                $stmt_aderezo->execute();
+            // Insertamos cada aderezo en la tabla Hamburguesa_Aderezo solo si hay aderezos seleccionados
+            if (!empty($aderezos)) {
+                foreach ($aderezos as $id_aderezo) {
+                    $sql_aderezo = "INSERT INTO hamburguesa_aderezo (id_hamburguesa, id_aderezo)
+                                    VALUES (?, ?)";
+                    $stmt_aderezo = $conexion->prepare($sql_aderezo);
+                    $stmt_aderezo->bind_param("ii", $id_hamburguesa, $id_aderezo); // "ii" para int, int
+                    $stmt_aderezo->execute();
+                }
             }
 
-            echo "<div class='alert alert-success' role='alert'>Hamburguesa, ingredientes y aderezos agregados exitosamente</div>";
+            echo "<div class='container mt-3'>
+                <div class='alert alert-success alert-dismissible fade show' role='alert'>
+                    Hamburguesa agregada exitosamente.
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>
+              </div>";
         } else {
-            echo "<div class='alert alert-danger' role='alert'>Error: " . $sql . "<br>" . $conexion->error . "</div>";
+            echo "<div class='container mt-3'>
+                <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                    Error: " . $stmt->error . "
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>
+              </div>";
         }
     }
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -75,8 +101,6 @@
             <label for="precio" class="form-label">Precio:</label>
             <input type="number" step="0.01" name="precio" id="precio" class="form-control" required>
         </div>
-
-        <!-- Ingredientes con cantidades -->
         <div class="mb-3">
             <label for="ingredientes" class="form-label">Selecciona Ingredientes y Cantidades:</label>
             <?php
@@ -95,8 +119,6 @@
             }
             ?>
         </div>
-
-        <!-- Aderezos con selección múltiple -->
         <div class="mb-3">
             <label for="aderezos" class="form-label">Selecciona Aderezos:</label>
             <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ced4da; padding: 10px; border-radius: 0.25rem;">

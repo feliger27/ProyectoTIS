@@ -21,8 +21,6 @@ $result = $conexion->query($sql);
             <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
         </div>
     <?php endif; ?>
-        
-    }
     
     <div class="d-flex justify-content-between align-items-center">
         <h1>Listado de Aderezos</h1>

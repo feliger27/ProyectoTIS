@@ -20,7 +20,6 @@ $result = $conexion->query($sql);
 <body>
 
 <div class="container mt-4">
-    <!-- Mensaje de confirmación de eliminación -->
     <?php if (isset($_GET['eliminado'])): ?>
         <div class='alert alert-success alert-dismissible fade show' role='alert'>
             Pedido ID <?php echo htmlspecialchars($_GET['id']); ?> eliminado exitosamente.
@@ -28,16 +27,11 @@ $result = $conexion->query($sql);
         </div>
     <?php endif; ?>
     
-    <!-- Encabezado con botón de volver -->
     <div class="d-flex justify-content-between align-items-center">
         <h1>Listado de Pedidos</h1>
         <button class="btn btn-secondary" onclick="window.location.href='../../index.php'">Volver</button>
     </div>
 
-    <!-- Botón para agregar un nuevo pedido -->
-    <a href="insertar.php" class="btn btn-success mb-3">Agregar Nuevo Pedido</a>
-
-    <!-- Tabla de pedidos -->
     <table class="table table-striped">
         <thead>
             <tr>
@@ -51,7 +45,6 @@ $result = $conexion->query($sql);
         </thead>
         <tbody>
             <?php if ($result->num_rows > 0): ?>
-                <!-- Iteración sobre los pedidos obtenidos -->
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <tr>
                         <td><?php echo $row['id_pedido']; ?></td>
@@ -60,16 +53,12 @@ $result = $conexion->query($sql);
                         <td><?php echo '$' . number_format($row['total'], 2); ?></td>
                         <td><?php echo ucfirst($row['estado_pedido']); ?></td>
                         <td>
-                            <!-- Botón para editar el pedido -->
                             <a href="editar.php?id=<?php echo $row['id_pedido']; ?>" class="btn btn-primary btn-sm">Editar</a>
-
-                            <!-- Botón para eliminar el pedido (con modal de confirmación) -->
                             <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#eliminarModal" data-id="<?php echo $row['id_pedido']; ?>">Eliminar</button>
                         </td>
                     </tr>
                 <?php endwhile; ?>
             <?php else: ?>
-                <!-- Mensaje si no hay pedidos -->
                 <tr>
                     <td colspan="6" class="text-center">No se encontraron pedidos.</td>
                 </tr>

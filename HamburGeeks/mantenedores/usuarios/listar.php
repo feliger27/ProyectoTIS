@@ -22,7 +22,11 @@ $result = $conexion->query($sql);
         </div>
     <?php endif; ?>
     
-    <h1>Listado de Usuarios</h1>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Listado de Usuarios</h1>
+        <button class="btn btn-secondary" onclick="window.location.href='../../index.php'">Volver</button>
+    </div>
+    
     <a href="insertar.php" class="btn btn-success mb-3">Agregar Nuevo Usuario</a>
     <table class="table table-striped">
         <thead>

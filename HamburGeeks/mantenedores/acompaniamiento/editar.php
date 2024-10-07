@@ -7,12 +7,11 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
-$id_acompanamiento = $_GET['id'];
-
+$id_acompaniamiento = $_GET['id'];
 // Obtenemos la información del acompañamiento
 $sql = "SELECT * FROM acompaniamiento WHERE id_acompaniamiento = ?";
 $stmt = $conexion->prepare($sql);
-$stmt->bind_param("i", $id_acompanamiento);
+$stmt->bind_param("i", $id_acompaniamiento);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -24,7 +23,7 @@ if ($result->num_rows == 0) {
 $row = $result->fetch_assoc();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nombre_acompanamiento = $_POST['nombre_acompaniamiento'];
+    $nombre_acompaniamiento = $_POST['nombre_acompaniamiento'];
     $cantidad = $_POST['cantidad'];
     $precio = $_POST['precio'];  // Agregado para actualizar el precio
 

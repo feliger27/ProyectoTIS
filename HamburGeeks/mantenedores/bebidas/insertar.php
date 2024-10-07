@@ -6,26 +6,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cantidad = $_POST['cantidad'];
     $precio = $_POST['precio'];
 
+    // Usamos consulta preparada
     $sql = "INSERT INTO bebida (nombre_bebida, cantidad, precio) 
-            VALUES ('$nombre_bebida', '$cantidad', '$precio')";
+            VALUES (?, ?, ?)";
+    $stmt = $conexion->prepare($sql);
 
-if ($stmt->execute()) {
-    echo "<div class='container mt-3'>
-            <div class='alert alert-success alert-dismissible fade show' role='alert'>
-                Bebida agregada exitosamente.
-                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-            </div>
-          </div>";
-} else {
-    echo "<div class='container mt-3'>
-            <div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                Error: " . $stmt->error . "
-                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-            </div>
-          </div>";
-}
+    if ($stmt) {
+        // Asignamos los valores a los parámetros
+        $stmt->bind_param("sii", $nombre_bebida, $cantidad, $precio);
+        
+        // Ejecutamos la consulta
+        if ($stmt->execute()) {
+            echo "<div class='container mt-3'>
+                    <div class='alert alert-success alert-dismissible fade show' role='alert'>
+                        Bebida agregada exitosamente.
+                        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                    </div>
+                  </div>";
+        } else {
+            echo "<div class='container mt-3'>
+                    <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                        Error: " . $stmt->error . "
+                        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                    </div>
+                  </div>";
+        }
+    } else {
+        echo "<div class='container mt-3'>
+                <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                    Error en la preparación de la consulta.
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>
+              </div>";
+    }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>

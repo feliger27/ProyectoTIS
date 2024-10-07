@@ -15,7 +15,7 @@ $sqlEliminarAcompaniamientos = "DELETE FROM combo_acompaniamiento WHERE id_combo
 $sqlEliminarBebidas = "DELETE FROM combo_bebida WHERE id_combo = ?";
 $sqlEliminarPostres = "DELETE FROM combo_postre WHERE id_combo = ?";
 
-// Preparamos y ejecutamos las consultas para eliminar las relaciones
+// consultas para eliminar las relaciones
 $stmt = $conexion->prepare($sqlEliminarHamburguesas);
 $stmt->bind_param("i", $id_combo);
 $stmt->execute();

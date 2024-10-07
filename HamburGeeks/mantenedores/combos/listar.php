@@ -36,7 +36,7 @@ $result = $conexion->query($sql);
 <div class="container mt-4">
     <?php if (isset($_GET['mensaje']) && $_GET['mensaje'] == 'eliminado'): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            El combo ha sido eliminado exitosamente.
+            Combo eliminado exitosamente.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
@@ -75,7 +75,6 @@ $result = $conexion->query($sql);
                         <td><?php echo $row['postres'] ?: 'Ninguno'; ?></td>
                         <td>
                             <a href="editar.php?id=<?php echo $row['id_combo']; ?>" class="btn btn-primary btn-sm">Editar</a>
-                            <!-- Botón para activar el modal de eliminación -->
                             <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#eliminarModal" data-id="<?php echo $row['id_combo']; ?>">Eliminar</button>
                         </td>
                     </tr>
@@ -102,7 +101,6 @@ $result = $conexion->query($sql);
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <!-- Este es el botón que ejecutará la eliminación -->
                 <a href="#" id="confirmarEliminar" class="btn btn-danger">Eliminar</a>
             </div>
         </div>

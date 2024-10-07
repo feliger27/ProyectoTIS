@@ -6,7 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Verificar si el ID del ingrediente está presente
     if (!empty($id_ingrediente)) {
-        // Preparar la consulta para eliminar el ingrediente
+        // eliminar el ingrediente
         $sql = "DELETE FROM ingrediente WHERE id_ingrediente = ?";
         $stmt = $conexion->prepare($sql);
         $stmt->bind_param("i", $id_ingrediente); // "i" para int

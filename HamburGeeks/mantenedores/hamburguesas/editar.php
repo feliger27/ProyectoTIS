@@ -51,52 +51,81 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $ingredientes = isset($_POST['ingredientes']) ? $_POST['ingredientes'] : []; // Ingredientes seleccionados
     $aderezos = isset($_POST['aderezos']) ? $_POST['aderezos'] : []; // Array de aderezos
 
-    // Actualizar la hamburguesa
-    $sql = "UPDATE hamburguesa 
-            SET nombre_hamburguesa = ?, descripcion = ?, precio = ? 
-            WHERE id_hamburguesa = ?";
-    $stmt = $conexion->prepare($sql);
-    $stmt->bind_param("ssdi", $nombre_hamburguesa, $descripcion, $precio, $id_hamburguesa);
-    
-    if ($stmt->execute()) {
-        // Primero eliminamos los ingredientes antiguos
-        $sql_delete_ingredientes = "DELETE FROM hamburguesa_ingrediente WHERE id_hamburguesa = ?";
-        $stmt_delete_ingredientes = $conexion->prepare($sql_delete_ingredientes);
-        $stmt_delete_ingredientes->bind_param("i", $id_hamburguesa);
-        $stmt_delete_ingredientes->execute();
-
-        // Insertamos los nuevos ingredientes
-        foreach ($ingredientes as $id_ingrediente => $cantidad) {
-            if ($cantidad > 0) { // Solo insertamos si la cantidad es mayor a 0
-                $sql_ingrediente = "INSERT INTO hamburguesa_ingrediente (id_hamburguesa, id_ingrediente, cantidad) 
-                                    VALUES (?, ?, ?)";
-                $stmt_ingrediente = $conexion->prepare($sql_ingrediente);
-                $stmt_ingrediente->bind_param("iii", $id_hamburguesa, $id_ingrediente, $cantidad);
-                $stmt_ingrediente->execute();
-            }
+    // Validar que haya al menos un ingrediente con cantidad mayor a 0
+    $tiene_ingredientes = false;
+    foreach ($ingredientes as $cantidad) {
+        if ($cantidad > 0) {
+            $tiene_ingredientes = true;
+            break;
         }
+    }
 
-        // Primero eliminamos los aderezos antiguos
-        $sql_delete_aderezos = "DELETE FROM hamburguesa_aderezo WHERE id_hamburguesa = ?";
-        $stmt_delete_aderezos = $conexion->prepare($sql_delete_aderezos);
-        $stmt_delete_aderezos->bind_param("i", $id_hamburguesa);
-        $stmt_delete_aderezos->execute();
-
-        // Insertamos los nuevos aderezos
-        foreach ($aderezos as $id_aderezo) {
-            $sql_aderezo = "INSERT INTO hamburguesa_aderezo (id_hamburguesa, id_aderezo) 
-                            VALUES (?, ?)";
-            $stmt_aderezo = $conexion->prepare($sql_aderezo);
-            $stmt_aderezo->bind_param("ii", $id_hamburguesa, $id_aderezo);
-            $stmt_aderezo->execute();
-        }
-
-        echo "<div class='alert alert-success' role='alert'>Hamburguesa actualizada exitosamente</div>";
+    if (!$tiene_ingredientes) {
+        echo "<div class='container mt-3'>
+                <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                    Debes seleccionar al menos un ingrediente con cantidad mayor a 0.
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>
+            </div>";
     } else {
-        echo "<div class='alert alert-danger' role='alert'>Error: " . $stmt->error . "</div>";
+        // Actualizar la hamburguesa
+        $sql = "UPDATE hamburguesa 
+                SET nombre_hamburguesa = ?, descripcion = ?, precio = ? 
+                WHERE id_hamburguesa = ?";
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param("ssdi", $nombre_hamburguesa, $descripcion, $precio, $id_hamburguesa);
+        
+        if ($stmt->execute()) {
+            // Primero eliminamos los ingredientes antiguos
+            $sql_delete_ingredientes = "DELETE FROM hamburguesa_ingrediente WHERE id_hamburguesa = ?";
+            $stmt_delete_ingredientes = $conexion->prepare($sql_delete_ingredientes);
+            $stmt_delete_ingredientes->bind_param("i", $id_hamburguesa);
+            $stmt_delete_ingredientes->execute();
+
+            // Insertamos los nuevos ingredientes
+            foreach ($ingredientes as $id_ingrediente => $cantidad) {
+                if ($cantidad > 0) { // Solo insertamos si la cantidad es mayor a 0
+                    $sql_ingrediente = "INSERT INTO hamburguesa_ingrediente (id_hamburguesa, id_ingrediente, cantidad) 
+                                        VALUES (?, ?, ?)";
+                    $stmt_ingrediente = $conexion->prepare($sql_ingrediente);
+                    $stmt_ingrediente->bind_param("iii", $id_hamburguesa, $id_ingrediente, $cantidad);
+                    $stmt_ingrediente->execute();
+                }
+            }
+
+            // Primero eliminamos los aderezos antiguos
+            $sql_delete_aderezos = "DELETE FROM hamburguesa_aderezo WHERE id_hamburguesa = ?";
+            $stmt_delete_aderezos = $conexion->prepare($sql_delete_aderezos);
+            $stmt_delete_aderezos->bind_param("i", $id_hamburguesa);
+            $stmt_delete_aderezos->execute();
+
+            // Insertamos los nuevos aderezos
+            foreach ($aderezos as $id_aderezo) {
+                $sql_aderezo = "INSERT INTO hamburguesa_aderezo (id_hamburguesa, id_aderezo) 
+                                VALUES (?, ?)";
+                $stmt_aderezo = $conexion->prepare($sql_aderezo);
+                $stmt_aderezo->bind_param("ii", $id_hamburguesa, $id_aderezo);
+                $stmt_aderezo->execute();
+            }
+
+            echo "<div class='container mt-3'>
+                <div class='alert alert-success alert-dismissible fade show' role='alert'>
+                    Hamburguesa editada exitosamente.
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>
+              </div>";
+        } else {
+            echo "<div class='container mt-3'>
+                <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                    Error: " . $stmt->error . "
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>
+              </div>";
+        }
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -131,7 +160,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input type="number" step="0.01" name="precio" id="precio" class="form-control" value="<?php echo $hamburguesa['precio']; ?>" required>
         </div>
 
-        <!-- Ingredientes con cantidades -->
         <div class="mb-3">
             <label for="ingredientes" class="form-label">Selecciona Ingredientes y Cantidades:</label>
             <?php
@@ -152,7 +180,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             ?>
         </div>
 
-        <!-- Aderezos -->
         <div class="mb-3">
             <label for="aderezos" class="form-label">Selecciona Aderezos:</label>
             <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ced4da; padding: 10px; border-radius: 0.25rem;">

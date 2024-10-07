@@ -47,7 +47,7 @@ $result = $conexion->query($sql);
                         <td><?php echo $row['precio']; ?></td>
                         <td>
                             <a href="editar.php?id=<?php echo $row['id_acompaniamiento']; ?>" class="btn btn-primary btn-sm">Editar</a>
-                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#eliminarModal" data-id="<?php echo $row['id_acompanamiento']; ?>">Eliminar</button>
+                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#eliminarModal" data-id="<?php echo $row['id_acompaniamiento']; ?>">Eliminar</button>
                         </td>
                     </tr>
                 <?php endwhile; ?>

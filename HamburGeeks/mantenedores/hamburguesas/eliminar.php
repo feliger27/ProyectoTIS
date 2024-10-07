@@ -10,9 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    echo "Eliminando hamburguesa ID: " . $id_hamburguesa; // Debug: Verifica que se recibe el ID
-
-    // Iniciamos una transacción para asegurar la integridad de los datos
+    echo "Eliminando hamburguesa ID: " . $id_hamburguesa; 
     $conexion->begin_transaction();
 
     try {
@@ -34,14 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_hamburguesa->bind_param("i", $id_hamburguesa);
         $stmt_hamburguesa->execute();
 
-        // Si todo está bien, confirmamos los cambios
         $conexion->commit();
 
         // Redirigir a listar.php con un mensaje de éxito
         header("Location: listar.php?eliminado=true&id=" . $id_hamburguesa);
         exit;
     } catch (Exception $e) {
-        // Si hay algún error, deshacemos los cambios
         $conexion->rollback();
         echo "<div class='alert alert-danger' role='alert'>Error al eliminar la hamburguesa: " . $e->getMessage() . "</div>";
     }
