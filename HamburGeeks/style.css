@@ -1,0 +1,104 @@
+/* Eliminar márgenes y paddings predeterminados, y establecer el uso de un sistema de caja consistente */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif; /* Fuente general del sitio */
+}
+
+/* Estilo general del cuerpo del sitio */
+body {
+    background-color: #f4f4f4; /* Fondo claro */
+    color: #fff; /* Texto blanco */
+}
+
+/* Cabecera del sitio */
+header {
+    background-color: #1a1a1a; /* Fondo oscuro del header */
+    padding: 30px; /* Espaciado interno */
+    display: flex; /* Flexbox para organizar logo y título */
+    justify-content: center; /* Centrar elementos horizontalmente */
+    align-items: center; /* Alinear verticalmente */
+    gap: 20px; /* Separación entre logo y título */
+}
+
+/* Contenedor circular para el logo */
+.logo-container {
+    background-color: #ffa500; /* Círculo naranja */
+    border-radius: 50%; /* Convertir el contenedor en círculo */
+    display: flex; /* Flexbox para centrar el logo */
+    justify-content: center;
+    align-items: center;
+}
+
+/* Estilo del logo */
+header .logo {
+    width: 100px; /* Tamaño del logo */
+}
+
+/* Título de la cabecera */
+h1 {
+    font-size: 2.5rem; /* Tamaño grande del texto del título */
+    color: #ffa500; /* Color naranja */
+}
+
+/* Contenedor de las tarjetas (mantenedores) */
+.container {
+    display: grid; /* Se utiliza grid para crear las columnas de tarjetas */
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas de igual tamaño */
+    gap: 30px; /* Espaciado entre las tarjetas */
+    padding: 50px; /* Espaciado interno general */
+    justify-items: center; /* Centramos las tarjetas */
+}
+
+/* Estilo de las tarjetas (mantenedores) */
+.card {
+    background-color: #333; /* Fondo oscuro */
+    border-radius: 15px; /* Bordes redondeados */
+    width: 350px; /* Tamaño más grande para las tarjetas */
+    padding: 30px; /* Espaciado interno */
+    text-align: center; /* Centrar el texto */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3); /* Sombra para darle profundidad */
+    transition: transform 0.3s ease; /* Efecto suave en hover */
+}
+
+/* Efecto al pasar el mouse por encima de las tarjetas */
+.card:hover {
+    transform: translateY(-5px); /* Elevación suave */
+}
+
+/* Títulos de cada tarjeta */
+.card h2 {
+    color: #ffa500; /* Color naranja para los títulos */
+    margin-bottom: 15px; /* Margen debajo del título */
+}
+
+/* Descripción en cada tarjeta */
+.card p {
+    color: #ccc; /* Texto más claro para la descripción */
+    margin-bottom: 20px; /* Margen debajo de la descripción */
+}
+
+/* Estilo del botón (enlace) dentro de las tarjetas */
+.card a {
+    display: inline-block; /* Mostrar como botón */
+    background-color: #ffa500; /* Color de fondo naranja */
+    color: #1a1a1a; /* Texto oscuro */
+    padding: 12px 20px; /* Espaciado interno */
+    text-decoration: none; /* Quitar el subrayado */
+    border-radius: 5px; /* Bordes redondeados */
+    font-weight: bold; /* Negrita para el texto */
+    transition: background-color 0.3s ease; /* Transición en el cambio de color */
+}
+
+/* Efecto al pasar el mouse por el botón */
+.card a:hover {
+    background-color: #ff8c00; /* Color más oscuro en hover */
+}
+
+/* Responsividad: En pantallas más pequeñas (menores a 768px), las tarjetas se mostrarán en una sola columna */
+@media screen and (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr; /* Una sola columna */
+    }
+}
