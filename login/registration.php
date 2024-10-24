@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
     <title>Registro de Usuario</title>
 </head>
 <body>
@@ -39,9 +40,9 @@
             if($password !== $confirm_password){
                 echo "<div class= 'alert alert-danger'> Las contraseñas no coinciden.</div>";
             } else {
-                $password_hash = password_hash($password, PASSWORD_BCRYPT);
+                $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
-                $query = "INSERT INTO usuario (nombre, apellido, correo_electronico, contrasenia, telefono) VALUES ('$nombre', '$apellido', '$email', '$password_hash', '$telefono')";
+                $query = "INSERT INTO usuario (nombre, apellido, correo_electronico, contrasenia, telefono, rol_usuario) VALUES ('$nombre', '$apellido', '$email', '$password_hash', '$telefono', 2)";
 
                 if($conn->query($query) == TRUE) {
                     echo "<div class= 'alert alert-success'> Te has registrado correctamente. Haz click aqui para <a href='login.php'>Iniciar sesión</a>.</div>";

@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
     <title>Login</title>
+
 </head>
 <body>
     <div class= "container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
@@ -15,31 +17,40 @@
             require('conexion.php');
             session_start();
 
-            if($_SERVER["REQUEST_METHOD"] == "POST") {
-
+            if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $username = stripslashes($_POST['username']);
                 $username = mysqli_real_escape_string($conn, $username);
-
+    
                 $password = stripslashes($_POST['password']);
                 $password = mysqli_real_escape_string($conn, $password);
-
-                $query = "SELECT * FROM usuario WHERE correo_electronico= '$username'";
+    
+                // Consulta para obtener el usuario
+                $query = "SELECT * FROM usuario WHERE correo_electronico=TRIM('$username')";
+                echo $query;
                 $result = mysqli_query($conn, $query);
-                $rows = mysqli_num_rows($result);
-
-                if($rows == 1) {
+    
+                if (!$result) {
+                    // Mostrar error si la consulta falla
+                    echo "<div class='alert alert-danger'>Error en la consulta a la base de datos: " . mysqli_error($conn) . "</div>";
+                } else if (mysqli_num_rows($result) == 1) {
                     $user = mysqli_fetch_assoc($result);
-
-                    if(password_verify($password, $user['contrasenia'])){
-                        $_SESSION['username'] = 'username';
+    
+                    // Verificar la contraseña
+                    if (password_verify($password, $user['contrasenia'])) {
+                        // Inicio de sesión exitoso
+                        $_SESSION['username'] = $user['correo_electronico'];
+                        $_SESSION['role'] = $user['rol_usuario'];
                         header("Location: index.php");
                         exit();
-                    } else{
+                    } else {
+                        // Contraseña incorrecta
                         echo "<div class='alert alert-danger'>Usuario o contraseña incorrectos.</div>";
                     }
                 } else {
-                    echo "<div class='alert alert-danger'>Usuario o contraseña incorrectos.</div>";
+                    // Usuario no encontrado
+                    echo "<div class='alert alert-danger'>Usuario no encontrado.</div>";
                 }
+               
             }
             ?>
 
