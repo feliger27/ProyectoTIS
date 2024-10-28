@@ -1,6 +1,10 @@
 <?php
 include '../conexion.php';
 session_start();
+if (!isset($_SESSION['username'])) {
+    header("Location: ../login/login.php");
+    exit();
+}
 
 // Mostrar el mensaje de éxito si está configurado
 if (isset($_SESSION['mensaje_exito'])) {
@@ -11,7 +15,7 @@ if (isset($_SESSION['mensaje_exito'])) {
     unset($_SESSION['mensaje_exito']); // Eliminar el mensaje después de mostrarlo
 }
 
-$user_id = $_SESSION['user_id']; // ID del usuario actual
+$user_id = $_SESSION['user_id'];
 
 // Consulta para obtener la información del usuario
 $query_user = "SELECT nombre, apellido, correo_electronico, telefono FROM usuario WHERE id_usuario = ?";
@@ -46,50 +50,83 @@ $stmt_direcciones->close();
 </head>
 <body>
     <div class="container my-5">
-        <h2 class="text-center mb-4">Mi Cuenta</h2>
-        <div class="row">
-            <!-- Menú lateral -->
-            <div class="col-md-3">
-                <ul class="list-group">
-                    <li class="list-group-item"><a href="#personal-info" data-bs-toggle="tab">Información Personal</a></li>
-                    <li class="list-group-item"><a href="#manage-addresses" data-bs-toggle="tab">Gestionar Direcciones</a></li>
-                    <li class="list-group-item"><a href="#settings" data-bs-toggle="tab">Configuración</a></li>
-                </ul>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-center">Mi Perfil</h2>
+            <div>
+                <a href="../index/index-lobby.php" class="btn btn-secondary me-2">Volver al Lobby</a>
+                <a href="../login/logout.php" class="btn btn-danger">Cerrar Sesión</a>
+            </div>
+        </div>
+
+        <!-- Barra de navegación en pestañas -->
+        <ul class="nav nav-pills mb-4" id="perfil-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="personal-tab" data-bs-toggle="pill" data-bs-target="#personal-info" type="button" role="tab">Información Personal</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="addresses-tab" data-bs-toggle="pill" data-bs-target="#manage-addresses" type="button" role="tab">Gestionar Direcciones</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings" type="button" role="tab">Configuración</button>
+            </li>
+        </ul>
+
+        <!-- Contenido de las pestañas en tarjetas -->
+        <div class="tab-content">
+            <!-- Información Personal -->
+            <div class="tab-pane fade show active" id="personal-info" role="tabpanel" aria-labelledby="personal-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Información Personal</h4>
+                        <p><strong>Nombre:</strong> <?php echo htmlspecialchars($user_data['nombre']); ?></p>
+                        <p><strong>Apellido:</strong> <?php echo htmlspecialchars($user_data['apellido']); ?></p>
+                        <p><strong>Correo Electrónico:</strong> <?php echo htmlspecialchars($user_data['correo_electronico']); ?></p>
+                        <p><strong>Teléfono:</strong> <?php echo htmlspecialchars($user_data['telefono']); ?></p>
+                        <!-- Botón para abrir el modal de edición -->
+                        <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#editPersonalInfoModal">Editar</button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Contenido de cada sección -->
-            <div class="col-md-9">
-                <div class="tab-content">
-                    <!-- Información Personal -->
-                    <div class="tab-pane fade show active" id="personal-info">
-                        <h3>Información Personal</h3>
-                        <form action="../mantenedores/usuarios/editar.php?id=<?php echo $user_id; ?>&origin=perfil" method="POST">
-                            <div class="form-group mb-3">
-                                <label for="nombre">Nombre</label>
-                                <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($user_data['nombre']); ?>" required>
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="apellido">Apellido</label>
-                                <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($user_data['apellido']); ?>" required>
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="email">Correo Electrónico</label>
-                                <input type="email" class="form-control" id="email" name="correo_electronico" value="<?php echo htmlspecialchars($user_data['correo_electronico']); ?>" readonly>
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="telefono">Teléfono</label>
-                                <input type="tel" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($user_data['telefono']); ?>" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                        </form>
+            <!-- Modal para editar Información Personal -->
+            <div class="modal fade" id="editPersonalInfoModal" tabindex="-1" aria-labelledby="editPersonalInfoModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editPersonalInfoModalLabel">Editar Información Personal</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="../mantenedores/usuarios/editar.php?id=<?php echo $user_id; ?>&origin=perfil" method="POST">
+                                <div class="form-group mb-3">
+                                    <label for="nombre">Nombre</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($user_data['nombre']); ?>" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="apellido">Apellido</label>
+                                    <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($user_data['apellido']); ?>" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="email">Correo Electrónico</label>
+                                    <input type="email" class="form-control" id="email" value="<?php echo htmlspecialchars($user_data['correo_electronico']); ?>" readonly>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="telefono">Teléfono</label>
+                                    <input type="tel" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($user_data['telefono']); ?>" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-3">Guardar Cambios</button>
+                            </form>
+                        </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Gestión de Direcciones -->
-                    <div class="tab-pane fade" id="manage-addresses">
-                        <h3>Gestionar Direcciones</h3>
+            <!-- Gestión de Direcciones -->
+            <div class="tab-pane fade" id="manage-addresses" role="tabpanel" aria-labelledby="addresses-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Gestionar Direcciones</h4>
                         <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addAddressModal">Añadir Nueva Dirección</button>
-                        
-                        <!-- Lista de direcciones del usuario actual -->
                         <ul class="list-group">
                             <?php foreach ($direcciones as $direccion): ?>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -102,12 +139,12 @@ $stmt_direcciones->close();
                                     </div>
                                 </li>
                                 <!-- Modal para Editar Dirección -->
-                                <div class="modal fade" id="editAddressModal-<?php echo $direccion['id_direccion']; ?>" tabindex="-1" aria-labelledby="editAddressModalLabel" aria-hidden="true">
+                                <div class="modal fade" id="editAddressModal-<?php echo $direccion['id_direccion']; ?>" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h5 class="modal-title" id="editAddressModalLabel">Editar Dirección</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                <h5 class="modal-title">Editar Dirección</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                             </div>
                                             <div class="modal-body">
                                                 <form action="../funciones/gestionar_direcciones/editar_direccion.php" method="POST">
@@ -136,52 +173,56 @@ $stmt_direcciones->close();
                                 </div>
                             <?php endforeach; ?>
                         </ul>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- Modal para Añadir Dirección -->
-                        <div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="addAddressModalLabel">Añadir Nueva Dirección</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form action="../funciones/gestionar_direcciones/insertar_direccion.php" method="POST">
-                                            <div class="form-group mb-3">
-                                                <label for="calle">Calle</label>
-                                                <input type="text" class="form-control" id="calle" name="calle" required>
-                                            </div>
-                                            <div class="form-group mb-3">
-                                                <label for="numero">Número</label>
-                                                <input type="text" class="form-control" id="numero" name="numero" required>
-                                            </div>
-                                            <div class="form-group mb-3">
-                                                <label for="ciudad">Ciudad</label>
-                                                <input type="text" class="form-control" id="ciudad" name="ciudad" required>
-                                            </div>
-                                            <div class="form-group mb-3">
-                                                <label for="codigoPostal">Código Postal</label>
-                                                <input type="text" class="form-control" id="codigoPostal" name="codigoPostal" required>
-                                            </div>
-                                            <button type="submit" class="btn btn-primary">Guardar Dirección</button>
-                                        </form>
-                                    </div>
+            <!-- Modal para Añadir Dirección -->
+            <div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addAddressModalLabel">Añadir Nueva Dirección</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="../funciones/gestionar_direcciones/insertar_direccion.php" method="POST">
+                                <div class="form-group mb-3">
+                                    <label for="calle">Calle</label>
+                                    <input type="text" class="form-control" id="calle" name="calle" required>
                                 </div>
-                            </div>
+                                <div class="form-group mb-3">
+                                    <label for="numero">Número</label>
+                                    <input type="text" class="form-control" id="numero" name="numero" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="ciudad">Ciudad</label>
+                                    <input type="text" class="form-control" id="ciudad" name="ciudad" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="codigoPostal">Código Postal</label>
+                                    <input type="text" class="form-control" id="codigoPostal" name="codigoPostal" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Guardar Dirección</button>
+                            </form>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Configuración -->
-                    <div class="tab-pane fade" id="settings">
-                        <h3>Configuración</h3>
+            <!-- Configuración -->
+            <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Configuración</h4>
                         <p>Opciones de configuración del perfil.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     <script>
-    // Ocultar el mensaje después de 5 segundos
     setTimeout(function() {
         var mensajeExito = document.getElementById('mensajeExito');
         if (mensajeExito) {
@@ -194,3 +235,5 @@ $stmt_direcciones->close();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+
