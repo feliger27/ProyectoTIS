@@ -1,6 +1,9 @@
+
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 include '../includes/header.php';
-session_start();
 if (!isset($_SESSION['username'])) {
     header("Location: ../login/login.php");
     exit();
