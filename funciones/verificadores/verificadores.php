@@ -19,6 +19,24 @@ function tienePermisosMantenedores($permisosUsuario) {
     return false;
 }
 
+function tienePermisosRestringidos($permisosUsuario) {
+    $permisosRestringidos = [
+        'iniciar_sesion', 'cerrar_sesion', 'ver_productos', 'ver_pedidos',
+        'crear_pedido', 'ver_recompensas', 'canjear_puntos', 'ver_direcciones',
+        'agregar_direccion', 'editar_direccion', 'eliminar_direccion', 'ver_sugerencias',
+        'ver_estado_despacho', 'ver_metodos_pago', 'agregar_metodo_pago', 
+        'editar_metodo_pago', 'eliminar_metodo_pago', 'ver_promociones',
+        'aplicar_cupon', 'valorar_producto', 'ver_notificaciones'
+    ];
+
+    foreach ($permisosRestringidos as $permiso) {
+        if (in_array($permiso, $permisosUsuario)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // Función para verificar un permiso específico para el usuario
 function verificarPermiso($permiso_nombre) {
     global $conexion;

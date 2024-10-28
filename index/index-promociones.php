@@ -1,13 +1,36 @@
 <?php
 include '../includes/header.php';
-session_start();
+
 if (!isset($_SESSION['username'])) {
     header("Location: ../login/login.php");
     exit();
 }
 ?>
 
-<div class="container mt-5">
+
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+        <div class="logo-container me-3">
+            <!-- Asegúrate que la ruta al lobby del menú es correcta -->
+            <a class="navbar-brand" href="../index/index-lobby.php">
+                <img src="../index/logo-hamburgeeks.png" alt="Logo" width="30" height="30"> HamburGeeks
+            </a>
+        </div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../index/index-menu.php">Menú</a></li>
+                <li class="nav-item"><a class="nav-link" href="../index/index-promociones.php">Promociones</a></li>
+                <li class="nav-item"><a class="nav-link" href="../index/index-perfil.php">Mi Cuenta</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5" style="padding-top: 80px;"> <!-- Ajusta el padding para no solapar el contenido con la navbar -->
     <h1 class="text-center">Promociones</h1>
     <div class="row">
         <!-- Tarjeta de promoción de ejemplo -->
@@ -21,9 +44,10 @@ if (!isset($_SESSION['username'])) {
                 </div>
             </div>
         </div>
-        <!-- Repite las tarjetas para más promociones -->
+        <!-- Puedes repetir las tarjetas para más promociones dinámicamente aquí -->
     </div>
 </div>
+
 
 <?php
 include '../includes/footer.php';

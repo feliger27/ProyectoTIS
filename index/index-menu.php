@@ -27,6 +27,39 @@ include '../includes/header.php'; // Incluye encabezado del sitio
         }
     </style>
 
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <div class="logo-container me-3">
+                <!-- Enlace al lobby del menú. Asegúrate de que la ruta es correcta. -->
+                <a class="navbar-brand" href="../index/index-lobby.php">
+                    <img src="../index/logo-hamburgeeks.png" alt="Logo HamburGeeks" width="30" height="30"> HamburGeeks
+                </a>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="../index/index-menu.php">Menú</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../index/index-promociones.php">Promociones</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../index/index-perfil.php">Mi Cuenta</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link cart-icon" href="../index/index-carrito.php">
+                            <i class="bi bi-cart" style="font-size: 1.5rem;"></i>
+                            <!-- Asumimos que esta es una variable que calcula los productos en el carrito -->
+                            <?php if ($numero_productos > 0): ?>
+                            <span class="cart-count"><?= $numero_productos ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </li>
+                    <?php if ($mostrarMantenedores && !$mostrarRestringidos): ?>
+                        <li class="nav-item"><a class="nav-link" href="../index/index.php">Mantenedores</a></li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
     <!-- Sección de Combos -->
     <div class="category-section">
         <h2 class="text-center text-primary mb-4">Combos</h2>

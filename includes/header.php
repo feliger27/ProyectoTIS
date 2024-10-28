@@ -5,8 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
 include '../funciones/verificadores/verificadores.php';
 
-// Usa `$_SESSION['permissions']` para almacenar permisos
-$permisosUsuario = isset($_SESSION['permissions']) ? $_SESSION['permissions'] : [];
+// Asumimos que los permisos del usuario están almacenados en la sesión o se obtienen de la base de datos
+$permisosUsuario = $_SESSION['permissions'] ?? [];
 $numero_productos = 0;
 if (isset($_SESSION['carrito'])) {
     foreach ($_SESSION['carrito'] as $tipo => $productos) {
@@ -15,6 +15,11 @@ if (isset($_SESSION['carrito'])) {
         }
     }
 }
+
+// Verificar permisos
+$mostrarMantenedores = tienePermisosMantenedores($permisosUsuario);
+$mostrarRestringidos = tienePermisosRestringidos($permisosUsuario);
+
 ?>
 
 <!DOCTYPE html>
@@ -76,7 +81,7 @@ if (isset($_SESSION['carrito'])) {
                     </a>
                 </li>
                 <!-- Mostrar el botón de Mantenedores solo si el usuario tiene los permisos necesarios -->
-                <?php if (tienePermisosMantenedores($permisosUsuario)): ?>
+                <?php if ($mostrarMantenedores && !$mostrarRestringidos): ?>
                     <li class="nav-item"><a class="nav-link" href="../index/index.php">Mantenedores</a></li>
                 <?php endif; ?>
             </ul>
@@ -84,11 +89,12 @@ if (isset($_SESSION['carrito'])) {
     </div>
 </nav>
 
-
-
 <div class="container" style="padding-top: 60px;">
-    <!-- JavaScript de Bootstrap y Popper.js -->
+</div>
+
+<!-- JavaScript de Bootstrap y Popper.js -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
-
+</body>
+</html>
