@@ -29,7 +29,7 @@ $result = $conexion->query($sql);
     
     <div class="d-flex justify-content-between align-items-center">
         <h1>Listado de Pedidos</h1>
-        <button class="btn btn-secondary" onclick="window.location.href='../../index.php'">Volver</button>
+        <button class="btn btn-secondary" onclick="window.location.href='../../index/index.php'">Volver</button>
     </div>
 
     <table class="table table-striped">

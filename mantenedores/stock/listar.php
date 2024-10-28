@@ -34,7 +34,7 @@ $aderezos = $conexion->query($aderezos_query);
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center">
         <h1>Stock</h1>
-        <button class="btn btn-secondary" onclick="window.location.href='../../index.php'">Volver</button>
+        <button class="btn btn-secondary" onclick="window.location.href='../../index/index.php'">Volver</button>
     </div>
     <button class="btn btn-outline-primary" onclick="window.open('reportes.php', '_blank')">PDF</button>
     
