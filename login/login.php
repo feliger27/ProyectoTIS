@@ -2,6 +2,8 @@
 include '../conexion.php';
 session_start();
 
+$error_message = ''; // Inicializa la variable para almacenar mensajes de error
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = stripslashes($_POST['username']);
     $username = mysqli_real_escape_string($conexion, $username);
@@ -9,8 +11,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = stripslashes($_POST['password']);
     $password = mysqli_real_escape_string($conexion, $password);
 
-    // Consulta para obtener el usuario
-    $query = "SELECT id_usuario, correo_electronico, contrasenia FROM usuario WHERE correo_electronico = ?";
+    // Consulta para obtener el usuario y su rol
+    $query = "SELECT u.id_usuario, u.correo_electronico, u.contrasenia, ur.id_rol FROM usuario u
+              JOIN usuario_rol ur ON u.id_usuario = ur.id_usuario
+              WHERE correo_electronico = ?";
     $stmt = $conexion->prepare($query);
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -21,37 +25,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Verificar la contraseña
         if (password_verify($password, $user['contrasenia'])) {
-            // Inicio de sesión exitoso: almacenar datos en la sesión
+            // Almacenar datos esenciales en la sesión
             $_SESSION['user_id'] = $user['id_usuario'];
             $_SESSION['username'] = $user['correo_electronico'];
+            $_SESSION['role_id'] = $user['id_rol'];
 
             // Cargar permisos en la sesión
             $permissions = [];
             $query_perms = "SELECT p.nombre_permiso FROM permiso p
                             JOIN rol_permiso rp ON p.id_permiso = rp.id_permiso
-                            JOIN usuario_rol ur ON rp.id_rol = ur.id_rol
-                            WHERE ur.id_usuario = ?";
+                            WHERE rp.id_rol = ?";
             $stmt_perms = $conexion->prepare($query_perms);
-            $stmt_perms->bind_param("i", $user['id_usuario']);
+            $stmt_perms->bind_param("i", $user['id_rol']);
             $stmt_perms->execute();
             $result_perms = $stmt_perms->get_result();
 
             while ($perm = $result_perms->fetch_assoc()) {
                 $permissions[] = $perm['nombre_permiso'];
             }
-            $_SESSION['permissions'] = $permissions; // Guardar permisos en la sesión
+            $_SESSION['permissions'] = $permissions;
             $stmt_perms->close();
 
-            // Redirigir al usuario a la página principal
-            header("Location: ../index/index-lobby.php");
-            exit();
+            // Redirigir al usuario basado en el rol
+            if ($user['id_rol'] == 1) { // 1 para administrador
+                header("Location: ../index/index.php");
+                exit();
+            } else {
+                header("Location: ../index/index-lobby.php");
+                exit();
+            }
         } else {
-            // Contraseña incorrecta
-            echo "<div class='alert alert-danger'>Usuario o contraseña incorrectos.</div>";
+            $error_message = "<div class='alert alert-danger'>Usuario o contraseña incorrectos.</div>";
         }
     } else {
-        // Usuario no encontrado
-        echo "<div class='alert alert-danger'>Usuario no encontrado.</div>";
+        $error_message = "<div class='alert alert-danger'>Usuario no encontrado.</div>";
     }
     $stmt->close();
 }
@@ -71,7 +78,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="col-md-6">
             <h2 class="text-center mb-4">Inicia Sesión</h2>
 
-            <!-- Formulario de login -->
+            <?php if (!empty($error_message)): ?>
+                <div class="mb-3"><?php echo $error_message; ?></div>
+            <?php endif; ?>
+
             <form action="" method="POST">
                 <div class="form-group">
                     <label for="username">Correo Electrónico</label>

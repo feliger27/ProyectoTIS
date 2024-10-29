@@ -37,6 +37,18 @@ function tienePermisosRestringidos($permisosUsuario) {
     return false;
 }
 
+function tienePermisosAdministradorDespacho($permisosUsuario) {
+    $permisosDespacho = [
+        'ver_pedidos', 'editar_pedido', 'eliminar_pedido'
+    ];
+
+    foreach ($permisosDespacho as $permiso) {
+        if (in_array($permiso, $permisosUsuario)) {
+            return true;
+        }
+    }
+    return false;
+}
 // Función para verificar un permiso específico para el usuario
 function verificarPermiso($permiso_nombre) {
     global $conexion;

@@ -1,3 +1,12 @@
+<?php
+session_start();
+include '../funciones/verificadores/verificadores.php'; // Incluye el archivo donde están las funciones de permisos
+
+$permisosUsuario = $_SESSION['permissions'] ?? []; // Asegúrate de que 'permissions' se establece correctamente en la sesión
+$esAdminDespacho = ($_SESSION['role_id'] ?? null) == 4; // Verifica si el rol es 4, que corresponde al administrador de despacho
+
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -158,15 +167,18 @@
         </div>
 
         <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Pedidos</h5>
-                        <p class="card-text">Gestiona los Pedidos.</p>
-                        <a href="../mantenedores/pedidos/listar.php" class="btn">Listar Pedidos</a>
+        <?php if ($esAdminDespacho): ?>
+                <div class="col-md-12 mb-4"> <!-- Cambiado a col-md-12 para centrar y expandir -->
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Pedidos</h5>
+                            <p class="card-text">Gestiona los Pedidos.</p>
+                            <a href="../mantenedores/pedidos/listar.php" class="btn">Listar Pedidos</a>
+                        </div>
                     </div>
                 </div>
-            </div>
+            <?php endif; ?>
+            
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
