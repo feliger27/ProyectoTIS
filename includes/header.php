@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-include '../funciones/verificadores/verificadores.php';
+include '../funciones/verificadores/verificadores.php'; // Asegúrate de la ruta correcta
 
 // Usa `$_SESSION['permissions']` para almacenar permisos
 $permisosUsuario = isset($_SESSION['permissions']) ? $_SESSION['permissions'] : [];
@@ -56,7 +56,9 @@ if (isset($_SESSION['carrito'])) {
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container">
         <div class="logo-container me-3">
-            <a class="navbar-brand" href="#"><img src="../index/logo-hamburgeeks.png" alt="Logo" width="30" height="30"> HamburGeeks</a>
+            <a href="../index/index-lobby.php">
+                <img src="../index/logo-hamburgeeks.png" alt="Logo" width="30" height="30">
+            </a>
         </div>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -66,7 +68,6 @@ if (isset($_SESSION['carrito'])) {
                 <li class="nav-item"><a class="nav-link" href="../index/index-menu.php">Menú</a></li>
                 <li class="nav-item"><a class="nav-link" href="../index/index-promociones.php">Promociones</a></li>
                 <li class="nav-item"><a class="nav-link" href="../index/index-perfil.php">Mi Cuenta</a></li>
-                <!-- Icono del Carrito como enlace directo a index-carrito.php -->
                 <li class="nav-item">
                     <a class="nav-link cart-icon" href="../index/index-carrito.php">
                         <i class="bi bi-cart" style="font-size: 1.5rem;"></i>
@@ -75,8 +76,8 @@ if (isset($_SESSION['carrito'])) {
                         <?php endif; ?>
                     </a>
                 </li>
-                <!-- Mostrar el botón de Mantenedores solo si el usuario tiene los permisos necesarios -->
-                <?php if (tienePermisosMantenedores($permisosUsuario)): ?>
+                <!-- Mostrar el botón de Mantenedores solo si el usuario tiene el permiso ver_mantenedores -->
+                <?php if (verificarPermisos(['ver_mantenedores'])): ?>
                     <li class="nav-item"><a class="nav-link" href="../index/index.php">Mantenedores</a></li>
                 <?php endif; ?>
             </ul>
@@ -84,11 +85,5 @@ if (isset($_SESSION['carrito'])) {
     </div>
 </nav>
 
-
-
 <div class="container" style="padding-top: 60px;">
-    <!-- JavaScript de Bootstrap y Popper.js -->
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 

@@ -1,43 +1,30 @@
 <?php
-// verificadores.php
-
 include '../conexion.php'; // asegúrate de tener la conexión disponible
 
-function tienePermisosMantenedores($permisosUsuario) {
-    $permisosMantenedores = [
-        'ver_usuarios', 'crear_usuario', 'editar_usuario', 'eliminar_usuario',
-        'ver_roles', 'crear_rol', 'editar_rol', 'eliminar_rol',
-        'ver_productos', 'crear_producto', 'editar_producto', 'eliminar_producto',
-        'ver_reportes', 'generar_reporte_ventas'
-    ];
-
-    foreach ($permisosMantenedores as $permiso) {
-        if (in_array($permiso, $permisosUsuario)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// Función para verificar un permiso específico para el usuario
-function verificarPermiso($permiso_nombre) {
+// Función para verificar uno o más permisos específicos para el usuario
+// Función para verificar uno o varios permisos para el usuario
+function verificarPermisos($permisos_requeridos) {
     global $conexion;
 
     // Verifica si el usuario está logueado
     if (!isset($_SESSION['user_id'])) {
-        return false; // Usuario no logueado, sin permiso
+        return false;
     }
 
-    // Obtén el ID del usuario desde la sesión
     $user_id = $_SESSION['user_id'];
-
+    $placeholders = implode(',', array_fill(0, count($permisos_requeridos), '?'));
     $query = "SELECT COUNT(*) as permiso_count FROM usuario_rol ur
               JOIN rol_permiso rp ON ur.id_rol = rp.id_rol
               JOIN permiso p ON rp.id_permiso = p.id_permiso
-              WHERE ur.id_usuario = ? AND p.nombre = ?";
+              WHERE ur.id_usuario = ? AND p.nombre_permiso IN ($placeholders)";
+    
     $stmt = $conexion->prepare($query);
-    $stmt->bind_param("is", $user_id, $permiso_nombre);
+    $params = array_merge([$user_id], $permisos_requeridos);
+    $stmt->bind_param(str_repeat('s', count($params)), ...$params);
     $stmt->execute();
     $result = $stmt->get_result()->fetch_assoc();
+
     return $result['permiso_count'] > 0;
 }
+
+

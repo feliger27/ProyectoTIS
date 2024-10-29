@@ -51,7 +51,9 @@
     <header class="header text-center">
         <div class="container d-flex justify-content-center align-items-center">
             <div class="logo-container me-3">
-                <img src="logo-hamburgeeks.png" alt="Logo">
+                <a href="../index/index-lobby.php">
+                    <img src="logo-hamburgeeks.png" alt="Logo">
+                </a>
             </div>
             <h1 class="m-0">Panel de Administración</h1>
         </div>
