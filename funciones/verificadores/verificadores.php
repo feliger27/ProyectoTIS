@@ -8,7 +8,7 @@ function tienePermisosMantenedores($permisosUsuario) {
         'ver_usuarios', 'crear_usuario', 'editar_usuario', 'eliminar_usuario',
         'ver_roles', 'crear_rol', 'editar_rol', 'eliminar_rol',
         'ver_productos', 'crear_producto', 'editar_producto', 'eliminar_producto',
-        'ver_reportes', 'generar_reporte_ventas'
+        'ver_reportes', 'generar_reporte_ventas','ver_pedidos', 'editar_pedido', 'eliminar_pedido'
     ];
 
     foreach ($permisosMantenedores as $permiso) {
@@ -21,12 +21,7 @@ function tienePermisosMantenedores($permisosUsuario) {
 
 function tienePermisosRestringidos($permisosUsuario) {
     $permisosRestringidos = [
-        'iniciar_sesion', 'cerrar_sesion', 'ver_productos', 'ver_pedidos',
-        'crear_pedido', 'ver_recompensas', 'canjear_puntos', 'ver_direcciones',
-        'agregar_direccion', 'editar_direccion', 'eliminar_direccion', 'ver_sugerencias',
-        'ver_estado_despacho', 'ver_metodos_pago', 'agregar_metodo_pago', 
-        'editar_metodo_pago', 'eliminar_metodo_pago', 'ver_promociones',
-        'aplicar_cupon', 'valorar_producto', 'ver_notificaciones'
+        'iniciar_sesion', 'cerrar_sesion'
     ];
 
     foreach ($permisosRestringidos as $permiso) {

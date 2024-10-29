@@ -5,7 +5,6 @@ if (session_status() === PHP_SESSION_NONE) {
 
 include '../funciones/verificadores/verificadores.php';
 
-// Asumimos que los permisos del usuario están almacenados en la sesión o se obtienen de la base de datos
 $permisosUsuario = $_SESSION['permissions'] ?? [];
 $numero_productos = 0;
 if (isset($_SESSION['carrito'])) {
@@ -16,10 +15,9 @@ if (isset($_SESSION['carrito'])) {
     }
 }
 
-// Verificar permisos
 $mostrarMantenedores = tienePermisosMantenedores($permisosUsuario);
+$esAdminDespacho = tienePermisosAdministradorDespacho($permisosUsuario);
 $mostrarRestringidos = tienePermisosRestringidos($permisosUsuario);
-
 ?>
 
 <!DOCTYPE html>
@@ -71,7 +69,6 @@ $mostrarRestringidos = tienePermisosRestringidos($permisosUsuario);
                 <li class="nav-item"><a class="nav-link" href="../index/index-menu.php">Menú</a></li>
                 <li class="nav-item"><a class="nav-link" href="../index/index-promociones.php">Promociones</a></li>
                 <li class="nav-item"><a class="nav-link" href="../index/index-perfil.php">Mi Cuenta</a></li>
-                <!-- Icono del Carrito como enlace directo a index-carrito.php -->
                 <li class="nav-item">
                     <a class="nav-link cart-icon" href="../index/index-carrito.php">
                         <i class="bi bi-cart" style="font-size: 1.5rem;"></i>
@@ -80,17 +77,17 @@ $mostrarRestringidos = tienePermisosRestringidos($permisosUsuario);
                         <?php endif; ?>
                     </a>
                 </li>
-                <!-- Mostrar el botón de Mantenedores solo si el usuario tiene los permisos necesarios -->
-                <?php if ($mostrarMantenedores && !$mostrarRestringidos): ?>
+                <!-- Mostrar el botón de Mantenedores si el usuario es admin de despacho o tiene permisos de mantenedores y no tiene permisos restringidos -->
+                <?php if (!$mostrarRestringidos && ($mostrarMantenedores || $esAdminDespacho)): ?>
                     <li class="nav-item"><a class="nav-link" href="../index/index.php">Mantenedores</a></li>
                 <?php endif; ?>
+
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="container" style="padding-top: 60px;">
-</div>
+<div class="container" style="padding-top: 60px;"></div>
 
 <!-- JavaScript de Bootstrap y Popper.js -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>

@@ -3,7 +3,8 @@ session_start();
 include '../funciones/verificadores/verificadores.php'; // Incluye el archivo donde están las funciones de permisos
 
 $permisosUsuario = $_SESSION['permissions'] ?? []; // Asegúrate de que 'permissions' se establece correctamente en la sesión
-$esAdminDespacho = ($_SESSION['role_id'] ?? null) == 4; // Verifica si el rol es 4, que corresponde al administrador de despacho
+$esAdminDespacho = ($_SESSION['role_id'] ?? null) == 4;
+$esAdminGeneral = ($_SESSION['role_id'] ?? null) == 1; // Verifica si el rol es 4, que corresponde al administrador de despacho
 
 ?>
 
@@ -67,8 +68,8 @@ $esAdminDespacho = ($_SESSION['role_id'] ?? null) == 4; // Verifica si el rol es
     </header>
 
     <div class="container mt-5">
+    <?php if ($esAdminGeneral): ?>
         <div class="row">
-            
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -101,7 +102,9 @@ $esAdminDespacho = ($_SESSION['role_id'] ?? null) == 4; // Verifica si el rol es
                 </div>
             </div>
         </div>
+        <?php endif; ?>
 
+        <?php if ($esAdminGeneral): ?>
         <div class="row">
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
@@ -133,7 +136,8 @@ $esAdminDespacho = ($_SESSION['role_id'] ?? null) == 4; // Verifica si el rol es
                 </div>
             </div>
         </div>
-
+        <?php endif; ?>
+        <?php if ($esAdminGeneral): ?>
         <div class="row">
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
@@ -165,10 +169,11 @@ $esAdminDespacho = ($_SESSION['role_id'] ?? null) == 4; // Verifica si el rol es
                 </div>
             </div>
         </div>
+        <?php endif; ?>
 
         <div class="row">
-        <?php if ($esAdminDespacho): ?>
-                <div class="col-md-12 mb-4"> <!-- Cambiado a col-md-12 para centrar y expandir -->
+        <?php if ($esAdminGeneral || $esAdminDespacho): ?>
+                <div class="col-md-4 mb-4">
                     <div class="card text-center">
                         <div class="card-body">
                             <h5 class="card-title">Pedidos</h5>
@@ -178,7 +183,7 @@ $esAdminDespacho = ($_SESSION['role_id'] ?? null) == 4; // Verifica si el rol es
                     </div>
                 </div>
             <?php endif; ?>
-            
+            <?php if ($esAdminGeneral): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -188,6 +193,8 @@ $esAdminDespacho = ($_SESSION['role_id'] ?? null) == 4; // Verifica si el rol es
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
+            <?php if ($esAdminGeneral): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -197,7 +204,9 @@ $esAdminDespacho = ($_SESSION['role_id'] ?? null) == 4; // Verifica si el rol es
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
+        <?php if ($esAdminGeneral): ?>
         <div class="row">
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
@@ -209,6 +218,7 @@ $esAdminDespacho = ($_SESSION['role_id'] ?? null) == 4; // Verifica si el rol es
                 </div>
             </div>
         </div>
+        <?php endif; ?>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
