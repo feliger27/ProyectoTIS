@@ -1,3 +1,9 @@
+<?php
+include '../conexion.php';
+include '../funciones/verificadores/verificadores.php';
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -44,7 +50,6 @@
         .card .btn:hover {
             background-color: #e69500;
         }
-        
     </style>
 </head>
 <body>
@@ -61,7 +66,7 @@
 
     <div class="container mt-5">
         <div class="row">
-            
+            <?php if (verificarPermisos(['ver_aderezos'])): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -71,8 +76,9 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
-            
+            <?php if (verificarPermisos(['ver_hamburguesas'])): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -82,8 +88,9 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
-            
+            <?php if (verificarPermisos(['ver_combos'])): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -93,9 +100,11 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
 
         <div class="row">
+            <?php if (verificarPermisos(['ver_ingredientes'])): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -105,7 +114,9 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
+            <?php if (verificarPermisos(['ver_postres'])): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -115,7 +126,9 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
+            <?php if (verificarPermisos(['ver_bebidas'])): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -125,9 +138,11 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
 
         <div class="row">
+            <?php if (verificarPermisos(['ver_acompaniamiento'])): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -137,7 +152,9 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
+            <?php if (verificarPermisos(['ver_promociones'])): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -147,7 +164,9 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
+            <?php if (verificarPermisos(['ver_usuarios'])): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -157,9 +176,11 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
 
         <div class="row">
+            <?php if (verificarPermisos(['ver_pedidos'])): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -169,15 +190,21 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
+
+            <?php if (verificarPermisos(['ver_stock'])): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
                         <h5 class="card-title">Stock</h5>
-                        <p class="card-text">Gestiona los Stock.</p>
+                        <p class="card-text">Gestiona el Stock.</p>
                         <a href="../mantenedores/stock/listar.php" class="btn">Listar Stock</a>
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
+
+            <?php if (verificarPermisos(['ver_roles'])): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -187,8 +214,11 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
+
         <div class="row">
+            <?php if (verificarPermisos(['ver_permisos'])): ?>
             <div class="col-md-4 mb-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -198,6 +228,7 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 
