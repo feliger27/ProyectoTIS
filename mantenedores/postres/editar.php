@@ -27,10 +27,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre_postre = $_POST['nombre_postre'];
     $cantidad = $_POST['cantidad'];
     $precio = $_POST['precio'];
+    $nombre_imagen = $row['imagen']; // Imagen actual por defecto
 
-    $sql = "UPDATE postre SET nombre_postre = ?, cantidad = ?, precio = ? WHERE id_postre = ?";
+    // Comprobamos si se ha subido una nueva imagen
+    if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] == UPLOAD_ERR_OK) {
+        $nombre_imagen = $_FILES['imagen']['name'];
+        $ruta_temporal = $_FILES['imagen']['tmp_name'];
+        $ruta_destino = "../../uploads/postres/" . $nombre_imagen;
+
+        // Movemos la imagen a la carpeta de destino
+        if (!move_uploaded_file($ruta_temporal, $ruta_destino)) {
+            echo "<div class='container mt-3'>
+                    <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                        Error al subir la imagen.
+                        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                    </div>
+                  </div>";
+            exit;
+        }
+    }
+
+    // Actualizamos el registro del postre
+    $sql = "UPDATE postre SET nombre_postre = ?, cantidad = ?, precio = ?, imagen = ? WHERE id_postre = ?";
     $stmt = $conexion->prepare($sql);
-    $stmt->bind_param("sidi", $nombre_postre, $cantidad, $precio, $id_postre);
+    $stmt->bind_param("sidss", $nombre_postre, $cantidad, $precio, $nombre_imagen, $id_postre);
 
     if ($stmt->execute()) {
         echo "<div class='container mt-3'>
@@ -65,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h1>Editar Postre</h1>
         <button class="btn btn-secondary" onclick="window.location.href='listar.php'">Volver</button>
     </div>
-    <form action="editar.php?id=<?php echo $id_postre; ?>" method="POST" class="mt-4">
+    <form action="editar.php?id=<?php echo $id_postre; ?>" method="POST" enctype="multipart/form-data" class="mt-4">
         <div class="mb-3">
             <label for="nombre_postre" class="form-label">Nombre del Postre</label>
             <input type="text" name="nombre_postre" id="nombre_postre" class="form-control" value="<?php echo $row['nombre_postre']; ?>" required>
@@ -81,6 +101,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input type="number" step="0.01" name="precio" id="precio" class="form-control" value="<?php echo $row['precio']; ?>" required>
         </div>
 
+        <div class="mb-3">
+            <label for="imagen" class="form-label">Imagen del Postre</label>
+            <?php if (!empty($row['imagen'])): ?>
+                <div class="mb-2">
+                    <img src="../../uploads/postres/<?php echo $row['imagen']; ?>" alt="Imagen Actual" style="width: 100px; height: 100px; object-fit: cover;">
+                </div>
+            <?php endif; ?>
+            <input type="file" name="imagen" id="imagen" class="form-control">
+        </div>
+
         <button type="submit" class="btn btn-primary">Actualizar Postre</button>
     </form>
 </div>
@@ -88,3 +118,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+

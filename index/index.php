@@ -50,6 +50,10 @@ session_start();
         .card .btn:hover {
             background-color: #e69500;
         }
+        .card:hover {
+            cursor: pointer;
+            background-color: #444;
+        }
     </style>
 </head>
 <body>
@@ -68,37 +72,37 @@ session_start();
         <div class="row">
             <?php if (verificarPermisos(['ver_aderezos'])): ?>
             <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Aderezos</h5>
-                        <p class="card-text">Gestiona los Aderezos.</p>
-                        <a href="../mantenedores/aderezos/listar.php" class="btn">Listar Aderezos</a>
+                <a href="../mantenedores/aderezos/listar.php" class="text-decoration-none">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Aderezos</h5>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <?php endif; ?>
 
             <?php if (verificarPermisos(['ver_hamburguesas'])): ?>
             <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Hamburguesas</h5>
-                        <p class="card-text">Gestiona las Hamburguesas.</p>
-                        <a href="../mantenedores/hamburguesas/listar.php" class="btn">Listar Hamburguesas</a>
+                <a href="../mantenedores/hamburguesas/listar.php" class="text-decoration-none">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Hamburguesas</h5>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <?php endif; ?>
 
             <?php if (verificarPermisos(['ver_combos'])): ?>
             <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Combos</h5>
-                        <p class="card-text">Gestiona los Combos.</p>
-                        <a href="../mantenedores/combos/listar.php" class="btn">Listar Combos</a>
+                <a href="../mantenedores/combos/listar.php" class="text-decoration-none">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Combos</h5>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <?php endif; ?>
         </div>
@@ -106,37 +110,37 @@ session_start();
         <div class="row">
             <?php if (verificarPermisos(['ver_ingredientes'])): ?>
             <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Ingredientes</h5>
-                        <p class="card-text">Gestiona los Ingredientes.</p>
-                        <a href="../mantenedores/ingredientes/listar.php" class="btn">Listar Ingredientes</a>
+                <a href="../mantenedores/ingredientes/listar.php" class="text-decoration-none">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Ingredientes</h5>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <?php endif; ?>
 
             <?php if (verificarPermisos(['ver_postres'])): ?>
             <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Postres</h5>
-                        <p class="card-text">Gestiona los Postres.</p>
-                        <a href="../mantenedores/postres/listar.php" class="btn">Listar Postres</a>
+                <a href="../mantenedores/postres/listar.php" class="text-decoration-none">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Postres</h5>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <?php endif; ?>
 
             <?php if (verificarPermisos(['ver_bebidas'])): ?>
             <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Bebidas</h5>
-                        <p class="card-text">Gestiona las Bebidas.</p>
-                        <a href="../mantenedores/bebidas/listar.php" class="btn">Listar Bebidas</a>
+                <a href="../mantenedores/bebidas/listar.php" class="text-decoration-none">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Bebidas</h5>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <?php endif; ?>
         </div>
@@ -144,37 +148,37 @@ session_start();
         <div class="row">
             <?php if (verificarPermisos(['ver_acompaniamiento'])): ?>
             <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Acompañamientos</h5>
-                        <p class="card-text">Gestiona los Acompañamientos.</p>
-                        <a href="../mantenedores/acompaniamiento/listar.php" class="btn">Listar Acompañamientos</a>
+                <a href="../mantenedores/acompaniamiento/listar.php" class="text-decoration-none">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Acompañamientos</h5>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <?php endif; ?>
 
             <?php if (verificarPermisos(['ver_promociones'])): ?>
             <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Promociones</h5>
-                        <p class="card-text">Gestiona las Promociones.</p>
-                        <a href="../mantenedores/promociones/listar.php" class="btn">Listar Promociones</a>
+                <a href="../mantenedores/promociones/listar.php" class="text-decoration-none">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Promociones</h5>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <?php endif; ?>
 
             <?php if (verificarPermisos(['ver_usuarios'])): ?>
             <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Usuarios</h5>
-                        <p class="card-text">Gestiona los Usuarios.</p>
-                        <a href="../mantenedores/usuarios/listar.php" class="btn">Listar Usuarios</a>
+                <a href="../mantenedores/usuarios/listar.php" class="text-decoration-none">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Usuarios</h5>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <?php endif; ?>
         </div>
@@ -182,37 +186,37 @@ session_start();
         <div class="row">
             <?php if (verificarPermisos(['ver_pedidos'])): ?>
             <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Pedidos</h5>
-                        <p class="card-text">Gestiona los Pedidos.</p>
-                        <a href="../mantenedores/pedidos/listar.php" class="btn">Listar Pedidos</a>
+                <a href="../mantenedores/pedidos/listar.php" class="text-decoration-none">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Pedidos</h5>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <?php endif; ?>
 
             <?php if (verificarPermisos(['ver_stock'])): ?>
             <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Stock</h5>
-                        <p class="card-text">Gestiona el Stock.</p>
-                        <a href="../mantenedores/stock/listar.php" class="btn">Listar Stock</a>
+                <a href="../mantenedores/stock/listar.php" class="text-decoration-none">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Stock</h5>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <?php endif; ?>
 
             <?php if (verificarPermisos(['ver_roles'])): ?>
             <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Roles</h5>
-                        <p class="card-text">Gestiona los Roles.</p>
-                        <a href="../mantenedores/roles/listar_roles.php" class="btn">Listar Roles</a>
+                <a href="../mantenedores/roles/listar_roles.php" class="text-decoration-none">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Roles</h5>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <?php endif; ?>
         </div>
@@ -220,13 +224,13 @@ session_start();
         <div class="row">
             <?php if (verificarPermisos(['ver_permisos'])): ?>
             <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Permisos</h5>
-                        <p class="card-text">Gestiona los Permisos.</p>
-                        <a href="../mantenedores/permisos/listar_permisos.php" class="btn">Listar Permisos</a>
+                <a href="../mantenedores/permisos/listar_permisos.php" class="text-decoration-none">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Permisos</h5>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <?php endif; ?>
         </div>

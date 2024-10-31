@@ -34,6 +34,7 @@ $result = $conexion->query($sql);
                 <th>Nombre</th>
                 <th>Cantidad</th>
                 <th>Precio</th>
+                <th>Imagen</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -46,6 +47,13 @@ $result = $conexion->query($sql);
                         <td><?php echo $row['cantidad']; ?></td>
                         <td><?php echo $row['precio']; ?></td>
                         <td>
+                            <?php if (!empty($row['imagen'])): ?>
+                                <img src="../../uploads/postres/<?php echo htmlspecialchars($row['imagen']); ?>" alt="Imagen" style="width: 50px; height: 50px; object-fit: cover;">
+                            <?php else: ?>
+                                No disponible
+                            <?php endif; ?>
+                        </td>
+                        <td>
                             <a href="editar.php?id=<?php echo $row['id_postre']; ?>" class="btn btn-primary btn-sm">Editar</a>
                             <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#eliminarModal" data-id="<?php echo $row['id_postre']; ?>">Eliminar</button>
                         </td>
@@ -53,7 +61,7 @@ $result = $conexion->query($sql);
                 <?php endwhile; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="5" class="text-center">No se encontraron postres.</td>
+                    <td colspan="6" class="text-center">No se encontraron postres.</td>
                 </tr>
             <?php endif; ?>
         </tbody>
@@ -97,4 +105,5 @@ $result = $conexion->query($sql);
 
 </body>
 </html>
+
 

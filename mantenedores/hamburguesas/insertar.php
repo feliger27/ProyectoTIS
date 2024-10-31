@@ -2,12 +2,11 @@
 include '../../conexion.php'; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Recogemos los datos del formulario
     $nombre_hamburguesa = $_POST['nombre_hamburguesa'];
     $descripcion = $_POST['descripcion'];
     $precio = $_POST['precio'];
-    $ingredientes = $_POST['ingredientes']; // Array de ingredientes con cantidades
-    $aderezos = isset($_POST['aderezos']) ? $_POST['aderezos'] : []; // Array de aderezos, vacío si no se selecciona ninguno
+    $ingredientes = $_POST['ingredientes'];
+    $aderezos = isset($_POST['aderezos']) ? $_POST['aderezos'] : [];
 
     // Validamos que haya al menos un ingrediente con cantidad mayor a 0
     $tiene_ingredientes = false;
@@ -21,50 +20,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!$tiene_ingredientes) {
         echo "<div class='alert alert-danger' role='alert'>Debes agregar al menos un ingrediente con cantidad mayor a 0.</div>";
     } else {
-        // Insertamos la nueva hamburguesa en la tabla Hamburguesa
-        $sql = "INSERT INTO hamburguesa (nombre_hamburguesa, descripcion, precio) 
-                VALUES (?, ?, ?)";
-        
-        $stmt = $conexion->prepare($sql);
-        $stmt->bind_param("ssd", $nombre_hamburguesa, $descripcion, $precio);  // "ssd" para string, string, decimal
-        if ($stmt->execute()) {
-            $id_hamburguesa = $stmt->insert_id; // Obtenemos el id de la hamburguesa recién insertada
+        // Procesamiento de la imagen
+        $nombre_imagen = '';
+        if ($_FILES['imagen']['error'] == UPLOAD_ERR_OK) {
+            $nombre_imagen = $_FILES['imagen']['name'];
+            $ruta_temporal = $_FILES['imagen']['tmp_name'];
+            $ruta_destino = "../../uploads/hamburguesas/" . $nombre_imagen;
 
-            // Insertamos cada ingrediente en la tabla Hamburguesa_Ingrediente con su cantidad
+            if (!move_uploaded_file($ruta_temporal, $ruta_destino)) {
+                echo "<div class='alert alert-danger' role='alert'>Error al subir la imagen.</div>";
+                exit;
+            }
+        }
+
+        // Insertamos la nueva hamburguesa en la tabla Hamburguesa
+        $sql = "INSERT INTO hamburguesa (nombre_hamburguesa, descripcion, precio, imagen) VALUES (?, ?, ?, ?)";
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param("ssds", $nombre_hamburguesa, $descripcion, $precio, $nombre_imagen);
+
+        if ($stmt->execute()) {
+            $id_hamburguesa = $stmt->insert_id;
+
+            // Insertamos los ingredientes
             foreach ($ingredientes as $id_ingrediente => $cantidad) {
-                if ($cantidad > 0) {  // Solo insertamos si la cantidad es mayor a 0
-                    $sql_ingrediente = "INSERT INTO hamburguesa_ingrediente (id_hamburguesa, id_ingrediente, cantidad)
-                                        VALUES (?, ?, ?)";
+                if ($cantidad > 0) {
+                    $sql_ingrediente = "INSERT INTO hamburguesa_ingrediente (id_hamburguesa, id_ingrediente, cantidad) VALUES (?, ?, ?)";
                     $stmt_ingrediente = $conexion->prepare($sql_ingrediente);
-                    $stmt_ingrediente->bind_param("iii", $id_hamburguesa, $id_ingrediente, $cantidad); // "iii" para int, int, int
+                    $stmt_ingrediente->bind_param("iii", $id_hamburguesa, $id_ingrediente, $cantidad);
                     $stmt_ingrediente->execute();
                 }
             }
 
-            // Insertamos cada aderezo en la tabla Hamburguesa_Aderezo solo si hay aderezos seleccionados
+            // Insertamos los aderezos
             if (!empty($aderezos)) {
                 foreach ($aderezos as $id_aderezo) {
-                    $sql_aderezo = "INSERT INTO hamburguesa_aderezo (id_hamburguesa, id_aderezo)
-                                    VALUES (?, ?)";
+                    $sql_aderezo = "INSERT INTO hamburguesa_aderezo (id_hamburguesa, id_aderezo) VALUES (?, ?)";
                     $stmt_aderezo = $conexion->prepare($sql_aderezo);
-                    $stmt_aderezo->bind_param("ii", $id_hamburguesa, $id_aderezo); // "ii" para int, int
+                    $stmt_aderezo->bind_param("ii", $id_hamburguesa, $id_aderezo);
                     $stmt_aderezo->execute();
                 }
             }
 
             echo "<div class='container mt-3'>
-                <div class='alert alert-success alert-dismissible fade show' role='alert'>
-                    Hamburguesa agregada exitosamente.
-                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                </div>
-              </div>";
+                    <div class='alert alert-success alert-dismissible fade show' role='alert'>
+                        Hamburguesa agregada exitosamente.
+                        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                    </div>
+                  </div>";
         } else {
             echo "<div class='container mt-3'>
-                <div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                    Error: " . $stmt->error . "
-                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                </div>
-              </div>";
+                    <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                        Error: " . $stmt->error . "
+                        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                    </div>
+                  </div>";
         }
     }
 }
@@ -86,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h1>Agregar Nueva Hamburguesa</h1>
         <button class="btn btn-secondary" onclick="window.location.href='listar.php'">Volver</button>
     </div>
-    <form action="insertar.php" method="POST" class="mt-4">
+    <form action="insertar.php" method="POST" enctype="multipart/form-data" class="mt-4">
         <div class="mb-3">
             <label for="nombre_hamburguesa" class="form-label">Nombre de la Hamburguesa:</label>
             <input type="text" name="nombre_hamburguesa" id="nombre_hamburguesa" class="form-control" required>
@@ -101,6 +110,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <label for="precio" class="form-label">Precio:</label>
             <input type="number" step="0.01" name="precio" id="precio" class="form-control" required>
         </div>
+
+        <div class="mb-3">
+            <label for="imagen" class="form-label">Imagen:</label>
+            <input type="file" name="imagen" id="imagen" class="form-control">
+        </div>
+
         <div class="mb-3">
             <label for="ingredientes" class="form-label">Selecciona Ingredientes y Cantidades:</label>
             <?php
@@ -119,6 +134,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             ?>
         </div>
+
         <div class="mb-3">
             <label for="aderezos" class="form-label">Selecciona Aderezos:</label>
             <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ced4da; padding: 10px; border-radius: 0.25rem;">
@@ -139,7 +155,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 ?>
             </div>
         </div>
-
 
         <div class="mb-3">
             <button type="submit" class="btn btn-primary">Guardar Hamburguesa</button>

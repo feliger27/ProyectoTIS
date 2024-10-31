@@ -1,7 +1,6 @@
 <?php
 include '../conexion.php'; // asegúrate de tener la conexión disponible
 
-// Función para verificar uno o más permisos específicos para el usuario
 // Función para verificar uno o varios permisos para el usuario
 function verificarPermisos($permisos_requeridos) {
     global $conexion;

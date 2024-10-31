@@ -1,8 +1,8 @@
 <?php
 include '../../conexion.php'; 
 
-// Consulta para obtener todas las hamburguesas, sus ingredientes y aderezos
-$sql = "SELECT h.id_hamburguesa, h.nombre_hamburguesa, h.precio, 
+// Consulta para obtener todas las hamburguesas, sus ingredientes, aderezos y sus imágenes
+$sql = "SELECT h.id_hamburguesa, h.nombre_hamburguesa, h.precio, h.imagen,
                GROUP_CONCAT(DISTINCT CONCAT(i.nombre_ingrediente, ' (', hi.cantidad, ')') SEPARATOR ', ') AS ingredientes,
                GROUP_CONCAT(DISTINCT a.nombre_aderezo SEPARATOR ', ') AS aderezos
         FROM hamburguesa h
@@ -11,8 +11,6 @@ $sql = "SELECT h.id_hamburguesa, h.nombre_hamburguesa, h.precio,
         LEFT JOIN hamburguesa_aderezo ha ON h.id_hamburguesa = ha.id_hamburguesa
         LEFT JOIN aderezo a ON ha.id_aderezo = a.id_aderezo
         GROUP BY h.id_hamburguesa";
-
-
 
 $result = $conexion->query($sql);
 ?>
@@ -48,6 +46,7 @@ $result = $conexion->query($sql);
                 <th>Precio</th>
                 <th>Ingredientes</th>
                 <th>Aderezos</th>
+                <th>Imagen</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -61,6 +60,13 @@ $result = $conexion->query($sql);
                         <td><?php echo $row['ingredientes'] ? $row['ingredientes'] : 'Sin ingredientes'; ?></td>
                         <td><?php echo $row['aderezos'] ? $row['aderezos'] : 'Sin aderezos'; ?></td>
                         <td>
+                            <?php if (!empty($row['imagen'])): ?>
+                                <img src="../../uploads/hamburguesas/<?php echo htmlspecialchars($row['imagen']); ?>" alt="Imagen de la hamburguesa" style="width: 50px; height: 50px; object-fit: cover;">
+                            <?php else: ?>
+                                No disponible
+                            <?php endif; ?>
+                        </td>
+                        <td>
                             <a href="editar.php?id=<?php echo $row['id_hamburguesa']; ?>" class="btn btn-primary btn-sm">Editar</a>
                             <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#eliminarModal" data-id="<?php echo $row['id_hamburguesa']; ?>">Eliminar</button>
                         </td>
@@ -68,7 +74,7 @@ $result = $conexion->query($sql);
                 <?php endwhile; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="6" class="text-center">No se encontraron hamburguesas.</td>
+                    <td colspan="7" class="text-center">No se encontraron hamburguesas.</td>
                 </tr>
             <?php endif; ?>
         </tbody>
@@ -112,5 +118,6 @@ $result = $conexion->query($sql);
 
 </body>
 </html>
+
 
 

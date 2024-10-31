@@ -25,11 +25,35 @@ $row = $result->fetch_assoc();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre_acompaniamiento = $_POST['nombre_acompaniamiento'];
     $cantidad = $_POST['cantidad'];
-    $precio = $_POST['precio'];  // Agregado para actualizar el precio
+    $precio = $_POST['precio'];
 
-    $sql = "UPDATE acompaniamiento SET nombre_acompaniamiento = ?, cantidad = ?, precio = ? WHERE id_acompaniamiento = ?";
-    $stmt = $conexion->prepare($sql);
-    $stmt->bind_param("sidi", $nombre_acompaniamiento, $cantidad, $precio, $id_acompaniamiento); // "sidi" para string, int, decimal, int
+    // Comprobamos si se ha subido una nueva imagen
+    if ($_FILES['imagen']['error'] == UPLOAD_ERR_OK) {
+        $nombre_imagen = $_FILES['imagen']['name'];
+        $ruta_temporal = $_FILES['imagen']['tmp_name'];
+        $ruta_destino = "../../uploads/" . $nombre_imagen;
+
+        if (move_uploaded_file($ruta_temporal, $ruta_destino)) {
+            // Actualizamos el registro con la nueva imagen
+            $sql = "UPDATE acompaniamiento SET nombre_acompaniamiento = ?, cantidad = ?, precio = ?, imagen = ? WHERE id_acompaniamiento = ?";
+            $stmt = $conexion->prepare($sql);
+            $stmt->bind_param("sidsi", $nombre_acompaniamiento, $cantidad, $precio, $nombre_imagen, $id_acompaniamiento);
+        } else {
+            echo "<div class='container mt-3'>
+                    <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                        Error al subir la imagen.
+                        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                    </div>
+                  </div>";
+            exit;
+        }
+    } else {
+        // Si no hay nueva imagen, se mantiene la actual
+        $sql = "UPDATE acompaniamiento SET nombre_acompaniamiento = ?, cantidad = ?, precio = ? WHERE id_acompaniamiento = ?";
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param("sidi", $nombre_acompaniamiento, $cantidad, $precio, $id_acompaniamiento);
+    }
+
     if ($stmt->execute()) {
         echo "<div class='container mt-3'>
                 <div class='alert alert-success alert-dismissible fade show' role='alert'>
@@ -63,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h1>Editar Acompañamiento</h1>
         <button class="btn btn-secondary" onclick="window.location.href='listar.php'">Volver</button>
     </div>
-    <form action="editar.php?id=<?php echo $id_acompaniamiento; ?>" method="POST" class="mt-4">
+    <form action="editar.php?id=<?php echo $id_acompaniamiento; ?>" method="POST" enctype="multipart/form-data" class="mt-4">
         <div class="mb-3">
             <label for="nombre_acompaniamiento" class="form-label">Nombre del Acompañamiento</label>
             <input type="text" name="nombre_acompaniamiento" id="nombre_acompaniamiento" class="form-control" value="<?php echo $row['nombre_acompaniamiento']; ?>" required>
@@ -77,6 +101,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="mb-3">
             <label for="precio" class="form-label">Precio</label>
             <input type="text" name="precio" id="precio" class="form-control" value="<?php echo $row['precio']; ?>" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="imagen" class="form-label">Imagen del Acompañamiento</label>
+            <?php if (!empty($row['imagen'])): ?>
+                <div class="mb-2">
+                    <img src="../../uploads/acompaniamientos/<?php echo $row['imagen']; ?>" alt="Imagen Actual" style="width: 100px; height: 100px; object-fit: cover;">
+                </div>
+            <?php endif; ?>
+            <input type="file" name="imagen" id="imagen" class="form-control">
         </div>
 
         <button type="submit" class="btn btn-primary">Actualizar Acompañamiento</button>
