@@ -66,13 +66,14 @@ if ($metodo_pago === 'debito' || $metodo_pago === 'credito') {
     }
 }
 
-// Crear el pedido en la base de datos
-$query = "INSERT INTO pedido (id_usuario, id_direccion, id_metodo_pago, fecha_pedido) VALUES (?, ?, ?, NOW())";
+// Crear el pedido en la base de datos con estado "en preparación"
+$query = "INSERT INTO pedido (id_usuario, id_direccion, id_metodo_pago, fecha_pedido, estado_pedido) VALUES (?, ?, ?, NOW(), 'en_preparación')";
 $stmt = $conexion->prepare($query);
 $stmt->bind_param("iii", $user_id, $direccion_id, $metodo_pago_id);
 $stmt->execute();
 $pedido_id = $stmt->insert_id;
 $stmt->close();
+
 
 // Procesar los productos del carrito y ajustar el stock
 if (!empty($_SESSION['carrito'])) {
@@ -131,6 +132,57 @@ if (!empty($_SESSION['carrito'])) {
         }
     }
 }
+
+// Calcular el monto total del pedido después de procesar los productos
+$total_pedido = 0.0;
+
+// Sumamos desde pedido_hamburguesa
+$query = "SELECT SUM(cantidad * precio) AS total FROM pedido_hamburguesa WHERE id_pedido = ?";
+$stmt = $conexion->prepare($query);
+$stmt->bind_param("i", $pedido_id);
+$stmt->execute();
+$stmt->bind_result($subtotal_hamburguesa);
+$stmt->fetch();
+$total_pedido += $subtotal_hamburguesa;
+$stmt->close();
+
+// Sumamos desde pedido_bebida
+$query = "SELECT SUM(cantidad * precio) AS total FROM pedido_bebida WHERE id_pedido = ?";
+$stmt = $conexion->prepare($query);
+$stmt->bind_param("i", $pedido_id);
+$stmt->execute();
+$stmt->bind_result($subtotal_bebida);
+$stmt->fetch();
+$total_pedido += $subtotal_bebida;
+$stmt->close();
+
+// Sumamos desde pedido_postre
+$query = "SELECT SUM(cantidad * precio) AS total FROM pedido_postre WHERE id_pedido = ?";
+$stmt = $conexion->prepare($query);
+$stmt->bind_param("i", $pedido_id);
+$stmt->execute();
+$stmt->bind_result($subtotal_postre);
+$stmt->fetch();
+$total_pedido += $subtotal_postre;
+$stmt->close();
+
+// Sumamos desde pedido_acompaniamiento
+$query = "SELECT SUM(cantidad * precio) AS total FROM pedido_acompaniamiento WHERE id_pedido = ?";
+$stmt = $conexion->prepare($query);
+$stmt->bind_param("i", $pedido_id);
+$stmt->execute();
+$stmt->bind_result($subtotal_acompaniamiento);
+$stmt->fetch();
+$total_pedido += $subtotal_acompaniamiento;
+$stmt->close();
+
+// Actualizar el pedido con el monto total calculado
+$query = "UPDATE pedido SET monto = ? WHERE id_pedido = ?";
+$stmt = $conexion->prepare($query);
+$stmt->bind_param("di", $total_pedido, $pedido_id);
+$stmt->execute();
+$stmt->close();
+
 
 // Limpiar el carrito de la sesión después de procesar el pedido
 unset($_SESSION['carrito']);
