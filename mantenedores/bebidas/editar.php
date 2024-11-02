@@ -8,7 +8,6 @@ if (!isset($_GET['id'])) {
 }
 
 $id_bebida = $_GET['id'];
-
 // Obtenemos la información de la bebida
 $sql = "SELECT * FROM bebida WHERE id_bebida = ?";
 $stmt = $conexion->prepare($sql);
@@ -28,9 +27,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cantidad = $_POST['cantidad'];
     $precio = $_POST['precio'];
 
-    $sql = "UPDATE bebida SET nombre_bebida = ?, cantidad = ?, precio = ? WHERE id_bebida = ?";
-    $stmt = $conexion->prepare($sql);
-    $stmt->bind_param("sidi", $nombre_bebida, $cantidad, $precio, $id_bebida);
+    // Comprobamos si se ha subido una nueva imagen
+    if ($_FILES['imagen']['error'] == UPLOAD_ERR_OK) {
+        $nombre_imagen = $_FILES['imagen']['name'];
+        $ruta_temporal = $_FILES['imagen']['tmp_name'];
+        $ruta_destino = "../../uploads/bebidas/" . $nombre_imagen;
+
+        if (move_uploaded_file($ruta_temporal, $ruta_destino)) {
+            // Actualizamos el registro con la nueva imagen
+            $sql = "UPDATE bebida SET nombre_bebida = ?, cantidad = ?, precio = ?, imagen = ? WHERE id_bebida = ?";
+            $stmt = $conexion->prepare($sql);
+            $stmt->bind_param("sidsi", $nombre_bebida, $cantidad, $precio, $nombre_imagen, $id_bebida);
+        } else {
+            echo "<div class='container mt-3'>
+                    <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                        Error al subir la imagen.
+                        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                    </div>
+                  </div>";
+            exit;
+        }
+    } else {
+        // Si no hay nueva imagen, se mantiene la actual
+        $sql = "UPDATE bebida SET nombre_bebida = ?, cantidad = ?, precio = ? WHERE id_bebida = ?";
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param("sidi", $nombre_bebida, $cantidad, $precio, $id_bebida);
+    }
+
     if ($stmt->execute()) {
         echo "<div class='container mt-3'>
                 <div class='alert alert-success alert-dismissible fade show' role='alert'>
@@ -64,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h1>Editar Bebida</h1>
         <button class="btn btn-secondary" onclick="window.location.href='listar.php'">Volver</button>
     </div>
-    <form action="editar.php?id=<?php echo $id_bebida; ?>" method="POST" class="mt-4">
+    <form action="editar.php?id=<?php echo $id_bebida; ?>" method="POST" enctype="multipart/form-data" class="mt-4">
         <div class="mb-3">
             <label for="nombre_bebida" class="form-label">Nombre de la Bebida</label>
             <input type="text" name="nombre_bebida" id="nombre_bebida" class="form-control" value="<?php echo $row['nombre_bebida']; ?>" required>
@@ -80,6 +103,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input type="number" step="0.01" name="precio" id="precio" class="form-control" value="<?php echo $row['precio']; ?>" required>
         </div>
 
+        <div class="mb-3">
+            <label for="imagen" class="form-label">Imagen de la Bebida</label>
+            <?php if (!empty($row['imagen'])): ?>
+                <div class="mb-2">
+                    <img src="../../uploads/bebidas/<?php echo $row['imagen']; ?>" alt="Imagen Actual" style="width: 100px; height: 100px; object-fit: cover;">
+                </div>
+            <?php endif; ?>
+            <input type="file" name="imagen" id="imagen" class="form-control">
+        </div>
+
         <button type="submit" class="btn btn-primary">Actualizar Bebida</button>
     </form>
 </div>
@@ -87,4 +120,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+
 

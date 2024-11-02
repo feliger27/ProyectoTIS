@@ -6,9 +6,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cantidad = $_POST['cantidad'];
     $precio = $_POST['precio'];
 
-    $sql = "INSERT INTO postre (nombre_postre, cantidad, precio) VALUES (?, ?, ?)";
+    // Manejar la subida de la imagen
+    $nombre_imagen = null; // Inicializamos la variable para la imagen
+    if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] == UPLOAD_ERR_OK) {
+        $nombre_imagen = $_FILES['imagen']['name'];
+        $ruta_temporal = $_FILES['imagen']['tmp_name'];
+        $ruta_destino = "../../uploads/postres/" . $nombre_imagen;
+
+        // Intentar mover el archivo a la ubicación de destino
+        if (!move_uploaded_file($ruta_temporal, $ruta_destino)) {
+            echo "<div class='container mt-3'>
+                    <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                        Error al subir la imagen.
+                        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                    </div>
+                  </div>";
+            exit;
+        }
+    }
+
+    // Insertar el postre en la base de datos junto con la imagen
+    $sql = "INSERT INTO postre (nombre_postre, cantidad, precio, imagen) VALUES (?, ?, ?, ?)";
     $stmt = $conexion->prepare($sql);
-    $stmt->bind_param("sid", $nombre_postre, $cantidad, $precio);
+    $stmt->bind_param("sids", $nombre_postre, $cantidad, $precio, $nombre_imagen);
 
     if ($stmt->execute()) {
         echo "<div class='container mt-3'>
@@ -43,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h1>Agregar Nuevo Postre</h1>
         <button class="btn btn-secondary" onclick="window.location.href='listar.php'">Volver</button>
     </div>
-    <form action="insertar.php" method="POST">
+    <form action="insertar.php" method="POST" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="nombre_postre" class="form-label">Nombre del Postre</label>
             <input type="text" name="nombre_postre" id="nombre_postre" class="form-control" required>
@@ -59,6 +79,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input type="number" step="0.01" name="precio" id="precio" class="form-control" required>
         </div>
 
+        <div class="mb-3">
+            <label for="imagen" class="form-label">Imagen del Postre</label>
+            <input type="file" name="imagen" id="imagen" class="form-control">
+        </div>
+
         <button type="submit" class="btn btn-primary">Agregar Postre</button>
     </form>
 </div>
@@ -66,3 +91,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
