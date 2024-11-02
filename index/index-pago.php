@@ -100,16 +100,16 @@ $tarjetas_debito = mysqli_query($conexion, $query_debito);
                 <div id="tarjeta-info" style="display: none;">
                     <h4>Detalles de Tarjeta</h4>
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <input type="text" class="form-control" name="nombre_titular" placeholder="Nombre del titular" />
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <input type="text" class="form-control" name="numero_tarjeta" placeholder="Número de tarjeta" />
                         </div>
                         <div class="col-md-4">
                             <input type="text" class="form-control" name="fecha_expiracion" placeholder="Fecha de expiración (MM/AA)" />
                         </div>
-                        <div class="col-md-4" id="cuotas" style="display: none;">
+                        <div class="col-md-4" id="cuotas">
                             <label for="num_cuotas">Cuotas:</label>
                             <select name="num_cuotas" class="form-select">
                                 <?php for ($i = 1; $i <= 12; $i++): ?>
@@ -162,5 +162,4 @@ $tarjetas_debito = mysqli_query($conexion, $query_debito);
 </script>
 
 <?php include('../includes/footer.php'); ?>
-
 
