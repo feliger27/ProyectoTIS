@@ -1,20 +1,28 @@
 <?php
+include '../conexion.php';
 session_start();
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login/login.php");
     exit();
 }
 
-include('../conexion.php');
-include('../includes/header.php'); // Incluir el encabezado
+include('../includes/header.php');
+
+$user_id = $_SESSION['user_id'];
 
 // Obtener las direcciones guardadas del usuario
-$user_id = $_SESSION['user_id'];
-$query = "SELECT d.id_direccion, d.calle, d.numero, d.ciudad, d.codigo_postal 
-          FROM direccion AS d
-          INNER JOIN direccion_usuario AS du ON d.id_direccion = du.id_direccion
-          WHERE du.id_usuario = $user_id";
-$direcciones = mysqli_query($conexion, $query);
+$query_direcciones = "SELECT d.id_direccion, d.calle, d.numero, d.ciudad, d.codigo_postal 
+                      FROM direccion AS d
+                      INNER JOIN direccion_usuario AS du ON d.id_direccion = du.id_direccion
+                      WHERE du.id_usuario = $user_id";
+$direcciones = mysqli_query($conexion, $query_direcciones);
+
+// Obtener las tarjetas de débito guardadas del usuario
+$query_debito = "SELECT mp.id_pago, mp.nombre_titular, mp.numero_tarjeta, mp.fecha_expiracion 
+                 FROM metodo_pago AS mp
+                 INNER JOIN usuario_metodo_pago AS ump ON mp.id_pago = ump.id_pago
+                 WHERE ump.id_usuario = $user_id AND mp.tipo_tarjeta = 'Debito'";
+$tarjetas_debito = mysqli_query($conexion, $query_debito);
 ?>
 
 <div class="container my-5">
@@ -23,7 +31,6 @@ $direcciones = mysqli_query($conexion, $query);
     <div class="card mb-4">
         <div class="card-body">
             <h3 class="card-title">Seleccionar Dirección de Envío</h3>
-            <!-- Formulario para enviar a procesar_pago.php -->
             <form action="../funciones/procesamiento/procesar-pago.php" method="POST">
                 <div class="mb-3">
                     <?php while($direccion = mysqli_fetch_assoc($direcciones)): ?>
@@ -75,21 +82,32 @@ $direcciones = mysqli_query($conexion, $query);
                     </div>
                 </div>
 
+                <!-- Selección de tarjeta de débito guardada -->
+                <?php if (mysqli_num_rows($tarjetas_debito) > 0): ?>
+                    <div id="tarjetas-debito-guardadas" style="display: none;">
+                        <h4>Seleccione una Tarjeta de Débito Guardada</h4>
+                        <select name="tarjeta_debito_id" class="form-select">
+                            <?php while($tarjeta = mysqli_fetch_assoc($tarjetas_debito)): ?>
+                                <option value="<?= $tarjeta['id_pago'] ?>">
+                                    <?= $tarjeta['nombre_titular'] ?> - **** **** **** <?= substr($tarjeta['numero_tarjeta'], -4) ?> (Exp: <?= date('m/y', strtotime($tarjeta['fecha_expiracion'])) ?>)
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
+                <?php endif; ?>
+
                 <!-- Información adicional para tarjeta -->
                 <div id="tarjeta-info" style="display: none;">
                     <h4>Detalles de Tarjeta</h4>
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <input type="text" class="form-control" name="nombre_tarjeta" placeholder="Nombre en la tarjeta" />
+                            <input type="text" class="form-control" name="nombre_titular" placeholder="Nombre del titular" />
                         </div>
                         <div class="col-md-6">
                             <input type="text" class="form-control" name="numero_tarjeta" placeholder="Número de tarjeta" />
                         </div>
                         <div class="col-md-4">
-                            <input type="text" class="form-control" name="fecha_vencimiento" placeholder="Fecha de vencimiento (MM/AA)" />
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="codigo_seguridad" placeholder="Código de seguridad" />
+                            <input type="text" class="form-control" name="fecha_expiracion" placeholder="Fecha de expiración (MM/AA)" />
                         </div>
                         <div class="col-md-4" id="cuotas" style="display: none;">
                             <label for="num_cuotas">Cuotas:</label>
@@ -125,17 +143,24 @@ $direcciones = mysqli_query($conexion, $query);
         radio.addEventListener('change', function() {
             const tarjetaInfo = document.getElementById('tarjeta-info');
             const cuotas = document.getElementById('cuotas');
+            const tarjetasDebitoGuardadas = document.getElementById('tarjetas-debito-guardadas');
+            
             if (this.value === 'debito') {
-                tarjetaInfo.style.display = 'block';
+                tarjetaInfo.style.display = 'none';
                 cuotas.style.display = 'none';
+                tarjetasDebitoGuardadas.style.display = 'block';
             } else if (this.value === 'credito') {
                 tarjetaInfo.style.display = 'block';
                 cuotas.style.display = 'block';
+                tarjetasDebitoGuardadas.style.display = 'none';
             } else {
                 tarjetaInfo.style.display = 'none';
+                tarjetasDebitoGuardadas.style.display = 'none';
             }
         });
     });
 </script>
 
 <?php include('../includes/footer.php'); ?>
+
+

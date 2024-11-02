@@ -46,21 +46,19 @@ $metodo_pago = $_POST['metodo_pago'];
 $metodo_pago_id = null;
 
 if ($metodo_pago === 'debito' || $metodo_pago === 'credito') {
-    $nombre_tarjeta = $_POST['nombre_tarjeta'];
+    $nombre_titular = $_POST['nombre_titular'];
     $numero_tarjeta = $_POST['numero_tarjeta'];
-    $fecha_vencimiento = $_POST['fecha_vencimiento'];
-    $codigo_seguridad = $_POST['codigo_seguridad'];
-    $cuotas = $metodo_pago === 'credito' ? $_POST['num_cuotas'] : null;
+    $fecha_expiracion = $_POST['fecha_expiracion'];
 
-    $query = "INSERT INTO metodo_pago (tipo, nombre_tarjeta, numero_tarjeta, fecha_vencimiento, codigo_seguridad, cuotas) VALUES (?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO metodo_pago (tipo_tarjeta, nombre_titular, numero_tarjeta, fecha_expiracion) VALUES (?, ?, ?, ?)";
     $stmt = $conexion->prepare($query);
-    $stmt->bind_param("sssssi", $metodo_pago, $nombre_tarjeta, $numero_tarjeta, $fecha_vencimiento, $codigo_seguridad, $cuotas);
+    $stmt->bind_param("ssss", $metodo_pago, $nombre_titular, $numero_tarjeta, $fecha_expiracion);
     $stmt->execute();
     $metodo_pago_id = $stmt->insert_id;
     $stmt->close();
 
     if (isset($_POST['recordar_metodo_pago'])) {
-        $query = "INSERT INTO usuario_metodo_pago (id_usuario, id_metodo_pago) VALUES (?, ?)";
+        $query = "INSERT INTO usuario_metodo_pago (id_usuario, id_pago) VALUES (?, ?)";
         $stmt = $conexion->prepare($query);
         $stmt->bind_param("ii", $user_id, $metodo_pago_id);
         $stmt->execute();
