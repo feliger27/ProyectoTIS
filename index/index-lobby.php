@@ -14,10 +14,9 @@ if (!isset($_SESSION['username'])) {
     <p class="text-center">Descubre las mejores hamburguesas, combos y más.</p>
 </div>
 
-<!-- Contenedor responsivo para el mapa arriba del footer -->
 <div class="container mt-4 mb-5">
     <div class="row">
-        <div class="col-12">
+        <div class="col-6">
             <div id="map" style="width: 100%; height: 300px;"></div>
         </div>
     </div>
@@ -25,7 +24,7 @@ if (!isset($_SESSION['username'])) {
 
 <script>
 function initMap() {
-    var hamburgeeks = {lat: -36.916083, lng: -73.029912}; // Ajusta estas coordenadas para tu ubicación
+    var hamburgeeks = {lat: -36.916083, lng: -73.029912}; 
     var map = new google.maps.Map(document.getElementById('map'), {
         zoom: 10,
         center: hamburgeeks
