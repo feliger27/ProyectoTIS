@@ -396,6 +396,33 @@ $stmt_metodos_pago->close();
             input.value = formattedValue; // Asignar el valor formateado al campo
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {  //Guardar la pestaña activa en localStorage
+
+            // Obt el id de la última pestaña activa del localStorage
+            var lastTab = localStorage.getItem('activeTab');
+            
+            //Si existe una pestaña activa guardada selecciona esa pestaña
+            if (lastTab) {
+                var selectedTab = document.querySelector(`#perfil-tabs button[data-bs-target="${lastTab}"]`);
+                var selectedTabContent = document.querySelector(lastTab);
+                if (selectedTab && selectedTabContent) {
+                    document.querySelector(`#perfil-tabs .nav-link.active`).classList.remove('active');
+                    document.querySelector(`.tab-content .tab-pane.show.active`).classList.remove('show', 'active');
+                    selectedTab.classList.add('active');
+                    selectedTabContent.classList.add('show', 'active');
+                }
+            }
+
+            //clics en las pestañas y guarda el id de la pestaña activa en el localStorage
+            document.querySelectorAll('#perfil-tabs button').forEach(function (tabButton) {
+                tabButton.addEventListener('click', function () {
+                    var target = tabButton.getAttribute('data-bs-target');
+                    localStorage.setItem('activeTab', target);
+                });
+            });
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
