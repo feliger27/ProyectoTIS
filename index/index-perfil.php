@@ -61,6 +61,32 @@ $stmt_metodos_pago->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Mi Perfil - HamburGeeks</title>
+    <style>
+    .container .btn-primary, .container .btn-warning, .container .btn-danger, .container .btn-success {
+    background-color: #fd7e14; 
+    border-color: #fd7e14; 
+    }
+
+    .container .btn-primary:hover, .container .btn-warning:hover, .container .btn-danger:hover, .container .btn-success:hover {
+    background-color: #e69500; 
+    border-color: #e69500;
+    }
+
+
+    .container h2, .container h4, .container .nav-link.active {
+    color: #fd7e14; /
+    }
+
+    .container .nav-link.active {
+    background-color: #fd7e14;
+    color: white;
+    }
+    .nav-pills .nav-link {
+    color: black; 
+   
+}
+
+    </style>
 </head>
 
 <body>

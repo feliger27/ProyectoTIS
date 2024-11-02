@@ -1,4 +1,3 @@
-
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -14,6 +13,30 @@ if (!isset($_SESSION['username'])) {
     <h1 class="text-center">Bienvenido a HamburGeeks</h1>
     <p class="text-center">Descubre las mejores hamburguesas, combos y más.</p>
 </div>
+
+<!-- Contenedor responsivo para el mapa arriba del footer -->
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <div class="col-12">
+            <div id="map" style="width: 100%; height: 300px;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+function initMap() {
+    var hamburgeeks = {lat: -36.916083, lng: -73.029912}; // Ajusta estas coordenadas para tu ubicación
+    var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 10,
+        center: hamburgeeks
+    });
+    var marker = new google.maps.Marker({
+        position: hamburgeeks,
+        map: map
+    });
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBDdYo2KvUW0fJayyfWMazSpdXeFDZHQaM&callback=initMap" async defer></script>
 
 <?php
 include '../includes/footer.php';

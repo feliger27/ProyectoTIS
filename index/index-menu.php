@@ -16,25 +16,41 @@ include '../includes/header.php'; // Incluye encabezado del sitio
 
     <!-- Estilo para las categorías -->
     <style>
-        .category-section {
-            margin-bottom: 3rem;
-        }
-        .product-card {
-            transition: transform 0.2s ease;
-        }
-        .product-card:hover {
-            transform: scale(1.05);
-        }
-        .product-card img {
-            width: 100%;      /* Hace que la imagen ocupe el ancho completo del contenedor */
-            height: 200px;    /* Altura fija para todas las imágenes */
-            object-fit: cover; /* Corta la imagen si es necesario, manteniendo la proporción */
-        }
+    .category-section {
+        margin-bottom: 3rem;
+    }
+    .product-card {
+        transition: transform 0.2s ease;
+    }
+    .product-card:hover {
+        transform: scale(1.05);
+    }
+    .product-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    .btn-primary {
+        background-color: #fd7e14;
+        border-color: #fd7e14;
+    }
+    .btn-primary:hover, .btn-primary:focus {
+        background-color: #e69500;
+        border-color: #e69500;
+    }
+    .category-title {
+        color: #fd7e14;
+        font-size: 24px;
+        font-weight: bold;
+        padding-bottom: 10px; 
+        margin-bottom: 20px; 
+        
+    }
     </style>
 
     <!-- Sección de Combos -->
     <div class="category-section">
-        <h2 class="text-center text-primary mb-4">Combos</h2>
+        <h2 class="text-center mb-4 category-title">Combos</h2>
         <div class="row">
             <?php foreach ($combos as $combo): ?>
             <div class="col-md-4">
@@ -58,7 +74,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
 
     <!-- Sección de Hamburguesas -->
     <div class="category-section">
-        <h2 class="text-center text-primary mb-4">Hamburguesas</h2>
+        <h2 class="text-center mb-4 category-title">Hamburguesas</h2>
         <div class="row">
             <?php foreach ($hamburguesas as $hamburguesa): ?>
             <div class="col-md-4">
@@ -82,7 +98,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
 
     <!-- Sección de Bebidas -->
     <div class="category-section">
-        <h2 class="text-center text-primary mb-4">Bebidas</h2>
+        <h2 class="text-center mb-4 category-title">Bebidas</h2>
         <div class="row">
             <?php foreach ($bebidas as $bebida): ?>
             <div class="col-md-4">
@@ -106,7 +122,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
 
 <!-- Sección de Postres -->
     <div class="category-section">
-        <h2 class="text-center text-primary mb-4">Postres</h2>
+        <h2 class="text-center mb-4 category-title">Postres</h2>
         <div class="row">
             <?php foreach ($postres as $postre): ?>
             <div class="col-md-4">
@@ -129,7 +145,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
     </div>
     <!-- Aquí un ejemplo para la sección de Acompañamientos -->
     <div class="category-section">
-        <h2 class="text-center text-primary mb-4">Acompañamientos</h2>
+        <h2 class="text-center mb-4 category-title">Acompañamientos</h2>
         <div class="row">
             <?php foreach ($acompaniamientos as $acomp): ?>
             <div class="col-md-4">
