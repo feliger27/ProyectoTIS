@@ -27,7 +27,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
     }
     .product-card img {
         width: 100%;
-        height: 200px;
+        height: 300px;
         object-fit: cover;
     }
     .btn-primary {
