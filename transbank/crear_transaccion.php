@@ -4,13 +4,15 @@ require 'config_transbank.php';
 
 use Transbank\Webpay\WebpayPlus\Transaction;
 
-// Crear una transacción de prueba
+// Obtener el monto de la URL o de la sesión
+$monto = isset($_GET['monto']) ? intval($_GET['monto']) : 0;
+
 try {
     $transaction = new Transaction();
     $response = $transaction->create(
         "orden12345",                  // Identificador único de la orden
         uniqid(),                      // Código único de compra
-        1000,                          // Monto de prueba en pesos chilenos
+        $monto,                        // Monto recibido dinámicamente
         TBK_RETURN_URL                 // URL de retorno después del pago
     );
 

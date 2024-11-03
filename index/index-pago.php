@@ -42,7 +42,7 @@ $tarjetas_guardadas = mysqli_query($conexion, $query_tarjetas);
     <div class="card mb-4">
         <div class="card-body">
             <h3 class="card-title">Seleccionar Dirección de Envío</h3>
-            <form action="../transbank/crear_transaccion.php" method="POST">
+            <form action="../funciones/procesamiento/procesar-pago.php" method="POST">
                 <div class="mb-3">
                     <?php while($direccion = mysqli_fetch_assoc($direcciones)): ?>
                         <div class="form-check">
@@ -142,6 +142,7 @@ $tarjetas_guardadas = mysqli_query($conexion, $query_tarjetas);
                 <input type="hidden" name="monto" value="<?= $monto_total ?>"> <!-- Usar el monto del carrito -->
                 <input type="hidden" name="pedido_id" value="<?= $id_pedido ?>"> <!-- Incluir el ID del pedido -->
                 <button type="submit" class="btn btn-primary w-100">Confirmar y Pagar</button>
+                <a href="../transbank/crear_transaccion.php?monto=<?= $monto_total ?>" class="btn btn-secondary w-100 mt-2" id="sistemaPruebaPago">Ir al Sistema Prueba de Pago</a>
             </form>
         </div>
     </div>
@@ -154,35 +155,27 @@ $tarjetas_guardadas = mysqli_query($conexion, $query_tarjetas);
         nuevaDireccionForm.style.display = nuevaDireccionForm.style.display === 'none' ? 'block' : 'none';
     });
 
-    // Cambiar formulario según método de pago y mostrar tarjetas guardadas
+    // Cambiar formulario según método de pago y mostrar/ocultar elementos
     document.querySelectorAll('input[name="metodo_pago"]').forEach((radio) => {
         radio.addEventListener('change', function() {
             const tarjetaInfo = document.getElementById('tarjeta-info');
             const cuotas = document.getElementById('cuotas');
             const tarjetasGuardadas = document.getElementById('tarjetas-guardadas');
-            const tarjetaSelect = document.getElementById('tarjeta_guardada_select');
+            const sistemaPruebaPago = document.getElementById('sistemaPruebaPago');
 
-            // Mostrar el formulario y lista desplegable de tarjetas según el tipo seleccionado
-            tarjetaInfo.style.display = 'block';
-            tarjetasGuardadas.style.display = 'block';
+            if (this.value === 'efectivo') {
+                sistemaPruebaPago.style.display = 'none';   // Oculta el botón de sistema de pruebas
+                tarjetaInfo.style.display = 'none';         // Oculta el formulario de tarjeta
+                tarjetasGuardadas.style.display = 'none';   // Oculta la selección de tarjetas guardadas
+            } else {
+                sistemaPruebaPago.style.display = 'block';  // Muestra el botón de sistema de pruebas
+                tarjetaInfo.style.display = 'block';        // Muestra el formulario de tarjeta
+                tarjetasGuardadas.style.display = 'block';  // Muestra la selección de tarjetas guardadas
 
-            // Filtrar tarjetas guardadas según el tipo de tarjeta
-            for (let i = 1; i < tarjetaSelect.options.length; i++) {
-                const tipoTarjeta = tarjetaSelect.options[i].getAttribute('data-tipo');
-                tarjetaSelect.options[i].style.display = (this.value === tipoTarjeta) ? 'block' : 'none';
+                // Mostrar u ocultar el campo de cuotas solo para crédito
+                cuotas.style.display = (this.value === 'credito') ? 'block' : 'none';
             }
-
-            // Mostrar u ocultar el campo de cuotas solo para crédito
-            cuotas.style.display = (this.value === 'credito') ? 'block' : 'none';
         });
-    });
-
-    // Autocompletar campos al seleccionar una tarjeta guardada
-    document.getElementById('tarjeta_guardada_select').addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        document.getElementById('nombre_titular').value = selectedOption.getAttribute('data-nombre') || '';
-        document.getElementById('numero_tarjeta').value = selectedOption.getAttribute('data-numero') || '';
-        document.getElementById('fecha_expiracion').value = selectedOption.getAttribute('data-fecha') || '';
     });
 </script>
 
