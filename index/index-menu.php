@@ -13,6 +13,12 @@ include '../includes/header.php'; // Incluye encabezado del sitio
 
 <div class="container my-5">
     <h1 class="text-center mb-4">Menú de Productos</h1>
+    <!-- Mensaje de error por stock insuficiente -->
+    <?php if (isset($_GET['error']) && $_GET['error'] == 'stock_insuficiente'): ?>
+        <div class="alert alert-danger" role="alert">
+            No hay suficiente stock disponible para este producto.
+        </div>
+    <?php endif; ?>
 
     <!-- Estilo para las categorías -->
     <style>

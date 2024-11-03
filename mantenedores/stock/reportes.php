@@ -30,11 +30,22 @@ if (isset($_GET['tipo'])) {
 
         $pdf->SetFont('Arial', '', 12);
         while ($row = $result->fetch_assoc()) {
+            // Cambia el color si la cantidad está por debajo del umbral
+            if ($row['cantidad'] < $row['umbral_reabastecimiento']) {
+                $pdf->SetTextColor(255, 0, 0); // Texto rojo para bajo stock
+            } else {
+                $pdf->SetTextColor(0, 0, 0); // Texto negro para stock suficiente
+            }
+
+            // Imprimir celdas con el color actual
             $pdf->Cell(40, 10, $row['id'], 1);
             $pdf->Cell(70, 10, $row['nombre'], 1);
             $pdf->Cell(30, 10, $row['cantidad'], 1);
             $pdf->Cell(50, 10, $row['umbral_reabastecimiento'], 1);
             $pdf->Ln();
+
+            // Restablecer el color de texto a negro para el siguiente producto
+            $pdf->SetTextColor(0, 0, 0); // Asegúrate de que el color se restablezca después de cada fila
         }
     } else {
         $pdf->Cell(190, 10, 'Tipo de producto no válido', 1, 1, 'C');
@@ -71,24 +82,27 @@ if (isset($_GET['tipo'])) {
         $result = $conexion->query($query);
 
         while ($row = $result->fetch_assoc()) {
-            $pdf->Cell(40, 10, $row['id'], 1);
-            $pdf->Cell(70, 10, $row['nombre'], 1);
-
-            // Cambiar el color si el stock está por debajo del umbral
+            // Cambia el color si la cantidad está por debajo del umbral
             if ($row['cantidad'] < $row['umbral_reabastecimiento']) {
                 $pdf->SetTextColor(255, 0, 0); // Texto rojo para bajo stock
             } else {
                 $pdf->SetTextColor(0, 0, 0); // Texto negro para stock suficiente
             }
+        
+            // Imprimir celdas con el color actual
+            $pdf->Cell(40, 10, $row['id'], 1);
+            $pdf->Cell(70, 10, $row['nombre'], 1);
             $pdf->Cell(30, 10, $row['cantidad'], 1);
             $pdf->Cell(50, 10, $row['umbral_reabastecimiento'], 1);
             $pdf->Ln();
+        
+            // Restablecer el color de texto a negro para el siguiente producto
+            $pdf->SetTextColor(0, 0, 0); // Asegúrate de que el color se restablezca después de cada fila
         }
-        $pdf->SetTextColor(0, 0, 0); // Restaurar color de texto a negro
-        $pdf->Ln(5); // Espacio entre categorías
     }
 }
 
 $pdf->Output('I', 'reportes.pdf');
 ?>
+
 

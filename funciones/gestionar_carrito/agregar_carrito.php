@@ -38,6 +38,14 @@ $result = $stmt->get_result();
 $producto = $result->fetch_assoc();
 
 if ($producto) {
+    // Verifica el stock disponible
+    $stock_disponible = $producto['cantidad']; // Asegúrate de que esta columna exista en tu tabla de productos
+    if ($cantidad > $stock_disponible) {
+        // Redirige con un mensaje de error si no hay suficiente stock
+        header('Location: ../../index/index-menu.php?error=stock_insuficiente');
+        exit();
+    }
+
     // Verifica si el producto ya está en el carrito
     if (isset($_SESSION['carrito'][$tipo_producto][$producto_id])) {
         $_SESSION['carrito'][$tipo_producto][$producto_id]['cantidad'] += $cantidad;
@@ -55,3 +63,4 @@ if ($producto) {
 // Redirige al menú o muestra un mensaje de éxito
 header('Location: ../../index/index-menu.php');
 exit();
+?>
