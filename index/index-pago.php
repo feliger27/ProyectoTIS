@@ -142,8 +142,8 @@ $tarjetas_guardadas = mysqli_query($conexion, $query_tarjetas);
                 <input type="hidden" name="monto" value="<?= $monto_total ?>"> <!-- Usar el monto del carrito -->
                 <input type="hidden" name="pedido_id" value="<?= $id_pedido ?>"> <!-- Incluir el ID del pedido -->
                 <button type="submit" class="btn btn-primary w-100">Confirmar y Pagar</button>
-                <a href="../transbank/crear_transaccion.php?monto=<?= $monto_total ?>" class="btn btn-secondary w-100 mt-2" id="sistemaPruebaPago">Ir al Sistema Prueba de Pago</a>
-            </form>
+                <a href="../funciones/transbank/crear_transaccion.php?monto=<?= $monto_total ?>" class="btn btn-secondary w-100 mt-2" id="sistemaPruebaPago">Ir al Sistema Prueba de Pago</a>
+                </form>
         </div>
     </div>
 </div>
