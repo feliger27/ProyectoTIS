@@ -6,7 +6,8 @@ $sql = "SELECT p.id_pedido, u.nombre AS nombre_usuario, u.apellido AS apellido_u
                p.monto, p.fecha_pedido, p.estado_pedido
         FROM pedido p
         INNER JOIN usuario u ON p.id_usuario = u.id_usuario
-        LEFT JOIN promocion pr ON p.id_promocion = pr.id_promocion";
+        LEFT JOIN promocion pr ON p.id_promocion = pr.id_promocion
+        ORDER BY p.id_pedido ASC";
 $result = $conexion->query($sql);
 ?>
 

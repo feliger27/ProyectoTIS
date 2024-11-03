@@ -18,14 +18,13 @@ if (isset($_GET['id'])) {
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Recibir datos del formulario
-        $id_usuario = $_POST['id_usuario'];
         $id_promocion = $_POST['id_promocion'] ?: null; // Permitir que el valor sea null si no se selecciona promoción
         $total = $_POST['total'];
 
         // Actualizar el pedido
-        $sql_update = "UPDATE pedido SET id_usuario = ?, id_promocion = ?, monto = ? WHERE id_pedido = ?";
+        $sql_update = "UPDATE pedido SET id_promocion = ?, monto = ? WHERE id_pedido = ?";
         $stmt_update = $conexion->prepare($sql_update);
-        $stmt_update->bind_param('isii', $id_usuario, $id_promocion, $total, $id_pedido);
+        $stmt_update->bind_param('sii', $id_promocion, $total, $id_pedido);
 
         if ($stmt_update->execute()) {
             header("Location: listar.php?actualizado=1");
@@ -61,17 +60,6 @@ if (isset($_GET['id'])) {
             <button class="btn btn-secondary" onclick="window.location.href='listar.php'">Volver</button>
         </div>
         <form method="POST" class="mt-4">
-            <div class="mb-3">
-                <label for="id_usuario" class="form-label">Usuario</label>
-                <select class="form-select" id="id_usuario" name="id_usuario" required>
-                    <?php while ($usuario = $usuarios->fetch_assoc()): ?>
-                        <option value="<?php echo $usuario['id_usuario']; ?>" <?php if ($pedido['id_usuario'] == $usuario['id_usuario']) echo 'selected'; ?>>
-                            <?php echo $usuario['nombre']; ?>
-                        </option>
-                    <?php endwhile; ?>
-                </select>
-            </div>
-
             <div class="mb-3">
                 <label for="id_promocion" class="form-label">Promoción</label>
                 <select class="form-select" id="id_promocion" name="id_promocion">
