@@ -38,12 +38,50 @@ $result = $stmt->get_result();
 $producto = $result->fetch_assoc();
 
 if ($producto) {
-    // Verifica el stock disponible
-    $stock_disponible = $producto['cantidad']; // Asegúrate de que esta columna exista en tu tabla de productos
-    if ($cantidad > $stock_disponible) {
-        // Redirige con un mensaje de error si no hay suficiente stock
-        header('Location: ../../index/index-menu.php?error=stock_insuficiente');
-        exit();
+    // Verificación especial para combos
+    if ($tipo_producto === 'combo') {
+        $stock_suficiente = true;
+
+        // Verificar hamburguesas del combo
+        $query = "SELECT ch.id_hamburguesa, ch.cantidad AS cantidad_necesaria 
+                  FROM combo_hamburguesa ch 
+                  WHERE ch.id_combo = ?";
+        $stmt = $conexion->prepare($query);
+        $stmt->bind_param("i", $producto_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        while ($row = $result->fetch_assoc()) {
+            $hamburguesa_id = $row['id_hamburguesa'];
+            $cantidad_necesaria = $row['cantidad_necesaria'] * $cantidad;
+
+            // Verificar los ingredientes necesarios para la hamburguesa
+            $query_ingredientes = "SELECT hi.id_ingrediente, hi.cantidad AS cantidad_por_hamburguesa, i.cantidad AS stock 
+                                   FROM hamburguesa_ingrediente hi 
+                                   JOIN ingrediente i ON hi.id_ingrediente = i.id_ingrediente 
+                                   WHERE hi.id_hamburguesa = ?";
+            $stmt_ingredientes = $conexion->prepare($query_ingredientes);
+            $stmt_ingredientes->bind_param("i", $hamburguesa_id);
+            $stmt_ingredientes->execute();
+            $result_ingredientes = $stmt_ingredientes->get_result();
+
+            while ($ingrediente = $result_ingredientes->fetch_assoc()) {
+                $cantidad_total_necesaria = $ingrediente['cantidad_por_hamburguesa'] * $cantidad_necesaria;
+                if ($ingrediente['stock'] < $cantidad_total_necesaria) {
+                    $stock_suficiente = false;
+                    break 2; // Rompe ambos bucles si un ingrediente está agotado
+                }
+            }
+        }
+
+        // Verificar stock para otros productos del combo de forma similar
+        // Aquí podríamos agregar lógica para acompañamientos, bebidas, y postres si fuera necesario.
+
+        // Si no hay stock suficiente, redirige con un mensaje de error
+        if (!$stock_suficiente) {
+            header('Location: ../../index/index-menu.php?error=stock_insuficiente');
+            exit();
+        }
     }
 
     // Verifica si el producto ya está en el carrito
@@ -52,15 +90,16 @@ if ($producto) {
     } else {
         // Agrega el producto al carrito
         $_SESSION['carrito'][$tipo_producto][$producto_id] = [
-            'id' => $producto_id,
             'nombre' => $producto['nombre_' . $tipo_producto],
             'precio' => $producto['precio'],
             'cantidad' => $cantidad
         ];
     }
-}
 
-// Redirige al menú o muestra un mensaje de éxito
-header('Location: ../../index/index-menu.php');
-exit();
+    header('Location: ../../index/index-menu.php?success=producto_agregado');
+    exit();
+} else {
+    header('Location: ../../index/index-menu.php?error=producto_no_encontrado');
+    exit();
+}
 ?>

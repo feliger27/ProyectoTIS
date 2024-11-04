@@ -45,7 +45,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
             <?php foreach ($combos as $combo): ?>
             <div class="col-md-4">
                 <div class="card product-card h-100 shadow-sm">
-                    <img src="../uploads/combos/<?= htmlspecialchars($combo['imagen']) ?>" class="card-img-top" alt="<?= htmlspecialchars($combo['nombre_combo']) ?>">
+                    <img src="../uploads/combos/<?= !empty($combo['imagen']) ? htmlspecialchars($combo['imagen']) : 'default-combo.jpg' ?>" class="card-img-top" alt="<?= htmlspecialchars($combo['nombre_combo']) ?>">
                     <div class="card-body">
                         <h5 class="card-title text-center"><?= htmlspecialchars($combo['nombre_combo']) ?></h5>
                         <p class="card-text text-center fw-bold text-success">$<?= htmlspecialchars($combo['precio']) ?></p>
@@ -61,6 +61,8 @@ include '../includes/header.php'; // Incluye encabezado del sitio
             <?php endforeach; ?>
         </div>
     </div>
+
+
 
     <!-- Sección de Hamburguesas -->
     <div class="category-section">
