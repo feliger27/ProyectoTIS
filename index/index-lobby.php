@@ -73,4 +73,3 @@ $hamburguesas = mysqli_query($conexion, $query_hamburguesas);
 </body>
 </html>
 
-
