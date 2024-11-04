@@ -90,11 +90,10 @@ $stmt_metodos_pago->close();
 </head>
 
 <body>
-    <div class="container my-5">
+    <div class="container pt-4 my-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="text-center">Mi Perfil</h2>
             <div>
-                <a href="../index/index-lobby.php" class="btn btn-secondary me-2">Volver al Lobby</a>
                 <a href="../login/logout.php" class="btn btn-danger">Cerrar Sesión</a>
             </div>
         </div>
