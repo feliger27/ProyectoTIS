@@ -1,13 +1,13 @@
 <?php
 include '../../conexion.php'; 
 
-// Consulta para obtener los combos y sus complementos
+// Consulta para obtener los combos y sus complementos con cantidades
 $sql = "
-    SELECT c.*, 
-           GROUP_CONCAT(DISTINCT h.nombre_hamburguesa) AS hamburguesas,
-           GROUP_CONCAT(DISTINCT a.nombre_acompaniamiento) AS acompaniamientos,
-           GROUP_CONCAT(DISTINCT b.nombre_bebida) AS bebidas,
-           GROUP_CONCAT(DISTINCT p.nombre_postre) AS postres
+    SELECT c.id_combo, c.nombre_combo, c.descripcion, c.precio,
+           GROUP_CONCAT(DISTINCT CONCAT(h.nombre_hamburguesa, ' (', IFNULL(ch.cantidad, 0), ')') SEPARATOR ', ') AS hamburguesas,
+           GROUP_CONCAT(DISTINCT CONCAT(a.nombre_acompaniamiento, ' (', IFNULL(ca.cantidad, 0), ')') SEPARATOR ', ') AS acompaniamientos,
+           GROUP_CONCAT(DISTINCT CONCAT(b.nombre_bebida, ' (', IFNULL(cb.cantidad, 0), ')') SEPARATOR ', ') AS bebidas,
+           GROUP_CONCAT(DISTINCT CONCAT(p.nombre_postre, ' (', IFNULL(cp.cantidad, 0), ')') SEPARATOR ', ') AS postres
     FROM combo c
     LEFT JOIN combo_hamburguesa ch ON c.id_combo = ch.id_combo
     LEFT JOIN hamburguesa h ON ch.id_hamburguesa = h.id_hamburguesa
@@ -40,7 +40,6 @@ $result = $conexion->query($sql);
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
-
 
     <div class="d-flex justify-content-between align-items-center">
         <h1>Listado de Combos</h1>
@@ -113,17 +112,12 @@ $result = $conexion->query($sql);
 // Script para pasar el ID del combo al enlace de confirmación de eliminación
 var eliminarModal = document.getElementById('eliminarModal');
 eliminarModal.addEventListener('show.bs.modal', function (event) {
-    // Botón que activó el modal
     var button = event.relatedTarget;
-    // Extraer el ID del combo del atributo data-id
     var idCombo = button.getAttribute('data-id');
-    // Seleccionar el botón de confirmación de eliminación
     var confirmarEliminar = document.getElementById('confirmarEliminar');
-    // Actualizar el enlace del botón con el ID del combo
     confirmarEliminar.href = 'eliminar.php?id=' + idCombo;
 });
 </script>
 
 </body>
 </html>
-

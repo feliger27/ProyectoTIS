@@ -23,38 +23,38 @@ if ($result->num_rows == 0) {
 
 $combo = $result->fetch_assoc();
 
-// Consultas para obtener los IDs de hamburguesas, acompañamientos, bebidas y postres asociados al combo
-$sqlHamburguesas = "SELECT id_hamburguesa FROM combo_hamburguesa WHERE id_combo = ?";
-$sqlAcompaniamientos = "SELECT id_acompaniamiento FROM combo_acompaniamiento WHERE id_combo = ?";
-$sqlBebidas = "SELECT id_bebida FROM combo_bebida WHERE id_combo = ?";
-$sqlPostres = "SELECT id_postre FROM combo_postre WHERE id_combo = ?";
-
-function obtener_ids_asociados($conexion, $sql, $id_combo) {
+// Función para obtener productos y cantidades asociadas
+function obtener_productos_y_cantidades($conexion, $tabla, $id_combo, $id_campo) {
+    $sql = "SELECT $id_campo, cantidad FROM $tabla WHERE id_combo = ?";
     $stmt = $conexion->prepare($sql);
     $stmt->bind_param("i", $id_combo);
     $stmt->execute();
     $result = $stmt->get_result();
-    $ids = [];
+    $productos = [];
     while ($row = $result->fetch_assoc()) {
-        $ids[] = $row[key($row)];
+        $productos[] = $row;
     }
-    return $ids;
+    return $productos;
 }
 
-$hamburguesasSeleccionadas = obtener_ids_asociados($conexion, $sqlHamburguesas, $id_combo);
-$acompaniamientosSeleccionados = obtener_ids_asociados($conexion, $sqlAcompaniamientos, $id_combo);
-$bebidasSeleccionadas = obtener_ids_asociados($conexion, $sqlBebidas, $id_combo);
-$postresSeleccionados = obtener_ids_asociados($conexion, $sqlPostres, $id_combo);
+$hamburguesasSeleccionadas = obtener_productos_y_cantidades($conexion, "combo_hamburguesa", $id_combo, "id_hamburguesa");
+$acompaniamientosSeleccionados = obtener_productos_y_cantidades($conexion, "combo_acompaniamiento", $id_combo, "id_acompaniamiento");
+$bebidasSeleccionadas = obtener_productos_y_cantidades($conexion, "combo_bebida", $id_combo, "id_bebida");
+$postresSeleccionados = obtener_productos_y_cantidades($conexion, "combo_postre", $id_combo, "id_postre");
 
 // Procesar el formulario cuando se envía
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre_combo = $_POST['nombre_combo'];
     $descripcion = $_POST['descripcion'];
     $precio = $_POST['precio'];
-    $hamburguesas = $_POST['hamburguesas'] ?? [];
-    $acompaniamientos = $_POST['acompaniamientos'] ?? [];
-    $bebidas = $_POST['bebidas'] ?? [];
-    $postres = $_POST['postres'] ?? [];
+    $hamburguesas = $_POST['hamburguesa_id'] ?? [];
+    $cantidadesHamburguesas = $_POST['cantidad_hamburguesa'] ?? [];
+    $acompaniamientos = $_POST['acompaniamiento_id'] ?? [];
+    $cantidadesAcompaniamientos = $_POST['cantidad_acompaniamiento'] ?? [];
+    $bebidas = $_POST['bebida_id'] ?? [];
+    $cantidadesBebidas = $_POST['cantidad_bebida'] ?? [];
+    $postres = $_POST['postre_id'] ?? [];
+    $cantidadesPostres = $_POST['cantidad_postre'] ?? [];
 
     // Actualizar los datos del combo
     $sql = "UPDATE combo SET nombre_combo = ?, descripcion = ?, precio = ? WHERE id_combo = ?";
@@ -68,24 +68,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $conexion->query("DELETE FROM combo_bebida WHERE id_combo = $id_combo");
         $conexion->query("DELETE FROM combo_postre WHERE id_combo = $id_combo");
 
-        foreach ($hamburguesas as $id_hamburguesa) {
-            if ($id_hamburguesa != 0) {
-                $conexion->query("INSERT INTO combo_hamburguesa (id_combo, id_hamburguesa) VALUES ($id_combo, $id_hamburguesa)");
+        // Insertar las nuevas relaciones con cantidades solo si están seleccionadas
+        foreach ($hamburguesas as $index => $id_hamburguesa) {
+            if (!empty($id_hamburguesa) && !empty($cantidadesHamburguesas[$index])) {
+                $cantidad = $cantidadesHamburguesas[$index];
+                $conexion->query("INSERT INTO combo_hamburguesa (id_combo, id_hamburguesa, cantidad) VALUES ($id_combo, $id_hamburguesa, $cantidad)");
             }
         }
-        foreach ($acompaniamientos as $id_acompaniamiento) {
-            if ($id_acompaniamiento != 0) {
-                $conexion->query("INSERT INTO combo_acompaniamiento (id_combo, id_acompaniamiento) VALUES ($id_combo, $id_acompaniamiento)");
+
+        foreach ($acompaniamientos as $index => $id_acompaniamiento) {
+            if (!empty($id_acompaniamiento) && !empty($cantidadesAcompaniamientos[$index])) {
+                $cantidad = $cantidadesAcompaniamientos[$index];
+                $conexion->query("INSERT INTO combo_acompaniamiento (id_combo, id_acompaniamiento, cantidad) VALUES ($id_combo, $id_acompaniamiento, $cantidad)");
             }
         }
-        foreach ($bebidas as $id_bebida) {
-            if ($id_bebida != 0) {
-                $conexion->query("INSERT INTO combo_bebida (id_combo, id_bebida) VALUES ($id_combo, $id_bebida)");
+
+        foreach ($bebidas as $index => $id_bebida) {
+            if (!empty($id_bebida) && !empty($cantidadesBebidas[$index])) {
+                $cantidad = $cantidadesBebidas[$index];
+                $conexion->query("INSERT INTO combo_bebida (id_combo, id_bebida, cantidad) VALUES ($id_combo, $id_bebida, $cantidad)");
             }
         }
-        foreach ($postres as $id_postre) {
-            if ($id_postre != 0) {
-                $conexion->query("INSERT INTO combo_postre (id_combo, id_postre) VALUES ($id_combo, $id_postre)");
+
+        foreach ($postres as $index => $id_postre) {
+            if (!empty($id_postre) && !empty($cantidadesPostres[$index])) {
+                $cantidad = $cantidadesPostres[$index];
+                $conexion->query("INSERT INTO combo_postre (id_combo, id_postre, cantidad) VALUES ($id_combo, $id_postre, $cantidad)");
             }
         }
 
@@ -117,12 +125,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 
 <div class="container mt-5">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1>Editar Combo</h1>
-            <button class="btn btn-secondary" onclick="window.location.href='listar.php'">Volver</button>
-        </div>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Editar Combo</h1>
+        <button class="btn btn-secondary" onclick="window.location.href='listar.php'">Volver</button>
+    </div>
     <form action="editar.php?id=<?php echo $id_combo; ?>" method="POST">
-
         <div class="mb-3">
             <label for="nombre_combo" class="form-label">Nombre del Combo</label>
             <input type="text" name="nombre_combo" class="form-control" value="<?php echo $combo['nombre_combo']; ?>" required>
@@ -138,67 +145,114 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input type="number" name="precio" class="form-control" value="<?php echo $combo['precio']; ?>" required min="0" step="0.01">
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Hamburguesas</label>
-            <select name="hamburguesas[]" class="form-select" multiple>
-                <option value="0">Ninguna</option> 
-                <?php
-                $result = $conexion->query("SELECT * FROM hamburguesa");
-                while ($row = $result->fetch_assoc()) {
-                    $selected = in_array($row['id_hamburguesa'], $hamburguesasSeleccionadas) ? 'selected' : '';
-                    echo "<option value='{$row['id_hamburguesa']}' $selected>{$row['nombre_hamburguesa']}</option>";
-                }
-                ?>
-            </select>
-        </div>
+        <?php
+        function render_product_section($type, $productosSeleccionados, $conexion) {
+            $id_column = "id_" . $type;
+            echo "<div class='mb-3'>";
+            echo "<label class='form-label'>" . ucfirst($type) . "s (opcional)</label>";
+            echo "<div id='{$type}-container'>";
 
-        <div class="mb-3">
-            <label class="form-label">Acompañamientos</label>
-            <select name="acompaniamientos[]" class="form-select" multiple>
-                <option value="0">Ninguno</option> 
-                <?php
-                $result = $conexion->query("SELECT * FROM acompaniamiento");
+            // Si ya hay productos seleccionados, mostrarlos
+            foreach ($productosSeleccionados as $index => $producto) {
+                echo "<div class='d-flex align-items-center mb-2'>";
+                echo "<select name='{$type}_id[]' class='form-select {$type}-select' onchange='toggleQuantity(this)'>";
+                echo "<option value=''>Seleccionar " . ucfirst($type) . "</option>";
+                $sql = "SELECT * FROM $type";
+                $result = $conexion->query($sql);
                 while ($row = $result->fetch_assoc()) {
-                    $selected = in_array($row['id_acompaniamiento'], $acompaniamientosSeleccionados) ? 'selected' : '';
-                    echo "<option value='{$row['id_acompaniamiento']}' $selected>{$row['nombre_acompaniamiento']}</option>";
+                    $selected = $row[$id_column] == $producto[$id_column] ? 'selected' : '';
+                    echo "<option value='" . $row[$id_column] . "' $selected>" . $row["nombre_" . $type] . "</option>";
                 }
-                ?>
-            </select>
-        </div>
+                echo "</select>";
+                echo "<input type='number' name='cantidad_{$type}[]' class='form-control ms-2' value='" . $producto['cantidad'] . "' min='1' style='display:block;'>";
+                echo "<button type='button' class='btn btn-sm btn-danger ms-2' onclick='removeItem(this)'>Eliminar</button>";
+                echo "</div>";
+            }
+            echo "</div>";
+            echo "<button type='button' class='btn btn-sm btn-primary mt-2' onclick=\"addItem('$type')\">Agregar " . ucfirst($type) . "</button>";
+            echo "</div>";
+        }
 
-        <div class="mb-3">
-            <label class="form-label">Bebidas</label>
-            <select name="bebidas[]" class="form-select" multiple>
-                <option value="0">Ninguna</option> 
-                <?php
-                $result = $conexion->query("SELECT * FROM bebida");
-                while ($row = $result->fetch_assoc()) {
-                    $selected = in_array($row['id_bebida'], $bebidasSeleccionadas) ? 'selected' : '';
-                    echo "<option value='{$row['id_bebida']}' $selected>{$row['nombre_bebida']}</option>";
-                }
-                ?>
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Postres</label>
-            <select name="postres[]" class="form-select" multiple>
-                <option value="0">Ninguno</option> 
-                <?php
-                $result = $conexion->query("SELECT * FROM postre");
-                while ($row = $result->fetch_assoc()) {
-                    $selected = in_array($row['id_postre'], $postresSeleccionados) ? 'selected' : '';
-                    echo "<option value='{$row['id_postre']}' $selected>{$row['nombre_postre']}</option>";
-                }
-                ?>
-            </select>
-        </div>
+        render_product_section("hamburguesa", $hamburguesasSeleccionadas, $conexion);
+        render_product_section("acompaniamiento", $acompaniamientosSeleccionados, $conexion);
+        render_product_section("bebida", $bebidasSeleccionadas, $conexion);
+        render_product_section("postre", $postresSeleccionados, $conexion);
+        ?>
 
         <button type="submit" class="btn btn-primary">Guardar Cambios</button>
     </form>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Almacenamos todas las opciones en variables de JavaScript para cada tipo
+const allOptions = {
+    hamburguesa: `<?php
+        $options = "<option value=''>Seleccionar Hamburguesa</option>";
+        $sql = "SELECT * FROM hamburguesa";
+        $result = $conexion->query($sql);
+        while ($row = $result->fetch_assoc()) {
+            $options .= "<option value='" . $row['id_hamburguesa'] . "'>" . $row['nombre_hamburguesa'] . "</option>";
+        }
+        echo $options;
+    ?>`,
+    acompanamiento: `<?php
+        $options = "<option value=''>Seleccionar Acompañamiento</option>";
+        $sql = "SELECT * FROM acompaniamiento";
+        $result = $conexion->query($sql);
+        while ($row = $result->fetch_assoc()) {
+            $options .= "<option value='" . $row['id_acompaniamiento'] . "'>" . $row['nombre_acompaniamiento'] . "</option>";
+        }
+        echo $options;
+    ?>`,
+    bebida: `<?php
+        $options = "<option value=''>Seleccionar Bebida</option>";
+        $sql = "SELECT * FROM bebida";
+        $result = $conexion->query($sql);
+        while ($row = $result->fetch_assoc()) {
+            $options .= "<option value='" . $row['id_bebida'] . "'>" . $row['nombre_bebida'] . "</option>";
+        }
+        echo $options;
+    ?>`,
+    postre: `<?php
+        $options = "<option value=''>Seleccionar Postre</option>";
+        $sql = "SELECT * FROM postre";
+        $result = $conexion->query($sql);
+        while ($row = $result->fetch_assoc()) {
+            $options .= "<option value='" . $row['id_postre'] . "'>" . $row['nombre_postre'] . "</option>";
+        }
+        echo $options;
+    ?>`
+};
+
+function addItem(type) {
+    const container = document.getElementById(`${type}-container`);
+    const newRow = document.createElement("div");
+    newRow.className = "d-flex align-items-center mb-2 " + type + "-row";
+
+    // Usar las opciones almacenadas en JavaScript
+    newRow.innerHTML = `
+        <select name="${type}_id[]" class="form-select ${type}-select" onchange="toggleQuantity(this)">
+            ${allOptions[type]}
+        </select>
+        <input type="number" name="cantidad_${type}[]" class="form-control ms-2" placeholder="Cantidad" min="1" value="1" style="display: none;">
+        <button type="button" class="btn btn-sm btn-danger ms-2" onclick="removeItem(this)">Eliminar</button>
+    `;
+    container.appendChild(newRow);
+}
+
+function toggleQuantity(select) {
+    const quantityInput = select.nextElementSibling;
+    quantityInput.style.display = select.value ? "block" : "none";
+}
+
+function removeItem(button) {
+    button.parentElement.remove();
+}
+
+function capitalize(word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+}
+</script>
 </body>
 </html>
-
