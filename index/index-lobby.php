@@ -58,13 +58,10 @@ $hamburguesas = mysqli_query($conexion, $query_hamburguesas);
     </div>
 
     <!-- Sección Sobre Nosotros -->
-    <div class="about-us text-center mt-5" style="padding-bottom: 50px;">
-            <!-- Ajusta el valor según lo necesites -->
-            <h2>Sobre Nosotros</h2>
-            <p>Somos una empresa dedicada a ofrecer las mejores hamburguesas de la ciudad, utilizando ingredientes
-                frescos y de alta calidad. Nuestro objetivo es brindar una experiencia culinaria única a nuestros
-                clientes, donde cada bocado sea memorable.</p>
-        </div>
+    <div class="about-us text-center mt-5">
+        <h2>Sobre Nosotros</h2>
+        <p>Somos una empresa dedicada a ofrecer las mejores hamburguesas de la ciudad, utilizando ingredientes frescos y de alta calidad. Nuestro objetivo es brindar una experiencia culinaria única a nuestros clientes, donde cada bocado sea memorable.</p>
+    </div>
 </div>
 
 <?php include '../includes/footer.php'; ?>
