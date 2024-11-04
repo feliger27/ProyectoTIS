@@ -1,6 +1,12 @@
 <?php
 include '../../conexion.php';
 
+// Consultar nombres y IDs de cada categoría
+$hamburguesas = $conexion->query("SELECT id_hamburguesa, nombre_hamburguesa FROM hamburguesa")->fetch_all(MYSQLI_ASSOC);
+$acompaniamientos = $conexion->query("SELECT id_acompaniamiento, nombre_acompaniamiento FROM acompaniamiento")->fetch_all(MYSQLI_ASSOC);
+$bebidas = $conexion->query("SELECT id_bebida, nombre_bebida FROM bebida")->fetch_all(MYSQLI_ASSOC);
+$postres = $conexion->query("SELECT id_postre, nombre_postre FROM postre")->fetch_all(MYSQLI_ASSOC);
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre_combo = $_POST['nombre_combo'];
     $descripcion = $_POST['descripcion'];
@@ -14,225 +20,211 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $postres = $_POST['postre_id'] ?? [];
     $cantidadesPostres = $_POST['cantidad_postre'] ?? [];
 
+    // Lógica de carga de imagen
+    $imagen_path = NULL;
+    if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] == UPLOAD_ERR_OK) {
+        $target_dir = "uploads/";
+        if (!file_exists($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+        $target_file = $target_dir . basename($_FILES['imagen']['name']);
+        if (move_uploaded_file($_FILES['imagen']['tmp_name'], $target_file)) {
+            $imagen_path = $target_file;
+        }
+    }
+
     // Inserción del nuevo combo
-    $sql = "INSERT INTO combo (nombre_combo, descripcion, precio) VALUES (?, ?, ?)";
+    $sql = "INSERT INTO combo (nombre_combo, descripcion, precio, imagen) VALUES (?, ?, ?, ?)";
     $stmt = $conexion->prepare($sql);
-    $stmt->bind_param("ssd", $nombre_combo, $descripcion, $precio);
+    $stmt->bind_param("ssds", $nombre_combo, $descripcion, $precio, $imagen_path);
 
     if ($stmt->execute()) {
-        // Obtener el ID del combo insertado
-        $id_combo = $conexion->insert_id;
+        $id_combo = $stmt->insert_id;
 
-        // Insertar hamburguesas solo si se han seleccionado
-        foreach ($hamburguesas as $index => $id_hamburguesa) {
-            if (!empty($id_hamburguesa) && !empty($cantidadesHamburguesas[$index])) {
-                $cantidad = $cantidadesHamburguesas[$index];
-                $conexion->query("INSERT INTO combo_hamburguesa (id_combo, id_hamburguesa, cantidad) VALUES ($id_combo, $id_hamburguesa, $cantidad)");
+        // Inserción de cada elemento en su tabla correspondiente
+        $sqlItems = [
+            "combo_hamburguesa" => ["id_hamburguesa", $hamburguesas, $cantidadesHamburguesas],
+            "combo_acompaniamiento" => ["id_acompaniamiento", $acompaniamientos, $cantidadesAcompaniamientos],
+            "combo_bebida" => ["id_bebida", $bebidas, $cantidadesBebidas],
+            "combo_postre" => ["id_postre", $postres, $cantidadesPostres]
+        ];
+
+        foreach ($sqlItems as $table => [$idField, $items, $quantities]) {
+            $sql = "INSERT INTO $table (id_combo, $idField, cantidad) VALUES (?, ?, ?)";
+            $stmt = $conexion->prepare($sql);
+            foreach ($items as $index => $item_id) {
+                $quantity = $quantities[$index];
+                $stmt->bind_param("iii", $id_combo, $item_id, $quantity);
+                $stmt->execute();
             }
         }
 
-        // Insertar acompañamientos solo si se han seleccionado
-        foreach ($acompaniamientos as $index => $id_acompaniamiento) {
-            if (!empty($id_acompaniamiento) && !empty($cantidadesAcompaniamientos[$index])) {
-                $cantidad = $cantidadesAcompaniamientos[$index];
-                $conexion->query("INSERT INTO combo_acompaniamiento (id_combo, id_acompaniamiento, cantidad) VALUES ($id_combo, $id_acompaniamiento, $cantidad)");
-            }
-        }
-
-        // Insertar bebidas solo si se han seleccionado
-        foreach ($bebidas as $index => $id_bebida) {
-            if (!empty($id_bebida) && !empty($cantidadesBebidas[$index])) {
-                $cantidad = $cantidadesBebidas[$index];
-                $conexion->query("INSERT INTO combo_bebida (id_combo, id_bebida, cantidad) VALUES ($id_combo, $id_bebida, $cantidad)");
-            }
-        }
-
-        // Insertar postres solo si se han seleccionado
-        foreach ($postres as $index => $id_postre) {
-            if (!empty($id_postre) && !empty($cantidadesPostres[$index])) {
-                $cantidad = $cantidadesPostres[$index];
-                $conexion->query("INSERT INTO combo_postre (id_combo, id_postre, cantidad) VALUES ($id_combo, $id_postre, $cantidad)");
-            }
-        }
-
-        echo "<div class='container mt-3'>
-                <div class='alert alert-success alert-dismissible fade show' role='alert'>
-                    Combo agregado exitosamente.
-                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                </div>
-              </div>";
+        header("Location: listar.php");
     } else {
-        echo "<div class='container mt-3'>
-                <div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                    Error: " . $stmt->error . "
-                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                </div>
-              </div>";
+        echo "Error al crear el combo.";
     }
 }
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agregar Nuevo Combo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        function agregarElemento(categoria) {
+            const contenedor = document.getElementById(`${categoria}-container`);
+            const selects = contenedor.querySelectorAll('select');
+            const cantidades = contenedor.querySelectorAll('input[type="number"]');
+            
+            // Verificar que todas las casillas actuales estén llenas
+            const todasLlenas = Array.from(selects).every(select => select.value) &&
+                                Array.from(cantidades).every(input => input.value > 0);
+
+            if (todasLlenas) {
+                const selectHTML = contenedor.querySelector('select').outerHTML;
+                const cantidadHTML = contenedor.querySelector('input[type="number"]').outerHTML;
+                const nuevoElemento = document.createElement('div');
+                nuevoElemento.classList.add('input-group', 'mb-2');
+                nuevoElemento.innerHTML = selectHTML + cantidadHTML;
+
+                // Botón de eliminar
+                const eliminarBtn = document.createElement('button');
+                eliminarBtn.type = "button";
+                eliminarBtn.className = "btn btn-danger ms-2";
+                eliminarBtn.textContent = "Eliminar";
+                eliminarBtn.onclick = () => nuevoElemento.remove();
+                
+                nuevoElemento.appendChild(eliminarBtn);
+                contenedor.appendChild(nuevoElemento);
+
+                // Agregar evento para actualizar las opciones al cambiar la selección
+                nuevoElemento.querySelector('select').addEventListener('change', function() {
+                    actualizarOpciones(categoria);
+                });
+                actualizarOpciones(categoria);
+            } else {
+                alert("Seleccione un elemento y especifique su cantidad en todas las filas antes de agregar otro.");
+            }
+        }
+
+        function actualizarOpciones(categoria) {
+            const contenedor = document.getElementById(`${categoria}-container`);
+            const selects = contenedor.querySelectorAll('select');
+            const seleccionados = Array.from(selects).map(select => select.value).filter(Boolean);
+
+            selects.forEach(select => {
+                Array.from(select.options).forEach(option => {
+                    option.disabled = seleccionados.includes(option.value) && option.value !== select.value;
+                });
+            });
+        }
+
+        function validarFormulario() {
+            const categorias = ['hamburguesas', 'acompaniamientos', 'bebidas', 'postres'];
+            for (const categoria of categorias) {
+                const contenedor = document.getElementById(`${categoria}-container`);
+                const selects = contenedor.querySelectorAll('select');
+                const cantidades = contenedor.querySelectorAll('input[type="number"]');
+
+                // Verificar si hay algún select con un valor sin una cantidad especificada
+                for (let i = 0; i < selects.length; i++) {
+                    if (selects[i].value && (!cantidades[i].value || cantidades[i].value <= 0)) {
+                        alert(`Por favor, especifique una cantidad para cada ${categoria.slice(0, -1)} seleccionado.`);
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+    </script>
 </head>
-<body>
-
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center">
-        <h1>Agregar Nuevo Combo</h1>
-        <button class="btn btn-secondary" onclick="window.location.href='listar.php'">Volver</button>
-    </div>
-    <form action="insertar.php" method="POST" class="mt-4" id="comboForm">
+<body class="container py-5">
+    <h1 class="mb-4">Agregar Nuevo Combo</h1>
+    <form action="insertar.php" method="POST" onsubmit="return validarFormulario()" enctype="multipart/form-data">
         <div class="mb-3">
-            <label for="nombre_combo" class="form-label">Nombre del Combo</label>
-            <input type="text" name="nombre_combo" id="nombre_combo" class="form-control" required>
+            <label for="nombre_combo" class="form-label">Nombre del Combo:</label>
+            <input type="text" name="nombre_combo" class="form-control" required>
         </div>
 
         <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción</label>
-            <textarea name="descripcion" id="descripcion" class="form-control" required></textarea>
+            <label for="descripcion" class="form-label">Descripción:</label>
+            <textarea name="descripcion" class="form-control" rows="3" required></textarea>
         </div>
 
         <div class="mb-3">
-            <label for="precio" class="form-label">Precio</label>
-            <input type="number" step="0.01" name="precio" id="precio" class="form-control" required>
+            <label for="precio" class="form-label">Precio:</label>
+            <input type="number" name="precio" class="form-control" step="0.01" required>
         </div>
 
         <!-- Hamburguesas -->
-        <div class="mb-3">
-            <label class="form-label">Hamburguesas (opcional)</label>
-            <div id="hamburguesa-container">
-                <div class="d-flex align-items-center mb-2 hamburguesa-row">
-                    <select name="hamburguesa_id[]" class="form-select hamburguesa-select" onchange="toggleQuantity(this)">
-                        <option value="">Seleccionar Hamburguesa</option>
-                        <?php
-                        $sql_hamburguesas = "SELECT * FROM hamburguesa";
-                        $result_hamburguesas = $conexion->query($sql_hamburguesas);
-                        while ($row_hamburguesa = $result_hamburguesas->fetch_assoc()) {
-                            echo "<option value='" . $row_hamburguesa['id_hamburguesa'] . "'>" . $row_hamburguesa['nombre_hamburguesa'] . "</option>";
-                        }
-                        ?>
-                    </select>
-                    <input type="number" name="cantidad_hamburguesa[]" class="form-control ms-2" placeholder="Cantidad" min="1" value="1" style="display: none;">
-                </div>
+        <h2 class="my-4">Hamburguesas</h2>
+        <div id="hamburguesas-container" class="mb-3">
+            <div class="input-group mb-2">
+                <select name="hamburguesa_id[]" class="form-select" onchange="actualizarOpciones('hamburguesas')">
+                    <option value="" selected disabled>Seleccione una Hamburguesa</option>
+                    <?php foreach ($hamburguesas as $hamburguesa): ?>
+                        <option value="<?= $hamburguesa['id_hamburguesa'] ?>"><?= $hamburguesa['nombre_hamburguesa'] ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <input type="number" name="cantidad_hamburguesa[]" class="form-control" placeholder="Cantidad">
             </div>
-            <button type="button" class="btn btn-sm btn-primary mt-2" onclick="addItem('hamburguesa')">Agregar Hamburguesa</button>
         </div>
+        <button type="button" class="btn btn-secondary" onclick="agregarElemento('hamburguesas')">Agregar Hamburguesa</button>
 
         <!-- Acompañamientos -->
-        <div class="mb-3">
-            <label class="form-label">Acompañamientos (opcional)</label>
-            <div id="acompaniamiento-container">
-                <div class="d-flex align-items-center mb-2 acompanamiento-row">
-                    <select name="acompaniamiento_id[]" class="form-select acompanamiento-select" onchange="toggleQuantity(this)">
-                        <option value="">Seleccionar Acompañamiento</option>
-                        <?php
-                        $sql_acompaniamientos = "SELECT * FROM acompaniamiento";
-                        $result_acompaniamientos = $conexion->query($sql_acompaniamientos);
-                        while ($row_acompaniamiento = $result_acompaniamientos->fetch_assoc()) {
-                            echo "<option value='" . $row_acompaniamiento['id_acompaniamiento'] . "'>" . $row_acompaniamiento['nombre_acompaniamiento'] . "</option>";
-                        }
-                        ?>
-                    </select>
-                    <input type="number" name="cantidad_acompaniamiento[]" class="form-control ms-2" placeholder="Cantidad" min="1" value="1" style="display: none;">
-                </div>
+        <h2 class="my-4">Acompañamientos</h2>
+        <div id="acompaniamientos-container" class="mb-3">
+            <div class="input-group mb-2">
+                <select name="acompaniamiento_id[]" class="form-select" onchange="actualizarOpciones('acompaniamientos')">
+                    <option value="" selected disabled>Seleccione un Acompañamiento</option>
+                    <?php foreach ($acompaniamientos as $acompaniamiento): ?>
+                        <option value="<?= $acompaniamiento['id_acompaniamiento'] ?>"><?= $acompaniamiento['nombre_acompaniamiento'] ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <input type="number" name="cantidad_acompaniamiento[]" class="form-control" placeholder="Cantidad">
             </div>
-            <button type="button" class="btn btn-sm btn-primary mt-2" onclick="addItem('acompaniamiento')">Agregar Acompañamiento</button>
         </div>
+        <button type="button" class="btn btn-secondary" onclick="agregarElemento('acompaniamientos')">Agregar Acompañamiento</button>
 
         <!-- Bebidas -->
-        <div class="mb-3">
-            <label class="form-label">Bebidas (opcional)</label>
-            <div id="bebida-container">
-                <div class="d-flex align-items-center mb-2 bebida-row">
-                    <select name="bebida_id[]" class="form-select bebida-select" onchange="toggleQuantity(this)">
-                        <option value="">Seleccionar Bebida</option>
-                        <?php
-                        $sql_bebidas = "SELECT * FROM bebida";
-                        $result_bebidas = $conexion->query($sql_bebidas);
-                        while ($row_bebida = $result_bebidas->fetch_assoc()) {
-                            echo "<option value='" . $row_bebida['id_bebida'] . "'>" . $row_bebida['nombre_bebida'] . "</option>";
-                        }
-                        ?>
-                    </select>
-                    <input type="number" name="cantidad_bebida[]" class="form-control ms-2" placeholder="Cantidad" min="1" value="1" style="display: none;">
-                </div>
+        <h2 class="my-4">Bebidas</h2>
+        <div id="bebidas-container" class="mb-3">
+            <div class="input-group mb-2">
+                <select name="bebida_id[]" class="form-select" onchange="actualizarOpciones('bebidas')">
+                    <option value="" selected disabled>Seleccione una Bebida</option>
+                    <?php foreach ($bebidas as $bebida): ?>
+                        <option value="<?= $bebida['id_bebida'] ?>"><?= $bebida['nombre_bebida'] ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <input type="number" name="cantidad_bebida[]" class="form-control" placeholder="Cantidad">
             </div>
-            <button type="button" class="btn btn-sm btn-primary mt-2" onclick="addItem('bebida')">Agregar Bebida</button>
         </div>
+        <button type="button" class="btn btn-secondary" onclick="agregarElemento('bebidas')">Agregar Bebida</button>
 
         <!-- Postres -->
-        <div class="mb-3">
-            <label class="form-label">Postres (opcional)</label>
-            <div id="postre-container">
-                <div class="d-flex align-items-center mb-2 postre-row">
-                    <select name="postre_id[]" class="form-select postre-select" onchange="toggleQuantity(this)">
-                        <option value="">Seleccionar Postre</option>
-                        <?php
-                        $sql_postres = "SELECT * FROM postre";
-                        $result_postres = $conexion->query($sql_postres);
-                        while ($row_postre = $result_postres->fetch_assoc()) {
-                            echo "<option value='" . $row_postre['id_postre'] . "'>" . $row_postre['nombre_postre'] . "</option>";
-                        }
-                        ?>
-                    </select>
-                    <input type="number" name="cantidad_postre[]" class="form-control ms-2" placeholder="Cantidad" min="1" value="1" style="display: none;">
-                </div>
+        <h2 class="my-4">Postres</h2>
+        <div id="postres-container" class="mb-3">
+            <div class="input-group mb-2">
+                <select name="postre_id[]" class="form-select" onchange="actualizarOpciones('postres')">
+                    <option value="" selected disabled>Seleccione un Postre</option>
+                    <?php foreach ($postres as $postre): ?>
+                        <option value="<?= $postre['id_postre'] ?>"><?= $postre['nombre_postre'] ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <input type="number" name="cantidad_postre[]" class="form-control" placeholder="Cantidad">
             </div>
-            <button type="button" class="btn btn-sm btn-primary mt-2" onclick="addItem('postre')">Agregar Postre</button>
+        </div>
+        <button type="button" class="btn btn-secondary" onclick="agregarElemento('postres')">Agregar Postre</button>
+
+        <!-- Campo de imagen opcional -->
+        <div class="mb-3 mt-5">
+            <label for="imagen" class="form-label">Imagen del Combo (Opcional):</label>
+            <input type="file" name="imagen" id="imagen" class="form-control" accept="image/*">
         </div>
 
-        <button type="submit" class="btn btn-primary">Guardar Combo</button>
+        <button type="submit" class="btn btn-primary mt-4">Guardar Combo</button>
     </form>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-function addItem(type) {
-    const container = document.getElementById(`${type}-container`);
-    const newRow = document.createElement("div");
-    newRow.className = "d-flex align-items-center mb-2 " + type + "-row";
-    
-    // Obtener productos ya seleccionados
-    const selectedValues = Array.from(container.querySelectorAll(`.${type}-select`))
-        .map(select => select.value)
-        .filter(value => value !== "");
-
-    // Generar opciones sin duplicados
-    const options = Array.from(document.querySelector(`.${type}-select`).options)
-        .filter(option => !selectedValues.includes(option.value) || option.value === "")
-        .map(option => `<option value="${option.value}">${option.text}</option>`)
-        .join("");
-
-    newRow.innerHTML = `
-        <select name="${type}_id[]" class="form-select ${type}-select" onchange="toggleQuantity(this)">
-            ${options}
-        </select>
-        <input type="number" name="cantidad_${type}[]" class="form-control ms-2" placeholder="Cantidad" min="1" value="1" style="display: none;">
-        <button type="button" class="btn btn-sm btn-danger ms-2" onclick="removeItem(this)">Eliminar</button>
-    `;
-    container.appendChild(newRow);
-}
-
-function toggleQuantity(select) {
-    const quantityInput = select.nextElementSibling;
-    quantityInput.style.display = select.value ? "block" : "none";
-}
-
-function removeItem(button) {
-    button.parentElement.remove();
-}
-
-function capitalize(word) {
-    return word.charAt(0).toUpperCase() + word.slice(1);
-}
-</script>
 </body>
 </html>
