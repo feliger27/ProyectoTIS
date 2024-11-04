@@ -60,9 +60,13 @@ $total = 0;
         </tfoot>
     </table>
 
+    <?php
+    // Almacenar el total en la sesión para que esté disponible en index-pago.php
+    $_SESSION['total_carrito'] = $total;
+    ?>
+
     <div class="text-end">
         <a href="index-pago.php" class="btn btn-success">Proceder al Pago</a>
     </div>
 </div>
-
 <?php include '../includes/footer.php'; ?>
