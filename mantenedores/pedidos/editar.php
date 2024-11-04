@@ -73,9 +73,9 @@ function enviarCorreoNotificacion($id_pedido, $estado_pedido, $correo)
         $mail->Host = 'sandbox.smtp.mailtrap.io';
         $mail->SMTPAuth = true;
         $mail->Username = '02508a3a3a9bf5';
-        $mail->Password = 'd99c3b27d1457ed';
+        $mail->Password = '99c3b27d1457ed';
         $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 2525;
+        $mail->Port = 25;
         $mail->CharSet = 'UTF-8';  // Establece la codificación de caracteres en UTF-8
 
         // Configurar correo de origen y destinatario

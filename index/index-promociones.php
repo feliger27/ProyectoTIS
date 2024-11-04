@@ -3,7 +3,7 @@ include '../includes/header.php';
 ?>
 
 <div class="container mt-5">
-    <h1 class="text-center">Promociones</h1>
+    <h1 class="text-center pt-4">Promociones</h1>
     <div class="row">
         <!-- Tarjeta de promoción de ejemplo -->
         <div class="col-md-4">
