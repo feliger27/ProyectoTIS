@@ -11,6 +11,7 @@ $postres = $conexion->query("SELECT * FROM postre")->fetch_all(MYSQLI_ASSOC);
 include '../includes/header.php'; // Incluye encabezado del sitio
 ?>
 
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 <div class="container my-5">
     <h1 class="text-center pt-4 mb-4">Menú de Productos</h1>
     <!-- Mensaje de error por stock insuficiente -->
@@ -59,7 +60,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
         <div class="row">
             <?php foreach ($combos as $combo): ?>
             <div class="col-md-4">
-                <div class="card product-card h-100 shadow-sm">
+                <div class="card product-card h-100 shadow-sm" data-aos="zoom-in" data-aos-duration="1500">
                     <img src="../uploads/combos/<?= htmlspecialchars($combo['imagen']) ?>" class="card-img-top" alt="<?= htmlspecialchars($combo['nombre_combo']) ?>">
                     <div class="card-body">
                         <h5 class="card-title text-center"><?= htmlspecialchars($combo['nombre_combo']) ?></h5>
@@ -83,7 +84,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
         <div class="row">
             <?php foreach ($hamburguesas as $hamburguesa): ?>
             <div class="col-md-4">
-                <div class="card product-card h-100 shadow-sm">
+                <div class="card product-card h-100 shadow-sm " data-aos="zoom-in" data-aos-duration="1500">
                     <img src="../uploads/hamburguesas/<?= htmlspecialchars($hamburguesa['imagen']) ?>" class="card-img-top" alt="<?= htmlspecialchars($hamburguesa['nombre_hamburguesa']) ?>">
                     <div class="card-body">
                         <h5 class="card-title text-center"><?= htmlspecialchars($hamburguesa['nombre_hamburguesa']) ?></h5>
@@ -107,7 +108,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
         <div class="row">
             <?php foreach ($bebidas as $bebida): ?>
             <div class="col-md-4">
-                <div class="card product-card h-100 shadow-sm">
+                <div class="card product-card h-100 shadow-sm" data-aos="zoom-in" data-aos-duration="1500">
                     <img src="../uploads/bebidas/<?= htmlspecialchars($bebida['imagen']) ?>" class="card-img-top" alt="<?= htmlspecialchars($bebida['nombre_bebida']) ?>">
                     <div class="card-body">
                         <h5 class="card-title text-center"><?= htmlspecialchars($bebida['nombre_bebida']) ?></h5>
@@ -131,7 +132,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
         <div class="row">
             <?php foreach ($postres as $postre): ?>
             <div class="col-md-4">
-                <div class="card product-card h-100 shadow-sm">
+                <div class="card product-card h-100 shadow-sm" data-aos="zoom-in" data-aos-duration="1500">
                     <img src="../uploads/postres/<?= htmlspecialchars($postre['imagen']) ?>" class="card-img-top" alt="<?= htmlspecialchars($postre['nombre_postre']) ?>">
                     <div class="card-body">
                         <h5 class="card-title text-center"><?= htmlspecialchars($postre['nombre_postre']) ?></h5>
@@ -154,7 +155,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
         <div class="row">
             <?php foreach ($acompaniamientos as $acomp): ?>
             <div class="col-md-4">
-                <div class="card product-card h-100 shadow-sm">
+                <div class="card product-card h-100 shadow-sm" data-aos="zoom-in" data-aos-duration="1500">
                     <img src="../uploads/acompaniamientos/<?= htmlspecialchars($acomp['imagen']) ?>" class="card-img-top" alt="<?= htmlspecialchars($acomp['nombre_acompaniamiento']) ?>">
                     <div class="card-body">
                         <h5 class="card-title text-center"><?= htmlspecialchars($acomp['nombre_acompaniamiento']) ?></h5>
@@ -174,5 +175,8 @@ include '../includes/header.php'; // Incluye encabezado del sitio
     
     <!-- Repite para bebidas y postres, asegurándote de que la carpeta coincide -->
 </div>
-
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init();
+</script>
 <?php include '../includes/footer.php'; ?>

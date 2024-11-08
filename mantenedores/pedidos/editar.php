@@ -22,7 +22,7 @@ if (isset($_GET['id'])) {
         $total = $_POST['total'];
 
         // Actualizar el pedido
-        $sql_update = "UPDATE pedido SET id_promocion = ?, monto = ? WHERE id_pedido = ?";
+        $sql_update = "UPDATE pedido SET id_promocion = ?, total = ? WHERE id_pedido = ?";
         $stmt_update = $conexion->prepare($sql_update);
         $stmt_update->bind_param('sii', $id_promocion, $total, $id_pedido);
 
@@ -74,7 +74,7 @@ if (isset($_GET['id'])) {
 
             <div class="mb-3">
                 <label for="total" class="form-label">Total</label>
-                <input type="number" class="form-control" id="total" name="total" value="<?php echo $pedido['monto']; ?>" required>
+                <input type="number" class="form-control" id="total" name="total" value="<?php echo $pedido['total']; ?>" required>
             </div>
 
             <button type="submit" class="btn btn-primary">Guardar Cambios</button>
