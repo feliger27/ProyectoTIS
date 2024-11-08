@@ -7,7 +7,7 @@ $total = 0;
 ?>
 
 <div class="container my-5">
-    <h1 class="text-center">Carrito de Compras</h1>
+    <h1 class="text-center pt-2">Carrito de Compras</h1>
     
     <table class="table table-bordered mt-4">
         <thead>
@@ -36,11 +36,7 @@ $total = 0;
                             <td>$<?= number_format($producto['precio'], 0, ',', '.'); ?></td>
                             <td>$<?= number_format($producto['precio'] * $producto['cantidad'], 0, ',', '.'); ?></td>
                             <td>
-                                <form action="../funciones/gestionar_carrito/eliminar_carrito.php" method="POST" class="d-inline">
-                                    <input type="hidden" name="producto_id" value="<?= htmlspecialchars($id); ?>">
-                                    <input type="hidden" name="tipo_producto" value="<?= htmlspecialchars($tipo); ?>">
-                                    <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                                </form>
+                                <a href="../funciones/gestionar_carrito/eliminar_carrito.php?producto_id=<?= $id; ?>&tipo_producto=<?= $tipo; ?>" class="btn btn-danger btn-sm">Eliminar</a>
                             </td>
                         </tr>
                         <?php $total += $producto['precio'] * $producto['cantidad']; ?>
@@ -59,6 +55,11 @@ $total = 0;
             </tr>
         </tfoot>
     </table>
+
+    <?php
+    // Almacenar el total en la sesión para que esté disponible en index-pago.php
+    $_SESSION['total_carrito'] = $total;
+    ?>
 
     <div class="text-end">
         <a href="index-pago.php" class="btn btn-success">Proceder al Pago</a>

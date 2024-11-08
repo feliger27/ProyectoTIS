@@ -61,14 +61,39 @@ $stmt_metodos_pago->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Mi Perfil - HamburGeeks</title>
+    <style>
+    .container .btn-primary, .container .btn-warning, .container .btn-danger, .container .btn-success {
+    background-color: #fd7e14; 
+    border-color: #fd7e14; 
+    }
+
+    .container .btn-primary:hover, .container .btn-warning:hover, .container .btn-danger:hover, .container .btn-success:hover {
+    background-color: #e69500; 
+    border-color: #e69500;
+    }
+
+
+    .container h2, .container h4, .container .nav-link.active {
+    color: #fd7e14; /
+    }
+
+    .container .nav-link.active {
+    background-color: #fd7e14;
+    color: white;
+    }
+    .nav-pills .nav-link {
+    color: black; 
+   
+}
+
+    </style>
 </head>
 
 <body>
-    <div class="container my-5">
+    <div class="container pt-4 my-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="text-center">Mi Perfil</h2>
             <div>
-                <a href="../index/index-lobby.php" class="btn btn-secondary me-2">Volver al Lobby</a>
                 <a href="../login/logout.php" class="btn btn-danger">Cerrar Sesión</a>
             </div>
         </div>

@@ -42,7 +42,7 @@ if (!$pedido) {
         </div>
     </div>
 
-    <h4 class="mt-4">Productos en el Pedido</h4>
+    <h4 class="mt-4">Resumen de Productos en el Pedido</h4>
     <table class="table table-bordered mt-3">
         <thead>
             <tr>
@@ -56,8 +56,10 @@ if (!$pedido) {
         <tbody>
             <?php
             $total = 0;
+            $total_sin_descuento = 0;
             $tipos = ['hamburguesa', 'acompaniamiento', 'bebida', 'postre'];
 
+            // Mostrar productos individuales
             foreach ($tipos as $tipo) {
                 $query_detalles = "SELECT p.nombre_$tipo AS nombre, pp.cantidad, pp.precio 
                                    FROM pedido_$tipo AS pp
@@ -71,6 +73,7 @@ if (!$pedido) {
                 while ($detalle = $result_detalles->fetch_assoc()) {
                     $subtotal = $detalle['cantidad'] * $detalle['precio'];
                     $total += $subtotal;
+                    $total_sin_descuento += $subtotal;
                     ?>
                     <tr>
                         <td><?= htmlspecialchars($detalle['nombre']) ?></td>
@@ -83,11 +86,68 @@ if (!$pedido) {
                 }
                 $stmt->close();
             }
+
+            // Mostrar combos y sus productos
+            $query_combos = "SELECT c.nombre_combo AS nombre, c.precio AS precio_combo, pc.id_combo 
+                             FROM pedido_combo AS pc
+                             JOIN combo AS c ON pc.id_combo = c.id_combo
+                             WHERE pc.id_pedido = ?";
+            $stmt_combo = $conexion->prepare($query_combos);
+            $stmt_combo->bind_param("i", $pedido_id);
+            $stmt_combo->execute();
+            $result_combo = $stmt_combo->get_result();
+
+            while ($combo = $result_combo->fetch_assoc()) {
+                $subtotal_combo = $combo['precio_combo'];
+                $total += $subtotal_combo;
+
+                echo "<tr>
+                        <td colspan='5' class='table-active'><strong>Combo: " . htmlspecialchars($combo['nombre']) . "</strong> - Precio Combo: $" . number_format($subtotal_combo, 0, ',', '.') . "</td>
+                      </tr>";
+
+                // Detalle de productos dentro del combo
+                foreach ($tipos as $tipo) {
+                    $query_productos_combo = "SELECT p.nombre_$tipo AS nombre, cc.cantidad, p.precio 
+                                              FROM combo_$tipo AS cc
+                                              JOIN $tipo AS p ON cc.id_$tipo = p.id_$tipo
+                                              WHERE cc.id_combo = ?";
+                    $stmt_productos_combo = $conexion->prepare($query_productos_combo);
+                    $stmt_productos_combo->bind_param("i", $combo['id_combo']);
+                    $stmt_productos_combo->execute();
+                    $result_productos_combo = $stmt_productos_combo->get_result();
+
+                    while ($producto_combo = $result_productos_combo->fetch_assoc()) {
+                        $subtotal_producto = $producto_combo['cantidad'] * $producto_combo['precio'];
+                        $total_sin_descuento += $subtotal_producto;
+
+                        echo "<tr>
+                                <td>&nbsp;&nbsp;&nbsp;" . htmlspecialchars($producto_combo['nombre']) . "</td>
+                                <td>" . ucfirst($tipo) . "</td>
+                                <td>" . htmlspecialchars($producto_combo['cantidad']) . "</td>
+                                <td>$" . number_format($producto_combo['precio'], 0, ',', '.') . "</td>
+                                <td>$" . number_format($subtotal_producto, 0, ',', '.') . "</td>
+                              </tr>";
+                    }
+                    $stmt_productos_combo->close();
+                }
+            }
+            $stmt_combo->close();
             ?>
         </tbody>
         <tfoot>
+            <?php
+            $ahorro = $total_sin_descuento - $total;
+            ?>
             <tr>
-                <th colspan="4" class="text-end">Total</th>
+                <th colspan="4" class="text-end">Total sin descuento</th>
+                <th>$<?= number_format($total_sin_descuento, 0, ',', '.') ?></th>
+            </tr>
+            <tr>
+                <th colspan="4" class="text-end">Ahorro por Combo</th>
+                <th>$<?= number_format($ahorro, 0, ',', '.') ?></th>
+            </tr>
+            <tr>
+                <th colspan="4" class="text-end">Total con descuento</th>
                 <th>$<?= number_format($total, 0, ',', '.') ?></th>
             </tr>
         </tfoot>

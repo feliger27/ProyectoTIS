@@ -1,16 +1,9 @@
 <?php
-include '../includes/header.php';
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-if (!isset($_SESSION['username'])) {
-    header("Location: ../login/login.php");
-    exit();
-}
+include '../includes/header.php'; 
 ?>
 
 <div class="container mt-5">
-    <h1 class="text-center">Promociones</h1>
+    <h1 class="text-center pt-4">Promociones</h1>
     <div class="row">
         <!-- Tarjeta de promoción de ejemplo -->
         <div class="col-md-4">
@@ -28,5 +21,5 @@ if (!isset($_SESSION['username'])) {
 </div>
 
 <?php
-include '../includes/footer.php';
+include '../includes/footer.php'; // Incluye el pie de página
 ?>

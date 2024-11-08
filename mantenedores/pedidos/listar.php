@@ -3,7 +3,7 @@ include '../../conexion.php';
 
 // Consulta para obtener los pedidos con la información del usuario, promoción, monto y fecha del pedido
 $sql = "SELECT p.id_pedido, u.nombre AS nombre_usuario, u.apellido AS apellido_usuario, pr.descripcion AS promocion, 
-               p.monto, p.fecha_pedido, p.estado_pedido
+               p.monto, p.fecha_pedido, p.estado_pedido, u.correo_electronico
         FROM pedido p
         INNER JOIN usuario u ON p.id_usuario = u.id_usuario
         LEFT JOIN promocion pr ON p.id_promocion = pr.id_promocion
@@ -24,9 +24,9 @@ $result = $conexion->query($sql);
 <body>
 
     <div class="container mt-4">
-        <?php if (isset($_GET['eliminado'])): ?>
-            <div class='alert alert-success alert-dismissible fade show' role='alert'>
-                Pedido ID <?php echo htmlspecialchars($_GET['id']); ?> eliminado exitosamente.
+        <?php if (isset($_GET['sin_cambio'])): ?>
+            <div class='alert alert-info alert-dismissible fade show' role='alert'>
+                No hubo cambios en el estado del pedido.
                 <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
             </div>
         <?php endif; ?>
@@ -60,7 +60,8 @@ $result = $conexion->query($sql);
                             <td>
                                 <span class="status" data-bs-toggle="modal" data-bs-target="#editStatusModal"
                                     data-id="<?php echo $row['id_pedido']; ?>"
-                                    data-estado="<?php echo $row['estado_pedido']; ?>">
+                                    data-estado="<?php echo $row['estado_pedido']; ?>"
+                                    data-correo="<?php echo $row['correo_electronico']; ?>">
                                     <?php echo ucfirst($row['estado_pedido']); ?>
                                 </span>
                             </td>
@@ -104,8 +105,7 @@ $result = $conexion->query($sql);
     </div>
 
     <!-- Modal para Editar Estado del Pedido -->
-    <div class="modal fade" id="editStatusModal" tabindex="-1" aria-labelledby="editStatusModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="editStatusModal" tabindex="-1" aria-labelledby="editStatusModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -115,6 +115,9 @@ $result = $conexion->query($sql);
                 <div class="modal-body">
                     <form action="actualizar_estado.php" method="POST">
                         <input type="hidden" name="id_pedido" id="editIdPedido" value="">
+                        <input type="hidden" name="correo_usuario" id="correoUsuario" value="">
+                        <input type="hidden" name="estado_actual" id="estadoActual" value="">
+
                         <div class="mb-3">
                             <label for="nuevo_estado" class="form-label">Nuevo Estado</label>
                             <select class="form-select" name="nuevo_estado" id="nuevo_estado" required>
@@ -130,29 +133,20 @@ $result = $conexion->query($sql);
         </div>
     </div>
 
-
-    <!-- Script para pasar el ID al formulario dentro del modal -->
+    <!-- Script para pasar el ID, correo y estado actual al formulario en el modal -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        var eliminarModal = document.getElementById('eliminarModal');
-        eliminarModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget; // Botón que abrió el modal
-            var idPedido = button.getAttribute('data-id'); // Extrae el ID del pedido
-            var modalForm = document.getElementById('eliminarForm');
-            var inputIdPedido = modalForm.querySelector('#id_pedido');
-            inputIdPedido.value = idPedido; // Coloca el ID en el input oculto del formulario
-        });
-
         var editStatusModal = document.getElementById('editStatusModal');
         editStatusModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget; // Botón que abrió el modal
-            var idPedido = button.getAttribute('data-id'); // Extrae el ID del pedido
-            var estadoPedido = button.getAttribute('data-estado'); // Extrae el estado actual del pedido
-            var modalForm = document.querySelector('#editStatusModal form');
-            modalForm.querySelector('#editIdPedido').value = idPedido; // Coloca el ID en el input oculto del formulario
-            modalForm.querySelector('#nuevo_estado').value = estadoPedido; // Coloca el estado actual en el select
-        });
+            var button = event.relatedTarget;
+            var idPedido = button.getAttribute('data-id');
+            var correoUsuario = button.getAttribute('data-correo');
+            var estadoActual = button.getAttribute('data-estado');
 
+            document.getElementById('editIdPedido').value = idPedido;
+            document.getElementById('correoUsuario').value = correoUsuario;
+            document.getElementById('estadoActual').value = estadoActual;
+        });
     </script>
 
 </body>

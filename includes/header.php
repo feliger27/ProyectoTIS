@@ -85,5 +85,5 @@ if (isset($_SESSION['carrito'])) {
     </div>
 </nav>
 
-<div class="container" style="padding-top: 20px;">
+<div class="container" style="padding-top: 10px;">
 

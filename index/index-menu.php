@@ -12,7 +12,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
 ?>
 
 <div class="container my-5">
-    <h1 class="text-center mb-4">Menú de Productos</h1>
+    <h1 class="text-center pt-4 mb-4">Menú de Productos</h1>
     <!-- Mensaje de error por stock insuficiente -->
     <?php if (isset($_GET['error']) && $_GET['error'] == 'stock_insuficiente'): ?>
         <div class="alert alert-danger" role="alert">
@@ -36,16 +36,31 @@ include '../includes/header.php'; // Incluye encabezado del sitio
             height: 200px;    /* Altura fija para todas las imágenes */
             object-fit: cover; /* Corta la imagen si es necesario, manteniendo la proporción */
         }
+        .btn-primary {
+            background-color: #fd7e14;
+            border-color: #fd7e14;
+        }
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: #e69500;
+            border-color: #e69500;
+        }
+        .category-title {
+            color: #fd7e14;
+            font-size: 24px;
+            font-weight: bold;
+            padding-bottom: 10px; 
+            margin-bottom: 20px; 
+        } 
     </style>
 
     <!-- Sección de Combos -->
     <div class="category-section">
-        <h2 class="text-center text-primary mb-4">Combos</h2>
+        <h2 class="text-center category-title mb-4">Combos</h2>
         <div class="row">
             <?php foreach ($combos as $combo): ?>
             <div class="col-md-4">
                 <div class="card product-card h-100 shadow-sm">
-                    <img src="../uploads/combos/<?= !empty($combo['imagen']) ? htmlspecialchars($combo['imagen']) : 'default-combo.jpg' ?>" class="card-img-top" alt="<?= htmlspecialchars($combo['nombre_combo']) ?>">
+                    <img src="../uploads/combos/<?= htmlspecialchars($combo['imagen']) ?>" class="card-img-top" alt="<?= htmlspecialchars($combo['nombre_combo']) ?>">
                     <div class="card-body">
                         <h5 class="card-title text-center"><?= htmlspecialchars($combo['nombre_combo']) ?></h5>
                         <p class="card-text text-center fw-bold text-success">$<?= htmlspecialchars($combo['precio']) ?></p>
@@ -62,11 +77,9 @@ include '../includes/header.php'; // Incluye encabezado del sitio
         </div>
     </div>
 
-
-
     <!-- Sección de Hamburguesas -->
     <div class="category-section">
-        <h2 class="text-center text-primary mb-4">Hamburguesas</h2>
+        <h2 class="text-center category-title mb-4">Hamburguesas</h2>
         <div class="row">
             <?php foreach ($hamburguesas as $hamburguesa): ?>
             <div class="col-md-4">
@@ -90,7 +103,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
 
     <!-- Sección de Bebidas -->
     <div class="category-section">
-        <h2 class="text-center text-primary mb-4">Bebidas</h2>
+        <h2 class="text-center category-title mb-4">Bebidas</h2>
         <div class="row">
             <?php foreach ($bebidas as $bebida): ?>
             <div class="col-md-4">
@@ -114,7 +127,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
 
 <!-- Sección de Postres -->
     <div class="category-section">
-        <h2 class="text-center text-primary mb-4">Postres</h2>
+        <h2 class="text-center category-title mb-4">Postres</h2>
         <div class="row">
             <?php foreach ($postres as $postre): ?>
             <div class="col-md-4">
@@ -137,7 +150,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
     </div>
     <!-- Aquí un ejemplo para la sección de Acompañamientos -->
     <div class="category-section">
-        <h2 class="text-center text-primary mb-4">Acompañamientos</h2>
+        <h2 class="text-center category-title mb-4">Acompañamientos</h2>
         <div class="row">
             <?php foreach ($acompaniamientos as $acomp): ?>
             <div class="col-md-4">

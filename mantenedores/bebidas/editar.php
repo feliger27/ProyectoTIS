@@ -23,51 +23,48 @@ if ($result->num_rows == 0) {
 $row = $result->fetch_assoc();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nombre_bebida = $_POST['nombre_bebida'];
-    $cantidad = $_POST['cantidad'];
-    $precio = $_POST['precio'];
-
-    // Comprobamos si se ha subido una nueva imagen
-    if ($_FILES['imagen']['error'] == UPLOAD_ERR_OK) {
-        $nombre_imagen = $_FILES['imagen']['name'];
-        $ruta_temporal = $_FILES['imagen']['tmp_name'];
-        $ruta_destino = "../../uploads/bebidas/" . $nombre_imagen;
-
-        if (move_uploaded_file($ruta_temporal, $ruta_destino)) {
-            // Actualizamos el registro con la nueva imagen
-            $sql = "UPDATE bebida SET nombre_bebida = ?, cantidad = ?, precio = ?, imagen = ? WHERE id_bebida = ?";
-            $stmt = $conexion->prepare($sql);
-            $stmt->bind_param("sidsi", $nombre_bebida, $cantidad, $precio, $nombre_imagen, $id_bebida);
-        } else {
-            echo "<div class='container mt-3'>
-                    <div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                        Error al subir la imagen.
-                        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                    </div>
-                  </div>";
-            exit;
+    // Si se pulsa el botón de eliminar imagen
+    if (isset($_POST['eliminar_imagen'])) {
+        $imagen = $row['imagen'];
+        if (!empty($imagen) && file_exists("../../uploads/bebidas/" . $imagen)) {
+            unlink("../../uploads/bebidas/" . $imagen); // Eliminar archivo
         }
-    } else {
-        // Si no hay nueva imagen, se mantiene la actual
-        $sql = "UPDATE bebida SET nombre_bebida = ?, cantidad = ?, precio = ? WHERE id_bebida = ?";
+        $sql = "UPDATE bebida SET imagen = NULL WHERE id_bebida = ?";
         $stmt = $conexion->prepare($sql);
-        $stmt->bind_param("sidi", $nombre_bebida, $cantidad, $precio, $id_bebida);
-    }
-
-    if ($stmt->execute()) {
-        echo "<div class='container mt-3'>
-                <div class='alert alert-success alert-dismissible fade show' role='alert'>
-                    Bebida editada exitosamente.
-                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                </div>
-              </div>";
+        $stmt->bind_param("i", $id_bebida);
+        $stmt->execute();
+        $row['imagen'] = null; // Actualizar el valor de la imagen en el array $row
+        echo "<div class='alert alert-success'>Imagen eliminada correctamente.</div>";
     } else {
-        echo "<div class='container mt-3'>
-                <div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                    Error: " . $stmt->error . "
-                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                </div>
-              </div>";
+        $nombre_bebida = $_POST['nombre_bebida'];
+        $cantidad = $_POST['cantidad'];
+        $precio = $_POST['precio'];
+        // Comprobamos si se ha subido una nueva imagen
+        if ($_FILES['imagen']['error'] == UPLOAD_ERR_OK) {
+            $nombre_imagen = $_FILES['imagen']['name'];
+            $ruta_temporal = $_FILES['imagen']['tmp_name'];
+            $ruta_destino = "../../uploads/bebidas/" . $nombre_imagen;
+            if (move_uploaded_file($ruta_temporal, $ruta_destino)) {
+                // Actualizamos el registro con la nueva imagen
+                $sql = "UPDATE bebida SET nombre_bebida = ?, cantidad = ?, precio = ?, imagen = ? WHERE id_bebida = ?";
+                $stmt = $conexion->prepare($sql);
+                $stmt->bind_param("sidsi", $nombre_bebida, $cantidad, $precio, $nombre_imagen, $id_bebida);
+            } else {
+                echo "<div class='alert alert-danger'>Error al subir la imagen.</div>";
+                exit;
+            }
+        } else {
+            // Si no hay nueva imagen, se mantiene la actual
+            $sql = "UPDATE bebida SET nombre_bebida = ?, cantidad = ?, precio = ? WHERE id_bebida = ?";
+            $stmt = $conexion->prepare($sql);
+            $stmt->bind_param("sidi", $nombre_bebida, $cantidad, $precio, $id_bebida);
+        }
+
+        if ($stmt->execute()) {
+            echo "<div class='alert alert-success'>Bebida editada exitosamente.</div>";
+        } else {
+            echo "<div class='alert alert-danger'>Error: " . $stmt->error . "</div>";
+        }
     }
 }
 ?>

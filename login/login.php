@@ -2,6 +2,8 @@
 include '../conexion.php';
 session_start();
 
+$error_message = ''; // Inicializar la variable de mensaje de error
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = stripslashes($_POST['username']);
     $username = mysqli_real_escape_string($conexion, $username);
@@ -47,11 +49,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         } else {
             // Contraseña incorrecta
-            echo "<div class='alert alert-danger'>Usuario o contraseña incorrectos.</div>";
+            $error_message = "<div class='alert alert-danger'>Usuario o contraseña incorrectos.</div>";
         }
     } else {
         // Usuario no encontrado
-        echo "<div class='alert alert-danger'>Usuario no encontrado.</div>";
+        $error_message = "<div class='alert alert-danger'>Usuario no encontrado.</div>";
     }
     $stmt->close();
 }
@@ -70,6 +72,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
         <div class="col-md-6">
             <h2 class="text-center mb-4">Inicia Sesión</h2>
+
+            <!-- Mostrar mensaje de error si existe -->
+            <?php if (!empty($error_message)): ?>
+                <div class="mb-3"><?php echo $error_message; ?></div>
+            <?php endif; ?>
 
             <!-- Formulario de login -->
             <form action="" method="POST">
