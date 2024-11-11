@@ -36,11 +36,7 @@ $total = 0;
                             <td>$<?= number_format($producto['precio'], 0, ',', '.'); ?></td>
                             <td>$<?= number_format($producto['precio'] * $producto['cantidad'], 0, ',', '.'); ?></td>
                             <td>
-                                <form action="../funciones/gestionar_carrito/eliminar_carrito.php" method="POST" class="d-inline">
-                                    <input type="hidden" name="producto_id" value="<?= htmlspecialchars($id); ?>">
-                                    <input type="hidden" name="tipo_producto" value="<?= htmlspecialchars($tipo); ?>">
-                                    <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                                </form>
+                                <a href="../funciones/gestionar_carrito/eliminar_carrito.php?producto_id=<?= $id; ?>&tipo_producto=<?= $tipo; ?>" class="btn btn-danger btn-sm">Eliminar</a>
                             </td>
                         </tr>
                         <?php $total += $producto['precio'] * $producto['cantidad']; ?>
