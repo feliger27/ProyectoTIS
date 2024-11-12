@@ -1,6 +1,6 @@
 <?php
 include '../../conexion.php';
-include 'C:/xampp/htdocs/xampp/ProyectoTIS/funciones/notificar usuario/notificar_usuario.php';
+include '../../funciones/notificar_usuario/notificar_usuario.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id_pedido = $_POST['id_pedido'];
