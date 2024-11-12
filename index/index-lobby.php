@@ -2,22 +2,54 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 include '../includes/header.php';
+
 if (!isset($_SESSION['username'])) {
     header("Location: ../login/login.php");
     exit();
 }
 
-// Conectar a la base de datos para obtener hamburguesas destacadas
+// Conectar a la base de datos para obtener hamburguesas destacadas y acompañamientos más vendidos
 include '../conexion.php';
 
-// Consulta de ejemplo para obtener tres hamburguesas de muestra con la columna 'imagen' corregida
+// Consulta para obtener las tres hamburguesas destacadas
 $query_hamburguesas_destacadas = "SELECT nombre_hamburguesa, descripcion, imagen FROM hamburguesa LIMIT 3";
 $hamburguesas_destacadas = mysqli_query($conexion, $query_hamburguesas_destacadas);
 
-// Verificación de la consulta
+// Verificar si la consulta fue exitosa
 if (!$hamburguesas_destacadas) {
     die("Error en la consulta de hamburguesas destacadas: " . mysqli_error($conexion));
+}
+
+// Consulta para obtener los tres acompañamientos más vendidos, eliminando saltos de línea innecesarios
+$query_acompanamientos_vendidos = "
+    SELECT a.nombre_acompaniamiento AS nombre, a.imagen, SUM(pa.cantidad) AS total_vendido
+    FROM acompaniamiento a
+    LEFT JOIN pedido_acompaniamiento pa ON a.id_acompaniamiento = pa.id_acompaniamiento
+    GROUP BY a.id_acompaniamiento
+    ORDER BY total_vendido DESC
+    LIMIT 3";
+$acompanamientos_vendidos = mysqli_query($conexion, $query_acompanamientos_vendidos);
+
+// Verificar si la consulta fue exitosa
+if (!$acompanamientos_vendidos) {
+    die("Error en la consulta de acompañamientos más vendidos: " . mysqli_error($conexion));
+}
+
+// Verificar si se encontraron menos de 3 acompañamientos vendidos y completar con otros acompañamientos si es necesario
+$acompanamientos = [];
+while ($row = mysqli_fetch_assoc($acompanamientos_vendidos)) {
+    $acompanamientos[] = $row;
+}
+
+if (count($acompanamientos) < 3) {
+    $faltantes = 3 - count($acompanamientos);
+    $query_acompanamientos_extra = "SELECT nombre_acompaniamiento AS nombre, imagen FROM acompaniamiento LIMIT $faltantes";
+    $acompanamientos_extra = mysqli_query($conexion, $query_acompanamientos_extra);
+    while ($row = mysqli_fetch_assoc($acompanamientos_extra)) {
+        $acompanamientos[] = $row;
+    }
 }
 ?>
 
@@ -120,6 +152,11 @@ if (!$hamburguesas_destacadas) {
             margin: 15px;
             border-radius: 10px;
         }
+        .products-section .card img {
+            border-radius: 10px 10px 0 0;
+            width: 100%;
+            height: auto;
+        }
         .products-section .card:hover {
             transform: scale(1.05);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
@@ -188,21 +225,13 @@ if (!$hamburguesas_destacadas) {
 
         <h3>Acompañamientos</h3>
         <div class="row justify-content-center">
-            <?php 
-            // Ejemplos de acompañamientos
-            $acompanamientos = [
-                ["nombre" => "Papas Fritas", "descripcion" => "Crujientes papas fritas.", "imagen" => "papas_fritas.jpg"],
-                ["nombre" => "Aros de Cebolla", "descripcion" => "Aros de cebolla dorados y crujientes.", "imagen" => "aros_cebolla.jpg"],
-                ["nombre" => "Nuggets de Pollo", "descripcion" => "Nuggets de pollo dorados.", "imagen" => "nuggets_pollo.jpg"]
-            ];
-
-            foreach ($acompanamientos as $acompanamiento): ?>
+            <?php foreach ($acompanamientos as $acompanamiento): ?>
                 <div class="col-md-4 mb-4 d-flex justify-content-center">
                     <div class="card">
-                        <img src="<?php echo '../uploads/acompanamientos/' . $acompanamiento['imagen']; ?>" alt="Imagen de <?php echo $acompanamiento['nombre']; ?>" class="card-img-top">
+                        <img src="<?php echo '../uploads/acompaniamientos/' . $acompanamiento['imagen']; ?>" alt="Imagen de <?php echo $acompanamiento['nombre']; ?>" class="card-img-top">
                         <div class="card-body text-center">
                             <h5 class="card-title"><?php echo $acompanamiento['nombre']; ?></h5>
-                            <p class="card-text"><?php echo $acompanamiento['descripcion']; ?></p>
+                            <p class="card-text">¡Uno de los más populares!</p>
                             <a href="detalle-producto.php?nombre=<?php echo urlencode($acompanamiento['nombre']); ?>" class="btn btn-primary">Ver Más</a>
                         </div>
                     </div>
@@ -210,7 +239,7 @@ if (!$hamburguesas_destacadas) {
             <?php endforeach; ?>
         </div>
     </section>
-
+    <?php include '../includes/footer.php'; ?>           
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,8 +1,6 @@
-
 </div> <!-- Cierre del container principal -->
-<div class="container" style="padding-top: 60px;">
-<footer class="bg-dark text-white text-center py-3 fixed-bottom">
-    <div class="container">
+<footer class="bg-dark text-white text-center py-3">
+    <div class="container-fluid">
         <p>© 2024 HamburGeeks</p>
         <div>
             <a href="#" class="text-white me-3">Nosotros</a>
