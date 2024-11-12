@@ -187,6 +187,24 @@ foreach ($_SESSION['carrito'] as $tipo => $productos) {
     }
 }
 
+// Calcula los puntos en base al total
+$puntos_ganados = floor($total / 1000);  // 1 punto por cada 1000 pesos
+
+// Actualiza los puntos del usuario
+$query_update_puntos = "UPDATE usuario SET puntos_recompensa = puntos_recompensa + ? WHERE id_usuario = ?";
+$stmt_update_puntos = $conexion->prepare($query_update_puntos);
+$stmt_update_puntos->bind_param("ii", $puntos_ganados, $user_id);
+$stmt_update_puntos->execute();
+$stmt_update_puntos->close();
+
+// Registrar los puntos en la tabla de recompensas
+$query_recompensa = "INSERT INTO recompensa (id_usuario, id_pedido, cantidad_recompensada) VALUES (?, ?, ?)";
+$stmt_recompensa = $conexion->prepare($query_recompensa);
+$stmt_recompensa->bind_param("iii", $user_id, $pedido_id, $puntos_ganados);
+$stmt_recompensa->execute();
+$stmt_recompensa->close();
+
+
 // Limpiar carrito y redirigir a confirmación
 unset($_SESSION['carrito']);
 header("Location: ../../index/index-confirmacion.php?pedido_id=$pedido_id");

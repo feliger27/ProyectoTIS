@@ -55,7 +55,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
 
     <!-- Sección de Combos -->
     <div class="category-section">
-        <h2 class="text-center category-title mb-4">Combos</h2>
+        <h2 class="text-center category-title mb-4" id ="combos">Combos</h2>
         <div class="row">
             <?php foreach ($combos as $combo): ?>
             <div class="col-md-4">
@@ -79,7 +79,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
 
     <!-- Sección de Hamburguesas -->
     <div class="category-section">
-        <h2 class="text-center category-title mb-4">Hamburguesas</h2>
+        <h2 class="text-center category-title mb-4" id ="hamburguesas">Hamburguesas</h2>
         <div class="row">
             <?php foreach ($hamburguesas as $hamburguesa): ?>
             <div class="col-md-4">
@@ -103,7 +103,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
 
     <!-- Sección de Bebidas -->
     <div class="category-section">
-        <h2 class="text-center category-title mb-4">Bebidas</h2>
+        <h2 class="text-center category-title mb-4" id ="bebidas">Bebidas</h2>
         <div class="row">
             <?php foreach ($bebidas as $bebida): ?>
             <div class="col-md-4">
@@ -127,7 +127,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
 
 <!-- Sección de Postres -->
     <div class="category-section">
-        <h2 class="text-center category-title mb-4">Postres</h2>
+        <h2 class="text-center category-title mb-4" id ="postres">Postres</h2>
         <div class="row">
             <?php foreach ($postres as $postre): ?>
             <div class="col-md-4">
@@ -150,7 +150,7 @@ include '../includes/header.php'; // Incluye encabezado del sitio
     </div>
     <!-- Aquí un ejemplo para la sección de Acompañamientos -->
     <div class="category-section">
-        <h2 class="text-center category-title mb-4">Acompañamientos</h2>
+        <h2 class="text-center category-title mb-4" id ="acompaniamientos">Acompañamientos</h2>
         <div class="row">
             <?php foreach ($acompaniamientos as $acomp): ?>
             <div class="col-md-4">

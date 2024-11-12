@@ -22,9 +22,20 @@ $result_pedido = $stmt->get_result();
 $pedido = $result_pedido->fetch_assoc();
 $stmt->close();
 
+$query_puntos = "SELECT puntos_recompensa FROM usuario WHERE id_usuario = ?";
+$stmt_puntos = $conexion->prepare($query_puntos);
+$stmt_puntos->bind_param("i", $user_id);
+$stmt_puntos->execute();
+$result_puntos = $stmt_puntos->get_result();
+$puntos_usuario = $result_puntos->fetch_assoc();
+$stmt_puntos->close();
+
+$puntos_recompensa = $puntos_usuario['puntos_recompensa'] ?? '0'; // Asume 0 si no está definido
+
 if (!$pedido) {
     die("Error: Pedido no encontrado.");
 }
+
 ?>
 
 <div class="container my-5">
@@ -39,6 +50,7 @@ if (!$pedido) {
             <p><strong>Fecha del Pedido:</strong> <?= htmlspecialchars($pedido['fecha_pedido']) ?></p>
             <p><strong>Dirección de Envío:</strong> <?= htmlspecialchars($pedido['calle']) ?>, <?= htmlspecialchars($pedido['ciudad']) ?>, <?= htmlspecialchars($pedido['codigo_postal']) ?></p>
             <p><strong>Método de Pago:</strong> <?= htmlspecialchars($pedido['metodo_pago'] ?? 'Efectivo') ?></p>
+            <p><strong>Puntos de Recompensa Actuales:</strong> <?= htmlspecialchars($puntos_recompensa) ?></p>
         </div>
     </div>
 

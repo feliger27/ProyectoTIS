@@ -19,8 +19,8 @@ if (isset($_SESSION['mensaje_exito'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Consulta para obtener la información del usuario
-$query_user = "SELECT nombre, apellido, correo_electronico, telefono FROM usuario WHERE id_usuario = ?";
+// Consulta para obtener la información del usuario y sus puntos de recompensa
+$query_user = "SELECT nombre, apellido, correo_electronico, telefono, puntos_recompensa FROM usuario WHERE id_usuario = ?";
 $stmt_user = $conexion->prepare($query_user);
 $stmt_user->bind_param("i", $user_id);
 $stmt_user->execute();
@@ -116,10 +116,22 @@ $stmt_metodos_pago->close();
                 <button class="nav-link" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings"
                     type="button" role="tab">Configuración</button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rewards-tab" data-bs-toggle="pill" data-bs-target="#rewards"
+                    type="button" role="tab">Recompensas</button>
+            </li>
         </ul>
 
         <!-- Contenido de las pestañas en tarjetas -->
         <div class="tab-content">
+            <div class="tab-pane fade" id="rewards" role="tabpanel" aria-labelledby="rewards-tab">
+                <div class="card">
+                     <div class="card-body">
+                        <h4>Recompensas</h4>
+                            <p>Tienes <strong><?= htmlspecialchars($user_data['puntos_recompensa']) ?></strong> puntos acumulados.</p>
+        </div>
+    </div>
+</div>
             <!-- Información Personal -->
             <div class="tab-pane fade show active" id="personal-info" role="tabpanel" aria-labelledby="personal-tab">
                 <div class="card">
