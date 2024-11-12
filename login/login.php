@@ -79,7 +79,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php if (!empty($error_message)): ?>
                 <div class="mb-3"><?php echo $error_message; ?></div>
             <?php endif; ?>
-
+            <?php
+            if (isset($_GET['message']) && $_GET['message'] == 'success') {
+                echo "<div class='alert alert-success'>Contraseña restablecida exitosamente. Ahora puedes iniciar sesión.</div>";
+            }
+            ?>
             <!-- Formulario de login -->
             <form action="" method="POST">
                 <div class="form-group">
