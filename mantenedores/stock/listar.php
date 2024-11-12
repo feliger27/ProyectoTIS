@@ -65,7 +65,7 @@ $aderezos = $conexion->query($aderezos_query);
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center">
         <h1>Gestión de Stock <button class="btn btn-outline-primary" onclick="window.open('reportes.php', '_blank')">PDF</button></h1>
-        <button class="btn btn-secondary" onclick="window.location.href='../../index/index.php'">Volver</button>
+        <button class="btn btn-secondary" onclick="window.location.href='../../index/index-mantenedores.php'">Volver</button>
     </div>
     <!-- Pestañas -->
     <ul class="nav nav-tabs" id="productTabs" role="tablist">

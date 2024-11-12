@@ -31,16 +31,22 @@ $result = $conexion->query($sql);
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Listado de Combos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="container py-5">
-    <h1 class="mb-4">Listado de Combos</h1>
-    
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Listado de Combos</h1>
+        <button class="btn btn-secondary"
+            onclick="window.location.href='../../index/index-mantenedores.php'">Volver</button>
+    </div>
+
     <a href="insertar.php" class="btn btn-success mb-3">Agregar Nuevo Combo</a>
-    
+
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -68,11 +74,13 @@ $result = $conexion->query($sql);
                     <td><?= $combo['postres'] ?: 'N/A' ?></td>
                     <td>
                         <a href="editar.php?id=<?= $combo['id_combo'] ?>" class="btn btn-primary btn-sm">Editar</a>
-                        <a href="eliminar.php?id=<?= $combo['id_combo'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro de que desea eliminar este combo?');">Eliminar</a>
+                        <a href="eliminar.php?id=<?= $combo['id_combo'] ?>" class="btn btn-danger btn-sm"
+                            onclick="return confirm('¿Está seguro de que desea eliminar este combo?');">Eliminar</a>
                     </td>
                 </tr>
             <?php endwhile; ?>
         </tbody>
     </table>
 </body>
+
 </html>

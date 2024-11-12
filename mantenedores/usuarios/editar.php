@@ -44,19 +44,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $correo_electronico = !empty($_POST['correo_electronico']) ? $_POST['correo_electronico'] : $usuario['correo_electronico'];
     $telefono = $_POST['telefono'];
 
+    // Actualizar los datos del usuario
     $sql_usuario = "UPDATE usuario SET nombre = ?, apellido = ?, correo_electronico = ?, telefono = ? WHERE id_usuario = ?";
     $stmt_usuario = $conexion->prepare($sql_usuario);
     $stmt_usuario->bind_param("ssssi", $nombre, $apellido, $correo_electronico, $telefono, $id_usuario);
 
     if ($stmt_usuario->execute()) {
+        // Si el usuario tiene permiso para editar roles y se ha enviado un nuevo rol
         if ($tiene_permiso_editar_usuario && isset($_POST['id_rol'])) {
+            // Eliminar el rol anterior si existe
+            $sql_delete_role = "DELETE FROM usuario_rol WHERE id_usuario = ?";
+            $stmt_delete_role = $conexion->prepare($sql_delete_role);
+            $stmt_delete_role->bind_param("i", $id_usuario);
+            $stmt_delete_role->execute();
+            $stmt_delete_role->close();
+
+            // Insertar el nuevo rol
             $id_rol = $_POST['id_rol'];
-            $sql_usuario_rol = "REPLACE INTO usuario_rol (id_usuario, id_rol) VALUES (?, ?)";
+            $sql_usuario_rol = "INSERT INTO usuario_rol (id_usuario, id_rol) VALUES (?, ?)";
             $stmt_usuario_rol = $conexion->prepare($sql_usuario_rol);
             $stmt_usuario_rol->bind_param("ii", $id_usuario, $id_rol);
             $stmt_usuario_rol->execute();
             $stmt_usuario_rol->close();
         }
+        
         echo "<div class='container mt-3'>
                 <div class='alert alert-success alert-dismissible fade show' role='alert'>
                     Usuario editado exitosamente.
@@ -136,6 +147,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 </body>
 </html>
+
 
 
 
