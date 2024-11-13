@@ -27,27 +27,7 @@ if (isset($_SESSION['carrito'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        .logo-container {
-            background-color: #ffa500;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        .cart-icon {
-            position: relative;
-        }
-        .cart-count {
-            position: absolute;
-            top: -5px;
-            right: -10px;
-            background-color: red;
-            color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 12px;
-        }
+        
     </style>
 </head>
 
@@ -57,7 +37,7 @@ if (isset($_SESSION['carrito'])) {
     <div class="container">
         <div class="logo-container me-3">
             <a href="../index/index-lobby.php">
-                <img src="../index/logo-hamburgeeks.png" alt="Logo" width="30" height="30">
+                <img src="../index/logo-hamburgeek.png" alt="Logo" width="140" height="60">
             </a>
         </div>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
