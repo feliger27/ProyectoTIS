@@ -10,12 +10,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $calle = mysqli_real_escape_string($conexion, $_POST['calle']);
     $numero = mysqli_real_escape_string($conexion, $_POST['numero']);
     $ciudad = mysqli_real_escape_string($conexion, $_POST['ciudad']);
-    $codigo_postal = mysqli_real_escape_string($conexion, $_POST['codigoPostal']);
 
     // Insertar la nueva dirección en la tabla direccion
-    $query_direccion = "INSERT INTO direccion (calle, numero, ciudad, codigo_postal) VALUES (?, ?, ?, ?)";
+    $query_direccion = "INSERT INTO direccion (calle, numero, ciudad) VALUES (?, ?, ?)";
     $stmt_direccion = $conexion->prepare($query_direccion);
-    $stmt_direccion->bind_param("sisi", $calle, $numero, $ciudad, $codigo_postal);
+    $stmt_direccion->bind_param("ssi", $calle, $numero, $ciudad);
 
     if ($stmt_direccion->execute()) {
         // Obtener el ID de la dirección recién insertada

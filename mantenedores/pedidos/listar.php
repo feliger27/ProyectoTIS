@@ -1,9 +1,9 @@
 <?php
 include '../../conexion.php';
 
-// Consulta para obtener los pedidos con la información del usuario, promoción, monto y fecha del pedido
+// Consulta para obtener los pedidos con la información del usuario, promoción, total y fecha del pedido
 $sql = "SELECT p.id_pedido, u.nombre AS nombre_usuario, u.apellido AS apellido_usuario, pr.descripcion AS promocion, 
-               p.monto, p.fecha_pedido, p.estado_pedido, u.correo_electronico
+               p.total, p.fecha_pedido, p.estado_pedido, u.correo_electronico
         FROM pedido p
         INNER JOIN usuario u ON p.id_usuario = u.id_usuario
         LEFT JOIN promocion pr ON p.id_promocion = pr.id_promocion
@@ -33,7 +33,7 @@ $result = $conexion->query($sql);
 
         <div class="d-flex justify-content-between align-items-center">
             <h1>Listado de Pedidos</h1>
-            <button class="btn btn-secondary" onclick="window.location.href='../../index/index.php'">Volver</button>
+            <button class="btn btn-secondary" onclick="window.location.href='../../index/index-mantenedores.php'">Volver</button>
         </div>
 
         <table class="table table-striped">
@@ -42,7 +42,7 @@ $result = $conexion->query($sql);
                     <th>ID</th>
                     <th>Cliente</th>
                     <th>Promoción</th>
-                    <th>Monto Total</th>
+                    <th>total Total</th>
                     <th>Fecha y Hora del Pedido</th>
                     <th>Estado del Pedido</th>
                     <th>Acciones</th>
@@ -55,7 +55,7 @@ $result = $conexion->query($sql);
                             <td><?php echo $row['id_pedido']; ?></td>
                             <td><?php echo $row['nombre_usuario'] . ' ' . $row['apellido_usuario']; ?></td>
                             <td><?php echo $row['promocion'] ? $row['promocion'] : 'Sin Promoción'; ?></td>
-                            <td><?php echo '$' . number_format($row['monto'], 2); ?></td>
+                            <td><?php echo '$' . number_format($row['total'], 2); ?></td>
                             <td><?php echo date('d-m-Y H:i', strtotime($row['fecha_pedido'])); ?></td>
                             <td>
                                 <span class="status" data-bs-toggle="modal" data-bs-target="#editStatusModal"

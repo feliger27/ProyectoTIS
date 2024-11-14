@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-11-2024 a las 18:44:31
+-- Tiempo de generación: 14-11-2024 a las 17:44:04
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -41,10 +41,12 @@ CREATE TABLE `acompaniamiento` (
 --
 
 INSERT INTO `acompaniamiento` (`id_acompaniamiento`, `nombre_acompaniamiento`, `cantidad`, `precio`, `umbral_reabastecimiento`, `imagen`) VALUES
-(1, 'Papas Fritas', 100, 1990, 5, NULL),
-(2, 'Aros de Cebolla', 100, 2490, 5, NULL),
-(4, 'Nuggets', 100, 1300, 5, 'nuggets.png'),
-(5, 'Palitos de Queso', 100, 1490, 5, NULL);
+(1, 'Papas Fritas', 100, 1990, 5, 'papas_fritas.jpg'),
+(2, 'Aros de Cebolla', 100, 2490, 5, 'aros_cebolla.jpg'),
+(4, 'Nuggets de Pollo', 100, 1490, 5, 'nuggets_pollo.jpg'),
+(5, 'Palitos de Ajo', 100, 1990, 5, 'palitos_ajo.jpg'),
+(6, 'Alitas de Pollo', 100, 2990, 5, 'alitas_pollo.jpg'),
+(7, 'Emapanaditas de Queso', 100, 2490, 5, 'empanadas_queso.jpg');
 
 -- --------------------------------------------------------
 
@@ -64,11 +66,14 @@ CREATE TABLE `aderezo` (
 --
 
 INSERT INTO `aderezo` (`id_aderezo`, `nombre_aderezo`, `cantidad`, `umbral_reabastecimiento`) VALUES
-(1, 'Salsa BBQ', 5, 5),
-(2, 'Mayonesa Casera', 25, 5),
-(3, 'Ketchup', 35, 5),
-(4, 'Mostaza Dijon', 20, 5),
-(5, 'Salsa Picante', 15, 5);
+(1, 'Salsa BBQ', 100, 5),
+(2, 'Mayonesa Casera', 100, 5),
+(3, 'Ketchup', 100, 5),
+(4, 'Mostaza Dijon', 100, 5),
+(5, 'Salsa Picante', 100, 5),
+(6, 'Salsa Teriyaki', 100, 5),
+(7, 'Mayonesa de Ajo', 100, 5),
+(8, 'Pesto', 100, 5);
 
 -- --------------------------------------------------------
 
@@ -90,9 +95,15 @@ CREATE TABLE `bebida` (
 --
 
 INSERT INTO `bebida` (`id_bebida`, `nombre_bebida`, `cantidad`, `precio`, `umbral_reabastecimiento`, `imagen`) VALUES
-(1, 'Coca Cola', 3, 1290, 5, 'coca cola.png'),
-(2, 'Fanta', 49, 1290, 5, NULL),
-(3, 'Agua Mineral', 98, 990, 5, NULL);
+(1, 'Coca Cola', 100, 1990, 5, 'coca_cola.jpg'),
+(2, 'Fanta', 100, 1990, 5, 'fanta.jpg'),
+(3, 'Sprite', 100, 1990, 5, 'sprite.jpg'),
+(4, 'Pepsi', 100, 1990, 5, 'pepsi.jpg'),
+(5, 'Red Bull', 100, 2490, 5, 'red_bull.jpg'),
+(6, 'Monster', 100, 2490, 5, 'monster.jpg'),
+(7, 'Jugo de Naranja', 100, 1490, 5, 'jugo_naranja.jpg'),
+(8, 'Jugo de Frutilla', 100, 1490, 5, 'jugo_frutilla.jpg'),
+(9, 'Agua Gasificada', 100, 990, 5, 'agua_gasificada.jpg');
 
 -- --------------------------------------------------------
 
@@ -218,21 +229,20 @@ CREATE TABLE `direccion` (
   `id_direccion` int(11) NOT NULL,
   `calle` varchar(100) DEFAULT NULL,
   `numero` int(11) DEFAULT NULL,
-  `ciudad` varchar(50) DEFAULT NULL,
-  `codigo_postal` int(11) DEFAULT NULL
+  `ciudad` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `direccion`
 --
 
-INSERT INTO `direccion` (`id_direccion`, `calle`, `numero`, `ciudad`, `codigo_postal`) VALUES
-(5, 'Rodrigo de Quiroga', 306, 'Cañete', 4390000),
-(6, 'Janequeo', 874, 'Concepción', 439100),
-(7, 'adsfasdf', NULL, 'asdfasdf', 123),
-(9, 'pasaje ocho', 1115, 'san pedro de la paz', 4130000),
-(10, 'pasaje ocho', NULL, 'Concepción', 4030000),
-(11, 'pasaje ocho', NULL, 'Concepción', 4030000);
+INSERT INTO `direccion` (`id_direccion`, `calle`, `numero`, `ciudad`) VALUES
+(5, 'Rodrigo de Quiroga', 306, 'Cañete'),
+(6, 'Janequeo', 874, 'Concepción'),
+(7, 'adsfasdf', NULL, 'asdfasdf'),
+(9, 'pasaje ocho', 1115, 'san pedro de la paz'),
+(10, 'pasaje ocho', NULL, 'Concepción'),
+(11, 'pasaje ocho', NULL, 'Concepción');
 
 -- --------------------------------------------------------
 
@@ -273,9 +283,13 @@ CREATE TABLE `hamburguesa` (
 --
 
 INSERT INTO `hamburguesa` (`id_hamburguesa`, `nombre_hamburguesa`, `descripcion`, `precio`, `imagen`) VALUES
-(1, 'Hamburguesa Clásica', 'Carne de res, lechuga, tomate y queso cheddar.', 4990, NULL),
-(2, 'Hamburguesa BBQ Bacon', 'Carne de res, queso cheddar, tocino y salsa BBQ.', 5990, 'hamburguesa.png'),
-(3, 'Hamburguesa Suprema', 'Doble Carne de Res, Queso Cheddar, Tocino, Cebolla Caramelizada, Champiñones Salteados y Pan Brioche, con Mayonesa Casera y Salsa BBQ.', 7990, '');
+(1, 'Hamburguesa Clásica', 'Carne de res, lechuga, tomate y queso cheddar.', 4990, 'clasica.jpg'),
+(2, 'Hamburguesa BBQ Bacon', 'Carne de res, queso cheddar, tocino y salsa BBQ.', 5990, 'bbq_bacon.jpg'),
+(4, 'Hamburguesa Hawaiana', 'Carne de res, queso suizo, piña a la parrilla, jamón, y salsa de teriyaki.', 5990, 'hawaiana.jpg'),
+(5, 'Hamburguesa Vegetariana', 'Hamburguesa de garbanzos, queso de cabra, aguacate, tomate, y mayonesa de ajo.', 5490, 'vegetariana.jpg'),
+(6, 'Hamburguesa con Champiñones', 'Carne de res, queso suizo, champiñones salteados, cebolla caramelizada, y mayonesa de ajo.', 5990, 'champiniones.jpg'),
+(7, 'Hamburguesa de Pollo BBQ', 'Pechuga de pollo a la parrilla, queso cheddar, lechuga, tomate, y salsa BBQ.', 5990, 'pollo_bbq.jpg'),
+(8, 'Hamburguesa Italiana', 'Carne de res, mozzarella, tomate, albahaca fresca, y pesto.', 6490, 'italiana.jpg');
 
 -- --------------------------------------------------------
 
@@ -294,8 +308,11 @@ CREATE TABLE `hamburguesa_aderezo` (
 
 INSERT INTO `hamburguesa_aderezo` (`id_hamburguesa`, `id_aderezo`) VALUES
 (2, 1),
-(3, 1),
-(3, 2);
+(4, 6),
+(5, 7),
+(6, 7),
+(7, 1),
+(8, 8);
 
 -- --------------------------------------------------------
 
@@ -323,12 +340,29 @@ INSERT INTO `hamburguesa_ingrediente` (`id_hamburguesa`, `id_ingrediente`, `cant
 (2, 2, 1),
 (2, 3, 1),
 (2, 6, 1),
-(3, 1, 1),
-(3, 2, 2),
-(3, 3, 1),
-(3, 6, 1),
-(3, 8, 1),
-(3, 9, 1);
+(4, 1, 1),
+(4, 2, 1),
+(4, 10, 1),
+(4, 11, 1),
+(5, 1, 1),
+(5, 5, 1),
+(5, 13, 1),
+(5, 14, 1),
+(5, 15, 1),
+(6, 1, 1),
+(6, 2, 1),
+(6, 8, 1),
+(6, 9, 1),
+(6, 10, 1),
+(7, 1, 1),
+(7, 3, 1),
+(7, 4, 1),
+(7, 5, 1),
+(7, 16, 1),
+(8, 1, 1),
+(8, 2, 1),
+(8, 17, 1),
+(8, 18, 1);
 
 -- --------------------------------------------------------
 
@@ -355,8 +389,17 @@ INSERT INTO `ingrediente` (`id_ingrediente`, `nombre_ingrediente`, `cantidad`, `
 (5, 'Tomate', 100, 5),
 (6, 'Tocino', 100, 5),
 (7, 'Pepinillos', 100, 5),
-(8, 'Cebolla Caramelizada', 100, 5),
-(9, 'Champiñones', 100, 5);
+(8, 'Cebolla', 100, 5),
+(9, 'Champiñones', 100, 5),
+(10, 'Queso Suizo', 100, 5),
+(11, 'Piña', 100, 5),
+(12, 'Jamón', 100, 5),
+(13, 'Hamburguesa de Garbanzos', 100, 5),
+(14, 'Queso de Cabra', 100, 5),
+(15, 'Palta', 100, 5),
+(16, 'Pechuga de Pollo', 100, 5),
+(17, 'Queso Mozzarella', 100, 5),
+(18, 'Albahaca', 100, 5);
 
 -- --------------------------------------------------------
 
@@ -394,6 +437,27 @@ CREATE TABLE `notificacion` (
   `mensaje` varchar(255) DEFAULT NULL,
   `fecha_envio` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `password_resets`
+--
+
+CREATE TABLE `password_resets` (
+  `id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `token` varchar(100) NOT NULL,
+  `expiry` datetime NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `password_resets`
+--
+
+INSERT INTO `password_resets` (`id`, `email`, `token`, `expiry`, `created_at`) VALUES
+(1, 'swolf@ing.ucsc.cl', 'e245bbedbbe801edc39f231f083e76064969f17d831fe83237a51f75070d389f671cb86412d0fe566f69198837d123af82d9', '2024-11-15 17:14:11', '2024-11-14 16:14:11');
 
 -- --------------------------------------------------------
 
@@ -622,9 +686,14 @@ CREATE TABLE `postre` (
 --
 
 INSERT INTO `postre` (`id_postre`, `nombre_postre`, `cantidad`, `precio`, `umbral_reabastecimiento`, `imagen`) VALUES
-(1, 'Helado de Fresa', 4, 1990, 5, 'helado frutilla.png'),
-(2, 'Brownie de Chocolate', 39, 2490, 5, NULL),
-(3, 'Cheescake', 19, 2490, 5, NULL);
+(1, 'Helado de Vainilla', 100, 1990, 5, 'helado_vainilla.jpg'),
+(2, 'Helado de Chocolate', 100, 1990, 5, 'helado_chocolate.jpg'),
+(3, 'Helado de Fresa', 100, 1990, 5, 'helado_fresa.jpg'),
+(4, 'Muffin de Frutos Rojos', 100, 1490, 5, 'muffin_frutos_rojos.jpg'),
+(5, 'Muffin de Chocolate', 100, 1490, 5, 'muffin_chocolate.jpg'),
+(6, 'Brownie de Chocolate', 100, 1990, 5, 'brownie_chocolate.jpg'),
+(7, 'Gelatina de Fresa', 100, 990, 5, 'gelatina_fresa.jpg'),
+(8, 'Ensalada de Frutas', 100, 1490, 5, 'ensalada_frutas.jpg');
 
 -- --------------------------------------------------------
 
@@ -634,13 +703,23 @@ INSERT INTO `postre` (`id_postre`, `nombre_postre`, `cantidad`, `precio`, `umbra
 
 CREATE TABLE `promocion` (
   `id_promocion` int(11) NOT NULL,
-  `codigo_promocion` varchar(20) DEFAULT NULL,
-  `descripcion` varchar(255) DEFAULT NULL,
-  `fecha_inicio` date DEFAULT NULL,
-  `fecha_fin` date DEFAULT NULL,
-  `porcentaje_descuento` int(11) DEFAULT NULL,
-  `condiciones` varchar(255) DEFAULT NULL
+  `nombre_promocion` varchar(255) NOT NULL,
+  `descripcion_promocion` text NOT NULL,
+  `fecha_inicio` datetime NOT NULL,
+  `fecha_fin` datetime NOT NULL,
+  `porcentaje_descuento` int(11) NOT NULL CHECK (`porcentaje_descuento` between 1 and 100),
+  `id_hamburguesa` int(11) DEFAULT NULL,
+  `id_postre` int(11) DEFAULT NULL,
+  `id_bebida` int(11) DEFAULT NULL,
+  `id_acompaniamiento` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `promocion`
+--
+
+INSERT INTO `promocion` (`id_promocion`, `nombre_promocion`, `descripcion_promocion`, `fecha_inicio`, `fecha_fin`, `porcentaje_descuento`, `id_hamburguesa`, `id_postre`, `id_bebida`, `id_acompaniamiento`) VALUES
+(1, 'Promoción Clásica', '20% de descuento en la hamburguesa clásica', '2024-11-14 13:22:00', '2024-11-15 13:22:00', 20, 1, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -674,7 +753,8 @@ CREATE TABLE `rol` (
 INSERT INTO `rol` (`id_rol`, `nombre_rol`, `descripcion_rol`) VALUES
 (1, 'Admin', 'poder de todo'),
 (2, 'Cliente', 'Funcionalidades básicas para realizar un pedido, editar su perfil.'),
-(4, 'Admin despacho', 'permite ver los pedidos ');
+(4, 'Admin despacho', 'permite ver los pedidos '),
+(5, 'admin stock', 'control de stock');
 
 -- --------------------------------------------------------
 
@@ -775,7 +855,9 @@ INSERT INTO `rol_permiso` (`id_rol`, `id_permiso`) VALUES
 (2, 52),
 (2, 55),
 (4, 22),
-(4, 68);
+(4, 68),
+(5, 67),
+(5, 68);
 
 -- --------------------------------------------------------
 
@@ -815,9 +897,10 @@ CREATE TABLE `usuario` (
 INSERT INTO `usuario` (`id_usuario`, `nombre`, `apellido`, `correo_electronico`, `contrasenia`, `telefono`, `fecha_registro`, `puntos_recompensa`) VALUES
 (10, 'jasmito', 'peres', 'xavito.lol.video@gmail.com', '$2y$10$11DwaD8q8fNGg2M6bPzOIet2h6acpkYlwFxjfZflKvhMh5QN/zPdy', '222233', '2024-10-27', NULL),
 (11, 'javier', 'Chavez', 'jchavezcontreras@admin.cl', '$2y$10$Heuspsz9hTT4znk0tdpmhOMnICZpdFOm.aaZrBKFmZg6.aFTNzK6i', '975243342', '2024-10-27', NULL),
-(12, 'Sergio', 'Wolf', 'swolf@ing.ucsc.cl', '$2y$10$gDzdNZYkaEwN/wQxJyTgmOsARz1BJ7MK1ra4MU7A97wVLLEOqBadC', '984690389', '2024-10-28', NULL),
+(12, 'Sergio', 'Wolf', 'swolf@ing.ucsc.cl', '$2y$10$Y5Te/tSJtmyOT9MKKxOsReVW5zaUYjijo2U5WIcICOCoMRi2.XN4.', '984690389', '2024-10-28', NULL),
 (13, 'javier', 'Chavez', 'despacho@despacho.cl', '$2y$10$C60LusjRKSZeXhBh8oqybupeMptHEwuroeO.3494x0kSYl0vavyx2', '975243342', '2024-11-01', NULL),
-(14, 'javier', 'Chavez', 'xavito.lol.videos@gmail.cl', '$2y$10$nwgztZbXpv8A99rd9IiMJ.fCjYwU.vnjqSncr1R8vCHfrXNB9PbAu', '975243342', '2024-11-01', NULL);
+(14, 'javier', 'Chavez', 'xavito.lol.videos@gmail.cl', '$2y$10$nwgztZbXpv8A99rd9IiMJ.fCjYwU.vnjqSncr1R8vCHfrXNB9PbAu', '975243342', '2024-11-01', NULL),
+(15, 'Prueba', 'Roles', 'pruebaroles@prueba.com', '$2y$10$w1v8FOfYWWmfPuBmpBjfL.F0RtM6QbBJLHoJ0r8fQ.i7f90lh3p7.', '12345678', '2024-11-14', NULL);
 
 -- --------------------------------------------------------
 
@@ -866,10 +949,10 @@ CREATE TABLE `usuario_rol` (
 INSERT INTO `usuario_rol` (`id_usuario`, `id_rol`) VALUES
 (10, 2),
 (11, 1),
-(12, 2),
-(13, 1),
+(12, 4),
 (13, 4),
-(14, 2);
+(14, 2),
+(15, 5);
 
 -- --------------------------------------------------------
 
@@ -883,7 +966,8 @@ CREATE TABLE `valoracion` (
   `id_pedido` int(11) DEFAULT NULL,
   `cantidad_estrellas` int(11) DEFAULT NULL,
   `comentario` varchar(255) DEFAULT NULL,
-  `fecha_valoracion` date DEFAULT NULL
+  `fecha_valoracion` date DEFAULT NULL,
+  `id_hamburguesa` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1002,6 +1086,12 @@ ALTER TABLE `notificacion`
   ADD PRIMARY KEY (`id_notificacion`);
 
 --
+-- Indices de la tabla `password_resets`
+--
+ALTER TABLE `password_resets`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indices de la tabla `pedido`
 --
 ALTER TABLE `pedido`
@@ -1060,7 +1150,11 @@ ALTER TABLE `postre`
 -- Indices de la tabla `promocion`
 --
 ALTER TABLE `promocion`
-  ADD PRIMARY KEY (`id_promocion`);
+  ADD PRIMARY KEY (`id_promocion`),
+  ADD KEY `id_hamburguesa` (`id_hamburguesa`),
+  ADD KEY `id_postre` (`id_postre`),
+  ADD KEY `id_bebida` (`id_bebida`),
+  ADD KEY `id_acompaniamiento` (`id_acompaniamiento`);
 
 --
 -- Indices de la tabla `recompensa`
@@ -1123,7 +1217,8 @@ ALTER TABLE `usuario_rol`
 ALTER TABLE `valoracion`
   ADD PRIMARY KEY (`id_valoracion`),
   ADD KEY `id_usuario` (`id_usuario`),
-  ADD KEY `id_pedido` (`id_pedido`);
+  ADD KEY `id_pedido` (`id_pedido`),
+  ADD KEY `id_hamburguesa` (`id_hamburguesa`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -1133,19 +1228,19 @@ ALTER TABLE `valoracion`
 -- AUTO_INCREMENT de la tabla `acompaniamiento`
 --
 ALTER TABLE `acompaniamiento`
-  MODIFY `id_acompaniamiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_acompaniamiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `aderezo`
 --
 ALTER TABLE `aderezo`
-  MODIFY `id_aderezo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_aderezo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `bebida`
 --
 ALTER TABLE `bebida`
-  MODIFY `id_bebida` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_bebida` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `boleta`
@@ -1163,19 +1258,19 @@ ALTER TABLE `combo`
 -- AUTO_INCREMENT de la tabla `direccion`
 --
 ALTER TABLE `direccion`
-  MODIFY `id_direccion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_direccion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `hamburguesa`
 --
 ALTER TABLE `hamburguesa`
-  MODIFY `id_hamburguesa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_hamburguesa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `ingrediente`
 --
 ALTER TABLE `ingrediente`
-  MODIFY `id_ingrediente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id_ingrediente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `metodo_pago`
@@ -1188,6 +1283,12 @@ ALTER TABLE `metodo_pago`
 --
 ALTER TABLE `notificacion`
   MODIFY `id_notificacion` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `password_resets`
+--
+ALTER TABLE `password_resets`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `pedido`
@@ -1205,13 +1306,13 @@ ALTER TABLE `permiso`
 -- AUTO_INCREMENT de la tabla `postre`
 --
 ALTER TABLE `postre`
-  MODIFY `id_postre` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_postre` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `promocion`
 --
 ALTER TABLE `promocion`
-  MODIFY `id_promocion` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_promocion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `recompensa`
@@ -1223,7 +1324,7 @@ ALTER TABLE `recompensa`
 -- AUTO_INCREMENT de la tabla `rol`
 --
 ALTER TABLE `rol`
-  MODIFY `id_rol` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_rol` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `sucursal`
@@ -1235,7 +1336,7 @@ ALTER TABLE `sucursal`
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `valoracion`
@@ -1307,8 +1408,7 @@ ALTER TABLE `hamburguesa_ingrediente`
 -- Filtros para la tabla `pedido`
 --
 ALTER TABLE `pedido`
-  ADD CONSTRAINT `pedido_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
-  ADD CONSTRAINT `pedido_ibfk_2` FOREIGN KEY (`id_promocion`) REFERENCES `promocion` (`id_promocion`);
+  ADD CONSTRAINT `pedido_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`);
 
 --
 -- Filtros para la tabla `pedido_acompaniamiento`
@@ -1344,6 +1444,15 @@ ALTER TABLE `pedido_hamburguesa`
 ALTER TABLE `pedido_postre`
   ADD CONSTRAINT `pedido_postre_ibfk_1` FOREIGN KEY (`id_pedido`) REFERENCES `pedido` (`id_pedido`),
   ADD CONSTRAINT `pedido_postre_ibfk_2` FOREIGN KEY (`id_postre`) REFERENCES `postre` (`id_postre`);
+
+--
+-- Filtros para la tabla `promocion`
+--
+ALTER TABLE `promocion`
+  ADD CONSTRAINT `promocion_ibfk_1` FOREIGN KEY (`id_hamburguesa`) REFERENCES `hamburguesa` (`id_hamburguesa`) ON DELETE CASCADE,
+  ADD CONSTRAINT `promocion_ibfk_2` FOREIGN KEY (`id_postre`) REFERENCES `postre` (`id_postre`) ON DELETE CASCADE,
+  ADD CONSTRAINT `promocion_ibfk_3` FOREIGN KEY (`id_bebida`) REFERENCES `bebida` (`id_bebida`) ON DELETE CASCADE,
+  ADD CONSTRAINT `promocion_ibfk_4` FOREIGN KEY (`id_acompaniamiento`) REFERENCES `acompaniamiento` (`id_acompaniamiento`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `recompensa`
@@ -1391,7 +1500,8 @@ ALTER TABLE `usuario_rol`
 --
 ALTER TABLE `valoracion`
   ADD CONSTRAINT `valoracion_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
-  ADD CONSTRAINT `valoracion_ibfk_2` FOREIGN KEY (`id_pedido`) REFERENCES `pedido` (`id_pedido`);
+  ADD CONSTRAINT `valoracion_ibfk_2` FOREIGN KEY (`id_pedido`) REFERENCES `pedido` (`id_pedido`),
+  ADD CONSTRAINT `valoracion_ibfk_3` FOREIGN KEY (`id_hamburguesa`) REFERENCES `hamburguesa` (`id_hamburguesa`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

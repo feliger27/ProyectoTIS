@@ -19,8 +19,8 @@ if (isset($_SESSION['mensaje_exito'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Consulta para obtener la información del usuario y sus puntos de recompensa
-$query_user = "SELECT nombre, apellido, correo_electronico, telefono, puntos_recompensa FROM usuario WHERE id_usuario = ?";
+// Consulta para obtener la información del usuario
+$query_user = "SELECT nombre, apellido, correo_electronico, telefono FROM usuario WHERE id_usuario = ?";
 $stmt_user = $conexion->prepare($query_user);
 $stmt_user->bind_param("i", $user_id);
 $stmt_user->execute();
@@ -29,7 +29,7 @@ $user_data = $result_user->fetch_assoc();
 $stmt_user->close();
 
 // Consulta para obtener direcciones del usuario actual
-$query_direcciones = "SELECT d.id_direccion, d.calle, d.numero, d.ciudad, d.codigo_postal
+$query_direcciones = "SELECT d.id_direccion, d.calle, d.numero, d.ciudad
                       FROM direccion d
                       JOIN direccion_usuario du ON d.id_direccion = du.id_direccion
                       WHERE du.id_usuario = ?";
@@ -83,9 +83,25 @@ $stmt_metodos_pago->close();
     }
     .nav-pills .nav-link {
     color: black; 
-   
-}
+    }
 
+    /* Asegura que el contenido del cuerpo y html ocupe toda la altura */
+    html, body {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Permite que el contenido ocupe el espacio disponible */
+    body {
+        flex-grow: 1;
+    }
+
+    /* Asegura que el footer siempre se quede en la parte inferior */
+    footer {
+        margin-top: auto; /* Empuja el footer al final si el contenido es corto */
+        width: 100%; /* Asegura que ocupe todo el ancho de la pantalla */
+    }
     </style>
 </head>
 
@@ -109,29 +125,13 @@ $stmt_metodos_pago->close();
                     type="button" role="tab">Gestionar Direcciones</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="payment-methods-tab" data-bs-toggle="pill"
-                    data-bs-target="#manage-payment-methods" type="button" role="tab">Gestionar Métodos de Pago</button>
-            </li>
-            <li class="nav-item" role="presentation">
                 <button class="nav-link" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings"
                     type="button" role="tab">Configuración</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="rewards-tab" data-bs-toggle="pill" data-bs-target="#rewards"
-                    type="button" role="tab">Recompensas</button>
             </li>
         </ul>
 
         <!-- Contenido de las pestañas en tarjetas -->
         <div class="tab-content">
-            <div class="tab-pane fade" id="rewards" role="tabpanel" aria-labelledby="rewards-tab">
-                <div class="card">
-                     <div class="card-body">
-                        <h4>Recompensas</h4>
-                            <p>Tienes <strong><?= htmlspecialchars($user_data['puntos_recompensa']) ?></strong> puntos acumulados.</p>
-        </div>
-    </div>
-</div>
             <!-- Información Personal -->
             <div class="tab-pane fade show active" id="personal-info" role="tabpanel" aria-labelledby="personal-tab">
                 <div class="card">
@@ -191,7 +191,7 @@ $stmt_metodos_pago->close();
                             <?php foreach ($direcciones as $direccion): ?>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <span>
-                                        <?= htmlspecialchars($direccion['calle']) . ' ' . htmlspecialchars($direccion['numero']) . ', ' . htmlspecialchars($direccion['ciudad']) . ', ' . htmlspecialchars($direccion['codigo_postal']); ?>
+                                        <?= htmlspecialchars($direccion['calle']) . ' ' . htmlspecialchars($direccion['numero']) . ', ' . htmlspecialchars($direccion['ciudad']); ?>
                                     </span>
                                     <div>
                                         <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editAddressModal-<?= $direccion['id_direccion']; ?>">Editar</button>
@@ -221,10 +221,6 @@ $stmt_metodos_pago->close();
                                                     <div class="form-group mb-3">
                                                         <label for="ciudad">Ciudad</label>
                                                         <input type="text" class="form-control" name="ciudad" value="<?= htmlspecialchars($direccion['ciudad']); ?>" required>
-                                                    </div>
-                                                    <div class="form-group mb-3">
-                                                        <label for="codigoPostal">Código Postal</label>
-                                                        <input type="text" class="form-control" name="codigoPostal" value="<?= htmlspecialchars($direccion['codigo_postal']); ?>" required>
                                                     </div>
                                                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                                                 </form>
@@ -260,135 +256,7 @@ $stmt_metodos_pago->close();
                                     <label for="ciudad">Ciudad</label>
                                     <input type="text" class="form-control" name="ciudad" required>
                                 </div>
-                                <div class="form-group mb-3">
-                                    <label for="codigoPostal">Código Postal</label>
-                                    <input type="text" class="form-control" name="codigoPostal" required>
-                                </div>
                                 <button type="submit" class="btn btn-primary">Guardar Dirección</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Gestión de Métodos de Pago -->
-            <div class="tab-pane fade" id="manage-payment-methods" role="tabpanel"
-                aria-labelledby="payment-methods-tab">
-                <div class="card">
-                    <div class="card-body">
-                        <h4>Gestionar Métodos de Pago</h4>
-                        <button class="btn btn-success mb-3" data-bs-toggle="modal"
-                            data-bs-target="#addPaymentMethodModal">Añadir Nuevo Método de Pago</button>
-                        <ul class="list-group">
-                            <?php foreach ($metodos_pago as $metodo): ?>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>
-                                        <strong>Tarjeta:</strong> <?= htmlspecialchars($metodo['tipo_tarjeta']); ?> |
-                                        <strong>Número:</strong> **** **** ****
-                                        <?= substr($metodo['numero_tarjeta'], -4); ?> |
-                                        <strong>Expira:</strong> <?= htmlspecialchars($metodo['fecha_expiracion']); ?>
-                                    </span>
-                                    <div>
-                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#editPaymentMethodModal-<?= $metodo['id_pago']; ?>">Editar</button>
-                                        <a href="../funciones/gestionar_metodos_pago/eliminar_metodo_pago.php?id_pago=<?= $metodo['id_pago']; ?>"
-                                            class="btn btn-danger btn-sm"
-                                            onclick="return confirm('¿Estás seguro de eliminar este método de pago?')">Eliminar</a>
-                                    </div>
-                                </li>
-                                <!-- Modal para Editar Método de Pago -->
-                                <div class="modal fade" id="editPaymentMethodModal-<?= $metodo['id_pago'] ?? ''; ?>"
-                                    tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Editar Método de Pago</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form action="../funciones/gestionar_metodos_pago/editar_metodo_pago.php"
-                                                    method="POST">
-                                                    <input type="hidden" name="id_pago"
-                                                        value="<?= $metodo['id_pago'] ?? ''; ?>">
-                                                    <div class="form-group mb-3">
-                                                        <label for="tipo_tarjeta">Tipo de Tarjeta</label>
-                                                        <select class="form-control" name="tipo_tarjeta" required>
-                                                            <option <?= ($metodo['tipo_tarjeta'] ?? '') === 'Crédito' ? 'selected' : ''; ?>>Crédito</option>
-                                                            <option <?= ($metodo['tipo_tarjeta'] ?? '') === 'Débito' ? 'selected' : ''; ?>>Débito</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="form-group mb-3">
-                                                        <label for="numero_tarjeta">Número de Tarjeta</label>
-                                                        <input type="text" class="form-control" name="numero_tarjeta"
-                                                            value="<?= htmlspecialchars($metodo['numero_tarjeta'] ?? ''); ?>"
-                                                            required>
-                                                    </div>
-                                                    <div class="form-group mb-3">
-                                                        <label for="fecha_expiracion">Fecha de Expiración</label>
-                                                        <input type="text" class="form-control" name="fecha_expiracion"
-                                                            value="<?= isset($metodo['fecha_expiracion']) ? date("m/y", strtotime($metodo['fecha_expiracion'])) : ''; ?>"
-                                                            placeholder="MM/YY" maxlength="5" required>
-                                                    </div>
-                                                    <div class="form-group mb-3">
-                                                        <label for="cvv">CVV</label>
-                                                        <input type="text" class="form-control" name="cvv"
-                                                            value="<?= htmlspecialchars($metodo['cvv'] ?? ''); ?>" required>
-                                                    </div>
-                                                    <div class="form-group mb-3">
-                                                        <label for="nombre_titular">Nombre del Titular</label>
-                                                        <input type="text" class="form-control" name="nombre_titular"
-                                                            value="<?= htmlspecialchars($metodo['nombre_titular'] ?? ''); ?>"
-                                                            required>
-                                                    </div>
-                                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal para Añadir Método de Pago -->
-            <div class="modal fade" id="addPaymentMethodModal" tabindex="-1"
-                aria-labelledby="addPaymentMethodModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="addPaymentMethodModalLabel">Añadir Nuevo Método de Pago</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form action="../funciones/gestionar_metodos_pago/insertar_metodo_pago.php" method="POST">
-                                <div class="form-group mb-3">
-                                    <label for="tipo_tarjeta">Tipo de Tarjeta</label>
-                                    <select class="form-control" name="tipo_tarjeta" required>
-                                        <option value="Crédito">Crédito</option>
-                                        <option value="Débito">Débito</option>
-                                    </select>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="nombre_titular">Nombre del Titular</label>
-                                    <input type="text" class="form-control" name="nombre_titular" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="numero_tarjeta">Número de Tarjeta</label>
-                                    <input type="text" class="form-control" name="numero_tarjeta" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="fecha_expiracion">Fecha de Expiración</label>
-                                    <input type="text" class="form-control" name="fecha_expiracion"
-                                        id="fecha_expiracion" placeholder="MM/YY" maxlength="5" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="cvv">CVV</label>
-                                    <input type="text" class="form-control" name="cvv" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Guardar Método de Pago</button>
                             </form>
                         </div>
                     </div>

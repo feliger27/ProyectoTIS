@@ -1,178 +1,199 @@
 <?php
-include '../conexion.php'; // Conexión a la base de datos
+// Conexión a la base de datos
+include('../conexion.php');
 
-// Consultas para obtener los productos por categoría
-$combos = $conexion->query("SELECT * FROM combo")->fetch_all(MYSQLI_ASSOC);
-$hamburguesas = $conexion->query("SELECT * FROM hamburguesa")->fetch_all(MYSQLI_ASSOC);
-$acompaniamientos = $conexion->query("SELECT * FROM acompaniamiento")->fetch_all(MYSQLI_ASSOC);
-$bebidas = $conexion->query("SELECT * FROM bebida")->fetch_all(MYSQLI_ASSOC);
-$postres = $conexion->query("SELECT * FROM postre")->fetch_all(MYSQLI_ASSOC);
+// Obtener la categoría seleccionada
+$filtroCategoria = isset($_GET['categoria']) ? $_GET['categoria'] : '';
+$filtroPrecioMin = isset($_GET['precio_min']) ? (int)$_GET['precio_min'] : 0;
+$filtroPrecioMax = isset($_GET['precio_max']) ? (int)$_GET['precio_max'] : 10000;
+$filtroIngrediente = isset($_GET['ingrediente']) ? $_GET['ingrediente'] : '';
 
-include '../includes/header.php'; // Incluye encabezado del sitio
+$categorias = [
+    "Todas" => "fa-list",
+    "Combos" => "fa-box",
+    "Hamburguesas" => "fa-hamburger",
+    "Acompañamientos" => "fa-utensils",
+    "Bebidas" => "fa-coffee",
+    "Postres" => "fa-ice-cream"
+];
+
+// Determinar la tabla e imagen según la categoría seleccionada
+switch ($filtroCategoria) {
+    case "Combos":
+        $tabla = "combo";
+        $imagenPath = "../uploads/combos/";
+        break;
+    case "Hamburguesas":
+        $tabla = "hamburguesa";
+        $imagenPath = "../uploads/hamburguesas/";
+        break;
+    case "Acompañamientos":
+        $tabla = "acompaniamiento";
+        $imagenPath = "../uploads/acompaniamientos/";
+        break;
+    case "Bebidas":
+        $tabla = "bebida";
+        $imagenPath = "../uploads/bebidas/";
+        break;
+    case "Postres":
+        $tabla = "postre";
+        $imagenPath = "../uploads/postres/";
+        break;
+    default:
+        $tabla = "";
+        $imagenPath = "../uploads/";
+        break;
+}
+
+if ($tabla) {
+    $query = "SELECT id_{$tabla} AS id, nombre_{$tabla} AS nombre, descripcion, precio, imagen FROM $tabla WHERE precio BETWEEN $filtroPrecioMin AND $filtroPrecioMax";
+} else {
+    $query = "
+        SELECT id_combo AS id, nombre_combo AS nombre, descripcion, precio, CONCAT('../uploads/combos/', imagen) AS imagen FROM combo WHERE precio BETWEEN $filtroPrecioMin AND $filtroPrecioMax
+        UNION ALL
+        SELECT id_hamburguesa AS id, nombre_hamburguesa AS nombre, descripcion, precio, CONCAT('../uploads/hamburguesas/', imagen) AS imagen FROM hamburguesa WHERE precio BETWEEN $filtroPrecioMin AND $filtroPrecioMax
+        UNION ALL
+        SELECT id_acompaniamiento AS id, nombre_acompaniamiento AS nombre, '' AS descripcion, precio, CONCAT('../uploads/acompaniamientos/', imagen) AS imagen FROM acompaniamiento WHERE precio BETWEEN $filtroPrecioMin AND $filtroPrecioMax
+        UNION ALL
+        SELECT id_bebida AS id, nombre_bebida AS nombre, '' AS descripcion, precio, CONCAT('../uploads/bebidas/', imagen) AS imagen FROM bebida WHERE precio BETWEEN $filtroPrecioMin AND $filtroPrecioMax
+        UNION ALL
+        SELECT id_postre AS id, nombre_postre AS nombre, '' AS descripcion, precio, CONCAT('../uploads/postres/', imagen) AS imagen FROM postre WHERE precio BETWEEN $filtroPrecioMin AND $filtroPrecioMax";
+}
+
+if ($filtroCategoria === "Hamburguesas" && $filtroIngrediente) {
+    $query .= " AND ingredientes LIKE '%$filtroIngrediente%'";
+}
+
+$resultado = $conexion->query($query);
 ?>
 
-<div class="container my-5">
-    <h1 class="text-center pt-4 mb-4">Menú de Productos</h1>
-    <!-- Mensaje de error por stock insuficiente -->
-    <?php if (isset($_GET['error']) && $_GET['error'] == 'stock_insuficiente'): ?>
-        <div class="alert alert-danger" role="alert">
-            No hay suficiente stock disponible para este producto.
-        </div>
-    <?php endif; ?>
-
-    <!-- Estilo para las categorías -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú - HamburGeeks</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        .category-section {
-            margin-bottom: 3rem;
+        body {
+            background: linear-gradient(to right, #f8fafc, #e2e8f0);
+            color: #333;
         }
-        .product-card {
-            transition: transform 0.2s ease;
+        .header-section {
+            text-align: center;
+            padding: 2rem;
+            color: #2d3748;
         }
-        .product-card:hover {
+        .header-section h1 {
+            font-weight: bold;
+            font-size: 2.5rem;
+            color: #1a202c;
+        }
+        .filter-form {
+            background-color: #edf2f7;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .filter-button {
+            background-color: #ff8c00;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.3s;
+        }
+        .filter-button:hover {
+            background-color: #e07b00;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
             transform: scale(1.05);
         }
-        .product-card img {
-            width: 100%;      /* Hace que la imagen ocupe el ancho completo del contenedor */
-            height: 200px;    /* Altura fija para todas las imágenes */
-            object-fit: cover; /* Corta la imagen si es necesario, manteniendo la proporción */
+        .card img {
+            border-radius: 10px 10px 0 0;
+            height: 200px;
+            object-fit: cover;
         }
-        .btn-primary {
-            background-color: #fd7e14;
-            border-color: #fd7e14;
+        .card-title {
+            color: #1a202c;
+            font-weight: 600;
         }
-        .btn-primary:hover, .btn-primary:focus {
-            background-color: #e69500;
-            border-color: #e69500;
+        .card-text {
+            font-size: 0.9rem;
+            color: #718096;
         }
-        .category-title {
-            color: #fd7e14;
-            font-size: 24px;
-            font-weight: bold;
-            padding-bottom: 10px; 
-            margin-bottom: 20px; 
-        } 
     </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h1>Descubre Nuestros Sabores</h1>
+            <p>Explora nuestro menú y encuentra algo delicioso para ordenar</p>
+        </div>
 
-    <!-- Sección de Combos -->
-    <div class="category-section">
-        <h2 class="text-center category-title mb-4" id ="combos">Combos</h2>
-        <div class="row">
-            <?php foreach ($combos as $combo): ?>
-            <div class="col-md-4">
-                <div class="card product-card h-100 shadow-sm">
-                    <img src="../uploads/combos/<?= htmlspecialchars($combo['imagen']) ?>" class="card-img-top" alt="<?= htmlspecialchars($combo['nombre_combo']) ?>">
-                    <div class="card-body">
-                        <h5 class="card-title text-center"><?= htmlspecialchars($combo['nombre_combo']) ?></h5>
-                        <p class="card-text text-center fw-bold text-success">$<?= htmlspecialchars($combo['precio']) ?></p>
-                        <form action="../funciones/gestionar_carrito/agregar_carrito.php" method="POST" class="text-center">
-                            <input type="hidden" name="producto_id" value="<?= $combo['id_combo'] ?>">
-                            <input type="hidden" name="tipo_producto" value="combo">
-                            <input type="number" name="cantidad" value="1" min="1" class="form-control mb-2 text-center" style="max-width: 80px; margin: 0 auto;">
-                            <button type="submit" class="btn btn-primary w-100">Agregar al Carrito</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
+        <!-- Botones de Filtro -->
+        <div class="filter-buttons">
+            <?php foreach ($categorias as $categoria => $icono): ?>
+                <form action="index-menu.php" method="GET" style="display: inline;">
+                    <input type="hidden" name="categoria" value="<?php echo $categoria; ?>">
+                    <button type="submit" class="filter-button">
+                        <i class="fas <?php echo $icono; ?>"></i> <?php echo $categoria; ?>
+                    </button>
+                </form>
             <?php endforeach; ?>
+        </div>
+
+        <!-- Listado de productos -->
+        <div class="row mt-4">
+            <?php if ($resultado->num_rows > 0): ?>
+                <?php while ($producto = $resultado->fetch_assoc()): ?>
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="<?php echo file_exists($producto['imagen']) ? $producto['imagen'] : '../uploads/default.jpg'; ?>" class="card-img-top" alt="<?php echo isset($producto['nombre']) ? $producto['nombre'] : 'Producto'; ?>">
+                            <div class="card-body">
+                                <h5 class="card-title"><?php echo isset($producto['nombre']) ? $producto['nombre'] : 'Producto'; ?></h5>
+                                <p class="card-text"><?php echo isset($producto['descripcion']) ? $producto['descripcion'] : 'Descripción no disponible'; ?></p>
+                                <p class="text-primary fw-bold">Precio: $<?php echo isset($producto['precio']) ? number_format($producto['precio'], 0, ',', '.') : '0'; ?></p>
+                                <?php if (isset($producto['id'])): ?>
+                                    <button onclick="agregarAlCarrito(<?php echo $producto['id']; ?>)" class="btn btn-custom w-100">Agregar al Carrito</button>
+                                <?php else: ?>
+                                    <button class="btn btn-secondary w-100" disabled>No disponible</button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <p class="text-center">No se encontraron productos con los filtros aplicados.</p>
+            <?php endif; ?>
         </div>
     </div>
 
-    <!-- Sección de Hamburguesas -->
-    <div class="category-section">
-        <h2 class="text-center category-title mb-4" id ="hamburguesas">Hamburguesas</h2>
-        <div class="row">
-            <?php foreach ($hamburguesas as $hamburguesa): ?>
-            <div class="col-md-4">
-                <div class="card product-card h-100 shadow-sm">
-                    <img src="../uploads/hamburguesas/<?= htmlspecialchars($hamburguesa['imagen']) ?>" class="card-img-top" alt="<?= htmlspecialchars($hamburguesa['nombre_hamburguesa']) ?>">
-                    <div class="card-body">
-                        <h5 class="card-title text-center"><?= htmlspecialchars($hamburguesa['nombre_hamburguesa']) ?></h5>
-                        <p class="card-text text-center fw-bold text-success">$<?= htmlspecialchars($hamburguesa['precio']) ?></p>
-                        <form action="../funciones/gestionar_carrito/agregar_carrito.php" method="POST" class="text-center">
-                            <input type="hidden" name="producto_id" value="<?= $hamburguesa['id_hamburguesa'] ?>">
-                            <input type="hidden" name="tipo_producto" value="hamburguesa">
-                            <input type="number" name="cantidad" value="1" min="1" class="form-control mb-2 text-center" style="max-width: 80px; margin: 0 auto;">
-                            <button type="submit" class="btn btn-primary w-100">Agregar al Carrito</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-
-    <!-- Sección de Bebidas -->
-    <div class="category-section">
-        <h2 class="text-center category-title mb-4" id ="bebidas">Bebidas</h2>
-        <div class="row">
-            <?php foreach ($bebidas as $bebida): ?>
-            <div class="col-md-4">
-                <div class="card product-card h-100 shadow-sm">
-                    <img src="../uploads/bebidas/<?= htmlspecialchars($bebida['imagen']) ?>" class="card-img-top" alt="<?= htmlspecialchars($bebida['nombre_bebida']) ?>">
-                    <div class="card-body">
-                        <h5 class="card-title text-center"><?= htmlspecialchars($bebida['nombre_bebida']) ?></h5>
-                        <p class="card-text text-center fw-bold text-success">$<?= htmlspecialchars($bebida['precio']) ?></p>
-                        <form action="../funciones/gestionar_carrito/agregar_carrito.php" method="POST" class="text-center">
-                            <input type="hidden" name="producto_id" value="<?= $bebida['id_bebida'] ?>">
-                            <input type="hidden" name="tipo_producto" value="bebida">
-                            <input type="number" name="cantidad" value="1" min="1" class="form-control mb-2 text-center" style="max-width: 80px; margin: 0 auto;">
-                            <button type="submit" class="btn btn-primary w-100">Agregar al Carrito</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-
-<!-- Sección de Postres -->
-    <div class="category-section">
-        <h2 class="text-center category-title mb-4" id ="postres">Postres</h2>
-        <div class="row">
-            <?php foreach ($postres as $postre): ?>
-            <div class="col-md-4">
-                <div class="card product-card h-100 shadow-sm">
-                    <img src="../uploads/postres/<?= htmlspecialchars($postre['imagen']) ?>" class="card-img-top" alt="<?= htmlspecialchars($postre['nombre_postre']) ?>">
-                    <div class="card-body">
-                        <h5 class="card-title text-center"><?= htmlspecialchars($postre['nombre_postre']) ?></h5>
-                        <p class="card-text text-center fw-bold text-success">$<?= htmlspecialchars($postre['precio']) ?></p>
-                        <form action="../funciones/gestionar_carrito/agregar_carrito.php" method="POST" class="text-center">
-                            <input type="hidden" name="producto_id" value="<?= $postre['id_postre'] ?>">
-                            <input type="hidden" name="tipo_producto" value="postre">
-                            <input type="number" name="cantidad" value="1" min="1" class="form-control mb-2 text-center" style="max-width: 80px; margin: 0 auto;">
-                            <button type="submit" class="btn btn-primary w-100">Agregar al Carrito</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <!-- Aquí un ejemplo para la sección de Acompañamientos -->
-    <div class="category-section">
-        <h2 class="text-center category-title mb-4" id ="acompaniamientos">Acompañamientos</h2>
-        <div class="row">
-            <?php foreach ($acompaniamientos as $acomp): ?>
-            <div class="col-md-4">
-                <div class="card product-card h-100 shadow-sm">
-                    <img src="../uploads/acompaniamientos/<?= htmlspecialchars($acomp['imagen']) ?>" class="card-img-top" alt="<?= htmlspecialchars($acomp['nombre_acompaniamiento']) ?>">
-                    <div class="card-body">
-                        <h5 class="card-title text-center"><?= htmlspecialchars($acomp['nombre_acompaniamiento']) ?></h5>
-                        <p class="card-text text-center fw-bold text-success">$<?= htmlspecialchars($acomp['precio']) ?></p>
-                        <form action="../funciones/gestionar_carrito/agregar_carrito.php" method="POST" class="text-center">
-                            <input type="hidden" name="producto_id" value="<?= $acomp['id_acompaniamiento'] ?>">
-                            <input type="hidden" name="tipo_producto" value="acompaniamiento">
-                            <input type="number" name="cantidad" value="1" min="1" class="form-control mb-2 text-center" style="max-width: 80px; margin: 0 auto;">
-                            <button type="submit" class="btn btn-primary w-100">Agregar al Carrito</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    
-    <!-- Repite para bebidas y postres, asegurándote de que la carpeta coincide -->
-</div>
-
-<?php include '../includes/footer.php'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function agregarAlCarrito(idProducto) {
+            alert('Producto ' + idProducto + ' agregado al carrito.');
+        }
+    </script>
+</body>
+</html>
