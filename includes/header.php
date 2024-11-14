@@ -37,7 +37,7 @@ if (isset($_SESSION['carrito'])) {
     <div class="container">
         <div class="logo-container me-3">
             <a href="../index/index-lobby.php">
-                <img src="../index/logo-hamburgeek.png" alt="Logo" width="140" height="60">
+                <img src="../index/logo-hamburgeek.png" alt="Logo" width="200" height="60">
             </a>
         </div>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
