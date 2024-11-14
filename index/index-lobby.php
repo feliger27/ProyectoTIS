@@ -5,7 +5,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
 include '../includes/header.php';
 
+// Verificar si el usuario ha iniciado sesión
 if (!isset($_SESSION['username'])) {
+    // Si no está logueado, redirigir al login
     header("Location: ../login/login.php");
     exit();
 }
@@ -14,15 +16,21 @@ if (!isset($_SESSION['username'])) {
 include '../conexion.php';
 
 // Consulta para obtener las tres hamburguesas destacadas
-$query_hamburguesas_destacadas = "SELECT nombre_hamburguesa, descripcion, imagen FROM hamburguesa LIMIT 3";
+$query_hamburguesas_destacadas = "
+    SELECT h.nombre_hamburguesa, h.descripcion, h.imagen, AVG(v.cantidad_estrellas) AS rating
+    FROM hamburguesa h
+    LEFT JOIN valoracion v ON h.id_hamburguesa = v.id_hamburguesa
+    GROUP BY h.id_hamburguesa
+    ORDER BY rating DESC
+    LIMIT 3";
 $hamburguesas_destacadas = mysqli_query($conexion, $query_hamburguesas_destacadas);
 
-// Verificar si la consulta fue exitosa
+// Check if the query was successful
 if (!$hamburguesas_destacadas) {
-    die("Error en la consulta de hamburguesas destacadas: " . mysqli_error($conexion));
+    die("Error in the hamburgers query: " . mysqli_error($conexion));
 }
 
-// Consulta para obtener los tres acompañamientos más vendidos, eliminando saltos de línea innecesarios
+// Consulta para obtener los tres acompañamientos más vendidos
 $query_acompanamientos_vendidos = "
     SELECT a.nombre_acompaniamiento AS nombre, a.imagen, SUM(pa.cantidad) AS total_vendido
     FROM acompaniamiento a
@@ -164,10 +172,17 @@ if (count($acompanamientos) < 3) {
         .card-title {
             font-weight: bold;
             font-size: 1.2rem;
+            text-decoration: none !important;
         }
         .card-text {
             font-size: 1rem;
+            text-decoration: none !important;
         }
+
+        .card-link {
+        text-decoration: none !important;
+        }
+
 
         /* Estilos para el botón "Ver Más" en cada tarjeta */
         .products-section .btn-primary {
@@ -183,9 +198,18 @@ if (count($acompanamientos) < 3) {
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
         }
 
+        /* Estilo para las estrellas */
+        .stars {
+            color: gold;
+            font-size: 1.5rem;
+        }
+        .stars span {
+            margin-right: 5px;
+        }
+
         /* Efecto hover en el texto de los productos */
         .card-title:hover {
-            text-decoration: underline;
+            text-decoration: none;
         }
     </style>
 </head>
@@ -198,8 +222,8 @@ if (count($acompanamientos) < 3) {
             <h1>Bienvenidos a HamburGeeks</h1>
             <p>¡Explora nuestro menú y realiza tu pedido ahora!</p>
             <div class="cta-buttons">
-                <a href="menu.html" class="btn btn-warning">Ver Menú</a>
-                <a href="login.html" class="btn btn-light">Iniciar Sesión</a>
+                <a href="index-menu.php" class="btn btn-warning">Ver Menú</a>
+                <a href="promociones.php" class="btn btn-light">Ver Promociones</a>
             </div>
         </div>
     </div>
@@ -211,14 +235,23 @@ if (count($acompanamientos) < 3) {
         <div class="row justify-content-center">
             <?php while ($hamburguesa = mysqli_fetch_assoc($hamburguesas_destacadas)): ?>
                 <div class="col-md-4 mb-4 d-flex justify-content-center">
-                    <div class="card">
-                        <img src="<?php echo '../uploads/hamburguesas/' . $hamburguesa['imagen']; ?>" alt="Imagen de <?php echo $hamburguesa['nombre_hamburguesa']; ?>" class="card-img-top">
-                        <div class="card-body text-center">
-                            <h5 class="card-title"><?php echo $hamburguesa['nombre_hamburguesa']; ?></h5>
-                            <p class="card-text"><?php echo $hamburguesa['descripcion']; ?></p>
-                            <a href="detalle-producto.php?nombre=<?php echo urlencode($hamburguesa['nombre_hamburguesa']); ?>" class="btn btn-primary">Ver Más</a>
+                    <a href="detalle-producto.php?nombre=<?php echo urlencode($hamburguesa['nombre_hamburguesa']); ?>" class="card-link">
+                        <div class="card">
+                            <img src="<?php echo '../uploads/hamburguesas/' . $hamburguesa['imagen']; ?>" alt="Imagen de <?php echo $hamburguesa['nombre_hamburguesa']; ?>" class="card-img-top">
+                            <div class="card-body text-center">
+                                <h5 class="card-title"><?php echo $hamburguesa['nombre_hamburguesa']; ?></h5>
+                                <p class="card-text"><?php echo $hamburguesa['descripcion']; ?></p>
+                                <div class="stars">
+                                    <?php
+                                        $rating = round($hamburguesa['rating']); // Redondear la puntuación a un entero
+                                        for ($i = 1; $i <= 5; $i++) {
+                                            echo $i <= $rating ? '<span>&#9733;</span>' : '<span>&#9734;</span>';
+                                        }
+                                    ?>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             <?php endwhile; ?>
         </div>
@@ -227,18 +260,20 @@ if (count($acompanamientos) < 3) {
         <div class="row justify-content-center">
             <?php foreach ($acompanamientos as $acompanamiento): ?>
                 <div class="col-md-4 mb-4 d-flex justify-content-center">
-                    <div class="card">
-                        <img src="<?php echo '../uploads/acompaniamientos/' . $acompanamiento['imagen']; ?>" alt="Imagen de <?php echo $acompanamiento['nombre']; ?>" class="card-img-top">
-                        <div class="card-body text-center">
-                            <h5 class="card-title"><?php echo $acompanamiento['nombre']; ?></h5>
-                            <p class="card-text">¡Uno de los más populares!</p>
-                            <a href="detalle-producto.php?nombre=<?php echo urlencode($acompanamiento['nombre']); ?>" class="btn btn-primary">Ver Más</a>
+                    <a href="detalle-producto.php?nombre=<?php echo urlencode($acompanamiento['nombre']); ?>" class="card-link">
+                        <div class="card">
+                            <img src="<?php echo '../uploads/acompaniamientos/' . $acompanamiento['imagen']; ?>" alt="Imagen de <?php echo $acompanamiento['nombre']; ?>" class="card-img-top">
+                            <div class="card-body text-center">
+                                <h5 class="card-title"><?php echo $acompanamiento['nombre']; ?></h5>
+                                <p class="card-text">¡Uno de los más populares!</p>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             <?php endforeach; ?>
         </div>
     </section>
+
     <?php include '../includes/footer.php'; ?>           
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

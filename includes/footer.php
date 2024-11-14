@@ -1,6 +1,8 @@
 </div> <!-- Cierre del container principal -->
-<footer class="bg-dark text-white text-center py-3">
-    <div class="container-fluid">
+
+<!-- Asegurar que el footer ocupe todo el ancho de la pantalla -->
+<footer class="bg-dark text-white text-center py-3" style="width: 100%; position: relative;">
+    <div class="container">
         <p>© 2024 HamburGeeks</p>
         <div>
             <a href="#" class="text-white me-3">Nosotros</a>

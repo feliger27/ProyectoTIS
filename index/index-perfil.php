@@ -83,9 +83,25 @@ $stmt_metodos_pago->close();
     }
     .nav-pills .nav-link {
     color: black; 
-   
-}
+    }
 
+    /* Asegura que el contenido del cuerpo y html ocupe toda la altura */
+    html, body {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Permite que el contenido ocupe el espacio disponible */
+    body {
+        flex-grow: 1;
+    }
+
+    /* Asegura que el footer siempre se quede en la parte inferior */
+    footer {
+        margin-top: auto; /* Empuja el footer al final si el contenido es corto */
+        width: 100%; /* Asegura que ocupe todo el ancho de la pantalla */
+    }
     </style>
 </head>
 
