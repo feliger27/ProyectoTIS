@@ -51,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $sql_update .= "$campo_id=? WHERE id_promocion=?";
     $stmt = $conexion->prepare($sql_update);
-    $stmt->bind_param("sssiiii", $nombre_promocion, $descripcion_promocion, $fecha_inicio, $fecha_fin, $porcentaje_descuento, $id_producto, $id_promocion);
+    $stmt->bind_param("ssssiii", $nombre_promocion, $descripcion_promocion, $fecha_inicio, $fecha_fin, $porcentaje_descuento, $id_producto, $id_promocion);
 
     if ($stmt->execute()) {
         echo "<div class='container mt-3'>
