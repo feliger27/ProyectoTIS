@@ -1,7 +1,7 @@
-
 </div> <!-- Cierre del container principal -->
-<div class="container" style="padding-top: 60px;">
-<footer class="bg-dark text-white text-center py-3 fixed-bottom">
+
+<!-- Asegurar que el footer ocupe todo el ancho de la pantalla -->
+<footer class="bg-dark text-white text-center py-3" style="width: 100%; position: relative;">
     <div class="container">
         <p>© 2024 HamburGeeks</p>
         <div>

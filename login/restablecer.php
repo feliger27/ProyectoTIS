@@ -116,9 +116,3 @@ if ($token) {
     echo "<div class='alert alert-danger text-center'>Falta el token de restablecimiento de contraseña.</div>";
 }
 ?>
-
-
-
-
-
-

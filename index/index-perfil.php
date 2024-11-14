@@ -83,7 +83,6 @@ $stmt_metodos_pago->close();
     }
     .nav-pills .nav-link {
     color: black; 
-   
     }
 
     /* Asegura que el contenido del cuerpo y html ocupe toda la altura */

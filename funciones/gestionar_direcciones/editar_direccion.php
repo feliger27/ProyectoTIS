@@ -11,12 +11,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id_direccion'])) {
     $calle = mysqli_real_escape_string($conexion, $_POST['calle']);
     $numero = mysqli_real_escape_string($conexion, $_POST['numero']);
     $ciudad = mysqli_real_escape_string($conexion, $_POST['ciudad']);
-    $codigo_postal = mysqli_real_escape_string($conexion, $_POST['codigoPostal']);
 
     // Actualizar la dirección en la tabla `direccion`
-    $query_actualizar_direccion = "UPDATE direccion SET calle = ?, numero = ?, ciudad = ?, codigo_postal = ? WHERE id_direccion = ?";
+    $query_actualizar_direccion = "UPDATE direccion SET calle = ?, numero = ?, ciudad = ? WHERE id_direccion = ?";
     $stmt_actualizar_direccion = $conexion->prepare($query_actualizar_direccion);
-    $stmt_actualizar_direccion->bind_param("sisii", $calle, $numero, $ciudad, $codigo_postal, $id_direccion);
+    $stmt_actualizar_direccion->bind_param("sisii", $calle, $numero, $ciudad, $id_direccion);
 
     if ($stmt_actualizar_direccion->execute()) {
         $_SESSION['mensaje_exito'] = "La dirección se ha actualizado correctamente.";

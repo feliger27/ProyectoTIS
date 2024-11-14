@@ -55,7 +55,7 @@ function enviarCorreoRestablecimiento($email, $token) {
         $mail->addAddress($email);
 
         // Establecer el contenido del correo
-        $reset_link = "http://localhost/xampp/hamburgeeks/ProyectoTIS/login/restablecer.php?token=" . $token;
+        $reset_link = "http://localhost/xampp/ProyectoTIS/login/restablecer.php?token=" . $token;
         $mail->isHTML(true);
         $mail->Subject = 'Restablecimiento de Contraseña';
         $mail->Body    = "Haz clic en el siguiente enlace para restablecer tu contraseña: <a href='$reset_link'>$reset_link</a>";

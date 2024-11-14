@@ -222,7 +222,7 @@ if (count($acompanamientos) < 3) {
             <h1>Bienvenidos a HamburGeeks</h1>
             <p>¡Explora nuestro menú y realiza tu pedido ahora!</p>
             <div class="cta-buttons">
-                <a href="menu.html" class="btn btn-warning">Ver Menú</a>
+                <a href="index-menu.php" class="btn btn-warning">Ver Menú</a>
                 <a href="promociones.php" class="btn btn-light">Ver Promociones</a>
             </div>
         </div>
@@ -278,4 +278,3 @@ if (count($acompanamientos) < 3) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
