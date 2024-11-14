@@ -61,6 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -68,6 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link href="style.css" rel="stylesheet">
     <title>Login</title>
 </head>
+
 <body>
     <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
         <div class="col-md-6">
@@ -77,7 +79,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php if (!empty($error_message)): ?>
                 <div class="mb-3"><?php echo $error_message; ?></div>
             <?php endif; ?>
-
+            <?php
+            if (isset($_GET['message']) && $_GET['message'] == 'success') {
+                echo "<div class='alert alert-success'>Contraseña restablecida exitosamente. Ahora puedes iniciar sesión.</div>";
+            }
+            ?>
             <!-- Formulario de login -->
             <form action="" method="POST">
                 <div class="form-group">
@@ -91,7 +97,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
 
                 <div class="form-group text-center mt-4">
-                    <button type="submit" class="btn btn-block" style="background-color: #fd7e14; color: white;">Entrar</button>
+                    <button type="submit" class="btn btn-block"
+                        style="background-color: #fd7e14; color: white;">Entrar</button>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="restablecer_contraseña.php" class="btn btn-link">¿Olvidaste tu contraseña?</a>
                 </div>
 
                 <div class="text-center mt-3">
@@ -103,4 +113,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

@@ -128,7 +128,7 @@ if (isset($_SESSION['carrito'])) {
                 <!-- Mostrar el botón de Mantenedores solo si el usuario tiene el permiso ver_mantenedores -->
                 <?php if (verificarPermisos(['ver_mantenedores'])): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="../index/index.php">Mantenedores</a>
+                        <a class="nav-link" href="../index/index-mantenedores.php">Mantenedores</a>
                     </li>
                 <?php endif; ?>
                 <li class="nav-item">

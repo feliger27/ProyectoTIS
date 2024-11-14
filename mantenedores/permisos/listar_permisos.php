@@ -16,7 +16,7 @@ $permisos = $conexion->query($query);
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center">
         <h1>Permisos</h1>
-        <button class="btn btn-secondary" onclick="window.location.href='../../index/index.php'">Volver</button>
+        <button class="btn btn-secondary" onclick="window.location.href='../../index/index-mantenedores.php'">Volver</button>
     </div>
     <a href="crear_permiso.php" class="btn btn-primary mb-3">Crear Permiso</a>
     
