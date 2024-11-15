@@ -73,7 +73,8 @@ $result = $conexion->query($sql);
                     <td><?= $combo['bebidas'] ?: 'N/A' ?></td>
                     <td><?= $combo['postres'] ?: 'N/A' ?></td>
                     <td>
-                        <a href="editar.php?id=<?= $combo['id_combo'] ?>" class="btn btn-primary btn-sm">Editar</a>
+                        <a href="editar.php?id_combo=<?= $combo['id_combo'] ?>" class="btn btn-primary btn-sm">Editar</a>
+
                         <a href="eliminar.php?id=<?= $combo['id_combo'] ?>" class="btn btn-danger btn-sm"
                             onclick="return confirm('¿Está seguro de que desea eliminar este combo?');">Eliminar</a>
                     </td>
