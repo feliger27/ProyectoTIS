@@ -83,12 +83,12 @@ if ($tipo_producto == 'combo') {
         LEFT JOIN postre p ON cp.id_postre = p.id_postre
         WHERE c.$columna_nombre = ?
     ";
-    
+
     $stmt_combo = $conexion->prepare($query_combo);
     $stmt_combo->bind_param("s", $nombre_producto);
     $stmt_combo->execute();
     $result_combo = $stmt_combo->get_result();
-    
+
     // Recoger los productos del combo
     $productos_combo = $result_combo->fetch_assoc();
     $stmt_combo->close();
@@ -97,75 +97,139 @@ if ($tipo_producto == 'combo') {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle del Producto - <?php echo $nombre_producto; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .product-detail {
-            margin-top: 50px;
+        body {
+            background-color: #f8f9fa;
         }
+
+        .product-detail {
+            margin-top: 80px;
+            /* Aumenta el margen superior para que no esté pegada al encabezado */
+        }
+
         .product-detail .image {
             max-width: 100%;
             height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-top: 30px;
+            /* Agregar un poco de margen superior */
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            /* Para centrar la imagen */
         }
+
         .product-detail .content {
             padding-left: 30px;
         }
+
         .product-detail .title {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: bold;
+            color: #343a40;
         }
+
         .product-detail .description {
             font-size: 1.2rem;
             margin-top: 20px;
+            color: #6c757d;
         }
+
         .product-detail .back-btn {
             margin-top: 30px;
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .product-detail .back-btn:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        .product-detail .product-details-list {
+            margin-top: 30px;
+        }
+
+        .product-detail .product-details-list li {
+            font-size: 1.1rem;
+            color: #495057;
+        }
+
+        .product-detail .row {
+            display: flex;
+            align-items: center;
+            /* Esto alineará verticalmente la imagen y el texto */
+            justify-content: center;
+            /* Centra todo horizontalmente */
+        }
+
+        .product-detail .image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-right: 30px;
+            /* Esto agrega un pequeño espacio entre la imagen y el texto */
+        }
+
+        .product-detail .content {
+            flex: 1;
+            /* Esto asegura que el texto ocupe el espacio restante */
+            margin-left: 30px;
+            /* Para asegurar que el texto no esté pegado a la imagen */
         }
     </style>
 </head>
+
 <body>
 
-<div class="container product-detail">
-    <div class="row mt-4">
-        <!-- Imagen del producto -->
-        <div class="col-md-6 mt-4">
-            <img src="<?php echo $imagenPath . $imagen; ?>" alt="Imagen de <?php echo $nombre_producto; ?>" class="image">
-        </div>
-        
-        <!-- Detalles del producto -->
-        <div class="col-md-6 content mt-4">
-            <h2 class="title"><?php echo $nombre_producto; ?></h2>
-            <p class="description"><?php echo $descripcion; ?></p>
+    <div class="container product-detail">
+        <div class="row mt-4">
+            <!-- Imagen del producto -->
+            <div class="col-md-6 mt-4">
+                <img src="<?php echo $imagenPath . $imagen; ?>" alt="Imagen de <?php echo $nombre_producto; ?>"
+                    class="image shadow-lg">
+            </div>
 
-            <!-- Mostrar productos del combo -->
-            <?php if ($tipo_producto == 'combo'): ?>
-                <h3>Productos incluidos en este combo:</h3>
-                <ul>
-                    <?php if ($productos_combo['hamburguesas']): ?>
-                        <li><strong>Hamburguesas:</strong> <?php echo $productos_combo['hamburguesas']; ?></li>
-                    <?php endif; ?>
-                    <?php if ($productos_combo['acompaniamientos']): ?>
-                        <li><strong>Acompañamientos:</strong> <?php echo $productos_combo['acompaniamientos']; ?></li>
-                    <?php endif; ?>
-                    <?php if ($productos_combo['bebidas']): ?>
-                        <li><strong>Bebidas:</strong> <?php echo $productos_combo['bebidas']; ?></li>
-                    <?php endif; ?>
-                    <?php if ($productos_combo['postres']): ?>
-                        <li><strong>Postres:</strong> <?php echo $productos_combo['postres']; ?></li>
-                    <?php endif; ?>
-                </ul>
-            <?php endif; ?>
+            <!-- Detalles del producto -->
+            <div class="col-md-6 content mt-4">
+                <h2 class="title"><?php echo $nombre_producto; ?></h2>
+                <p class="description"><?php echo $descripcion; ?></p>
 
-            <a href="index-menu.php" class="btn btn-primary back-btn">Volver al Menú</a>
+                <!-- Mostrar productos del combo -->
+                <?php if ($tipo_producto == 'combo'): ?>
+                    <h3 class="mt-4">Productos incluidos en este combo:</h3>
+                    <ul class="product-details-list">
+                        <?php if ($productos_combo['hamburguesas']): ?>
+                            <li><strong>Hamburguesas:</strong> <?php echo $productos_combo['hamburguesas']; ?></li>
+                        <?php endif; ?>
+                        <?php if ($productos_combo['acompaniamientos']): ?>
+                            <li><strong>Acompañamientos:</strong> <?php echo $productos_combo['acompaniamientos']; ?></li>
+                        <?php endif; ?>
+                        <?php if ($productos_combo['bebidas']): ?>
+                            <li><strong>Bebidas:</strong> <?php echo $productos_combo['bebidas']; ?></li>
+                        <?php endif; ?>
+                        <?php if ($productos_combo['postres']): ?>
+                            <li><strong>Postres:</strong> <?php echo $productos_combo['postres']; ?></li>
+                        <?php endif; ?>
+                    </ul>
+                <?php endif; ?>
+
+                <a href="index-menu.php" class="btn btn-primary back-btn">Volver al Menú</a>
+            </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
 
 <?php
