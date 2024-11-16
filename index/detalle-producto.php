@@ -1,6 +1,7 @@
 <?php
 include '../conexion.php';
 include '../includes/header.php';
+
 // Obtener los parámetros desde la URL
 $nombre_producto = isset($_GET['nombre']) ? $_GET['nombre'] : '';
 $tipo_producto = isset($_GET['tipo']) ? $_GET['tipo'] : '';
@@ -61,47 +62,41 @@ $nombre_producto = $producto[$columna_nombre];
 $descripcion = $producto['descripcion'];
 $imagen = $producto['imagen'];
 
-// Si el tipo es combo, obtener los productos incluidos en el combo
+// Si el tipo es combo, obtener los productos incluidos en el combo con las cantidades
 $productos_combo = [];
 if ($tipo_producto == 'combo') {
-    // Consultar los productos incluidos en el combo
     $query_combo = "
-    SELECT 
-        h.nombre_hamburguesa, SUM(ch.cantidad) AS cantidad_hamburguesa,
-        a.nombre_acompaniamiento, SUM(ca.cantidad) AS cantidad_acompaniamiento,
-        b.nombre_bebida, SUM(cb.cantidad) AS cantidad_bebida,
-        p.nombre_postre, SUM(cp.cantidad) AS cantidad_postre
-    FROM combo c
-    LEFT JOIN combo_hamburguesa ch ON c.id_combo = ch.id_combo
-    LEFT JOIN hamburguesa h ON ch.id_hamburguesa = h.id_hamburguesa
-    LEFT JOIN combo_acompaniamiento ca ON c.id_combo = ca.id_combo
-    LEFT JOIN acompaniamiento a ON ca.id_acompaniamiento = a.id_acompaniamiento
-    LEFT JOIN combo_bebida cb ON c.id_combo = cb.id_combo
-    LEFT JOIN bebida b ON cb.id_bebida = b.id_bebida
-    LEFT JOIN combo_postre cp ON c.id_combo = cp.id_combo
-    LEFT JOIN postre p ON cp.id_postre = p.id_postre
-    WHERE c.$columna_nombre = ?
-    GROUP BY 
-        h.nombre_hamburguesa, a.nombre_acompaniamiento, b.nombre_bebida, p.nombre_postre";
-
-
+        SELECT 
+            GROUP_CONCAT(DISTINCT CONCAT(h.nombre_hamburguesa, ' (', ch.cantidad, ')') ORDER BY h.nombre_hamburguesa ASC SEPARATOR ', ') AS hamburguesas,
+            GROUP_CONCAT(DISTINCT CONCAT(a.nombre_acompaniamiento, ' (', ca.cantidad, ')') ORDER BY a.nombre_acompaniamiento ASC SEPARATOR ', ') AS acompaniamientos,
+            GROUP_CONCAT(DISTINCT CONCAT(b.nombre_bebida, ' (', cb.cantidad, ')') ORDER BY b.nombre_bebida ASC SEPARATOR ', ') AS bebidas,
+            GROUP_CONCAT(DISTINCT CONCAT(p.nombre_postre, ' (', cp.cantidad, ')') ORDER BY p.nombre_postre ASC SEPARATOR ', ') AS postres
+        FROM 
+            combo c
+        LEFT JOIN combo_hamburguesa ch ON c.id_combo = ch.id_combo
+        LEFT JOIN hamburguesa h ON ch.id_hamburguesa = h.id_hamburguesa
+        LEFT JOIN combo_acompaniamiento ca ON c.id_combo = ca.id_combo
+        LEFT JOIN acompaniamiento a ON ca.id_acompaniamiento = a.id_acompaniamiento
+        LEFT JOIN combo_bebida cb ON c.id_combo = cb.id_combo
+        LEFT JOIN bebida b ON cb.id_bebida = b.id_bebida
+        LEFT JOIN combo_postre cp ON c.id_combo = cp.id_combo
+        LEFT JOIN postre p ON cp.id_postre = p.id_postre
+        WHERE c.$columna_nombre = ?
+    ";
+    
     $stmt_combo = $conexion->prepare($query_combo);
     $stmt_combo->bind_param("s", $nombre_producto);
     $stmt_combo->execute();
     $result_combo = $stmt_combo->get_result();
-
+    
     // Recoger los productos del combo
-    while ($row = $result_combo->fetch_assoc()) {
-        $productos_combo[] = $row;
-    }
+    $productos_combo = $result_combo->fetch_assoc();
     $stmt_combo->close();
 }
-
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -111,115 +106,66 @@ if ($tipo_producto == 'combo') {
         .product-detail {
             margin-top: 50px;
         }
-
         .product-detail .image {
             max-width: 100%;
             height: auto;
         }
-
         .product-detail .content {
             padding-left: 30px;
         }
-
         .product-detail .title {
             font-size: 2rem;
             font-weight: bold;
         }
-
         .product-detail .description {
             font-size: 1.2rem;
             margin-top: 20px;
         }
-
         .product-detail .back-btn {
             margin-top: 30px;
         }
     </style>
 </head>
-
 <body>
 
-    <div class="container product-detail">
-        <div class="row mt-4">
-            <!-- Imagen del producto -->
-            <div class="col-md-6 mt-4">
-                <img src="<?php echo $imagenPath . $imagen; ?>" alt="Imagen de <?php echo $nombre_producto; ?>"
-                    class="image">
-            </div>
+<div class="container product-detail">
+    <div class="row mt-4">
+        <!-- Imagen del producto -->
+        <div class="col-md-6 mt-4">
+            <img src="<?php echo $imagenPath . $imagen; ?>" alt="Imagen de <?php echo $nombre_producto; ?>" class="image">
+        </div>
+        
+        <!-- Detalles del producto -->
+        <div class="col-md-6 content mt-4">
+            <h2 class="title"><?php echo $nombre_producto; ?></h2>
+            <p class="description"><?php echo $descripcion; ?></p>
 
-            <!-- Detalles del producto -->
-            <div class="col-md-6 content mt-4">
-                <h2 class="title"><?php echo $nombre_producto; ?></h2>
-                <p class="description"><?php echo $descripcion; ?></p>
+            <!-- Mostrar productos del combo -->
+            <?php if ($tipo_producto == 'combo'): ?>
+                <h3>Productos incluidos en este combo:</h3>
+                <ul>
+                    <?php if ($productos_combo['hamburguesas']): ?>
+                        <li><strong>Hamburguesas:</strong> <?php echo $productos_combo['hamburguesas']; ?></li>
+                    <?php endif; ?>
+                    <?php if ($productos_combo['acompaniamientos']): ?>
+                        <li><strong>Acompañamientos:</strong> <?php echo $productos_combo['acompaniamientos']; ?></li>
+                    <?php endif; ?>
+                    <?php if ($productos_combo['bebidas']): ?>
+                        <li><strong>Bebidas:</strong> <?php echo $productos_combo['bebidas']; ?></li>
+                    <?php endif; ?>
+                    <?php if ($productos_combo['postres']): ?>
+                        <li><strong>Postres:</strong> <?php echo $productos_combo['postres']; ?></li>
+                    <?php endif; ?>
+                </ul>
+            <?php endif; ?>
 
-                <?php if ($tipo_producto == 'combo'): ?>
-                    <h3>Productos incluidos en este combo:</h3>
-                    <ul>
-                        <?php
-                        // Inicializar un array para llevar las cantidades por producto
-                        $productosAgrupados = [
-                            'hamburguesas' => [],
-                            'acompaniamientos' => [],
-                            'bebidas' => [],
-                            'postres' => []
-                        ];
-
-                        // Agrupar los productos por tipo y acumular las cantidades correctamente
-                        foreach ($productos_combo as $producto_item) {
-                            if ($producto_item['nombre_hamburguesa']) {
-                                // Acumulamos la cantidad de la hamburguesa
-                                if (!isset($productosAgrupados['hamburguesas'][$producto_item['nombre_hamburguesa']])) {
-                                    $productosAgrupados['hamburguesas'][$producto_item['nombre_hamburguesa']] = 0;
-                                }
-                                $productosAgrupados['hamburguesas'][$producto_item['nombre_hamburguesa']] += (int) $producto_item['cantidad_hamburguesa']; // Aseguramos que la cantidad sea un número entero
-                            }
-                            if ($producto_item['nombre_acompaniamiento']) {
-                                // Acumulamos la cantidad del acompañamiento
-                                if (!isset($productosAgrupados['acompaniamientos'][$producto_item['nombre_acompaniamiento']])) {
-                                    $productosAgrupados['acompaniamientos'][$producto_item['nombre_acompaniamiento']] = 0;
-                                }
-                                $productosAgrupados['acompaniamientos'][$producto_item['nombre_acompaniamiento']] += (int) $producto_item['cantidad_acompaniamiento']; // Aseguramos que la cantidad sea un número entero
-                            }
-                            if ($producto_item['nombre_bebida']) {
-                                // Acumulamos la cantidad de la bebida
-                                if (!isset($productosAgrupados['bebidas'][$producto_item['nombre_bebida']])) {
-                                    $productosAgrupados['bebidas'][$producto_item['nombre_bebida']] = 0;
-                                }
-                                $productosAgrupados['bebidas'][$producto_item['nombre_bebida']] += (int) $producto_item['cantidad_bebida']; // Aseguramos que la cantidad sea un número entero
-                            }
-                            if ($producto_item['nombre_postre']) {
-                                // Acumulamos la cantidad del postre
-                                if (!isset($productosAgrupados['postres'][$producto_item['nombre_postre']])) {
-                                    $productosAgrupados['postres'][$producto_item['nombre_postre']] = 0;
-                                }
-                                $productosAgrupados['postres'][$producto_item['nombre_postre']] += (int) $producto_item['cantidad_postre']; // Aseguramos que la cantidad sea un número entero
-                            }
-                        }
-
-                        // Mostrar los productos agrupados y las cantidades correctas
-                        foreach ($productosAgrupados as $categoria => $productos) {
-                            if (!empty($productos)) {
-                                echo "<h4>" . ucfirst($categoria) . ":</h4>";
-                                foreach ($productos as $nombre => $cantidad) {
-                                    echo "<li>$nombre (Cantidad: $cantidad)</li>";
-                                }
-                            }
-                        }
-                        ?>
-                    </ul>
-                <?php endif; ?>
-
-
-
-
-                <a href="index-menu.php" class="btn btn-primary back-btn">Volver al Menú</a>
-            </div>
+            <a href="index-menu.php" class="btn btn-primary back-btn">Volver al Menú</a>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
 
 <?php

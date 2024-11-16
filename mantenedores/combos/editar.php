@@ -29,7 +29,6 @@ $acompaniamientosSeleccionados = $conexion->query("SELECT id_acompaniamiento, ca
 $bebidasSeleccionadas = $conexion->query("SELECT id_bebida, cantidad FROM combo_bebida WHERE id_combo = $id_combo")->fetch_all(MYSQLI_ASSOC);
 $postresSeleccionados = $conexion->query("SELECT id_postre, cantidad FROM combo_postre WHERE id_combo = $id_combo")->fetch_all(MYSQLI_ASSOC);
 
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre_combo = $_POST['nombre_combo'];
     $descripcion = $_POST['descripcion'];
@@ -49,7 +48,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $ruta_destino = "../../uploads/combos/" . $nombre_imagen;
 
         if (move_uploaded_file($ruta_temporal, $ruta_destino)) {
-            // Actualizar la hamburguesa con la nueva imagen
             $sql = "UPDATE combo SET nombre_combo = ?, descripcion = ?, precio = ?, imagen = ? WHERE id_combo = ?";
             $stmt = $conexion->prepare($sql);
             $stmt->bind_param("ssdsi", $nombre_combo, $descripcion, $precio, $nombre_imagen, $id_combo);
@@ -63,20 +61,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit;
         }
     } else {
-        // Si no se sube una nueva imagen, mantener la imagen actual
+
         $sql = "UPDATE combo SET nombre_combo = ?, descripcion = ?, precio = ? WHERE id_combo = ?";
         $stmt = $conexion->prepare($sql);
         $stmt->bind_param("ssdi", $nombre_combo, $descripcion, $precio, $id_combo);
     }
 
     if ($stmt->execute()) {
-        // Eliminar los registros previos de elementos del combo
         $conexion->query("DELETE FROM combo_hamburguesa WHERE id_combo = $id_combo");
         $conexion->query("DELETE FROM combo_acompaniamiento WHERE id_combo = $id_combo");
         $conexion->query("DELETE FROM combo_bebida WHERE id_combo = $id_combo");
         $conexion->query("DELETE FROM combo_postre WHERE id_combo = $id_combo");
 
-        // Insertar los nuevos elementos
         $sqlItems = [
             "combo_hamburguesa" => ["id_hamburguesa", $hamburguesas, $cantidadesHamburguesas],
             "combo_acompaniamiento" => ["id_acompaniamiento", $acompaniamientos, $cantidadesAcompaniamientos],
@@ -94,7 +90,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-        // Redirigir al listar
         header("Location: listar.php");
         exit();
     } else {
@@ -102,8 +97,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="es">
@@ -258,10 +251,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </select>
                     <input type="number" class="form-control" name="cantidad_hamburguesa[]"
                         value="<?php echo $hamburguesa['cantidad']; ?>" min="1" required>
-                    <button type="button" class="btn btn-danger ms-2" onclick="this.parentElement.remove()">Eliminar</button>
+                    <button type="button" class="btn btn-danger ms-2"
+                        onclick="this.parentElement.remove()">Eliminar</button>
                 </div>
             <?php endforeach; ?>
-            <button type="button" class="btn btn-secondary mb-3" onclick="agregarElemento('hamburguesas')">Agregar Hamburguesa</button>
+            <button type="button" class="btn btn-secondary mb-3" onclick="agregarElemento('hamburguesas')">Agregar
+                Hamburguesa</button>
         </div>
 
         <!-- Sección de Acompañamientos -->
@@ -278,10 +273,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </select>
                     <input type="number" class="form-control" name="cantidad_acompaniamiento[]"
                         value="<?php echo $acompaniamiento['cantidad']; ?>" min="1" required>
-                    <button type="button" class="btn btn-danger ms-2" onclick="this.parentElement.remove()">Eliminar</button>
+                    <button type="button" class="btn btn-danger ms-2"
+                        onclick="this.parentElement.remove()">Eliminar</button>
                 </div>
             <?php endforeach; ?>
-            <button type="button" class="btn btn-secondary mb-3" onclick="agregarElemento('acompaniamientos')">Agregar Acompañamiento</button>
+            <button type="button" class="btn btn-secondary mb-3" onclick="agregarElemento('acompaniamientos')">Agregar
+                Acompañamiento</button>
         </div>
 
         <!-- Sección de Bebidas -->
@@ -298,10 +295,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </select>
                     <input type="number" class="form-control" name="cantidad_bebida[]"
                         value="<?php echo $bebida['cantidad']; ?>" min="1" required>
-                    <button type="button" class="btn btn-danger ms-2" onclick="this.parentElement.remove()">Eliminar</button>
+                    <button type="button" class="btn btn-danger ms-2"
+                        onclick="this.parentElement.remove()">Eliminar</button>
                 </div>
             <?php endforeach; ?>
-            <button type="button" class="btn btn-secondary mb-3" onclick="agregarElemento('bebidas')">Agregar Bebida</button>
+            <button type="button" class="btn btn-secondary mb-3" onclick="agregarElemento('bebidas')">Agregar
+                Bebida</button>
         </div>
 
         <!-- Sección de Postres -->
@@ -318,10 +317,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </select>
                     <input type="number" class="form-control" name="cantidad_postre[]"
                         value="<?php echo $postre['cantidad']; ?>" min="1" required>
-                    <button type="button" class="btn btn-danger ms-2" onclick="this.parentElement.remove()">Eliminar</button>
+                    <button type="button" class="btn btn-danger ms-2"
+                        onclick="this.parentElement.remove()">Eliminar</button>
                 </div>
             <?php endforeach; ?>
-            <button type="button" class="btn btn-secondary mb-3" onclick="agregarElemento('postres')">Agregar Postre</button>
+            <button type="button" class="btn btn-secondary mb-3" onclick="agregarElemento('postres')">Agregar
+                Postre</button>
         </div>
 
         <button type="submit" class="btn btn-primary">Guardar Cambios</button>
