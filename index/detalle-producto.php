@@ -69,7 +69,7 @@ $imagen = $producto['imagen'];
             <h2 class="title"><?php echo $nombre_hamburguesa; ?></h2>
             <p class="description"><?php echo $descripcion; ?></p>
 
-            <a href="menu.html" class="btn btn-primary back-btn">Volver al Menú</a>
+            <a href="index-lobby.php" class="btn btn-primary back-btn">Volver al Menú</a>
         </div>
     </div>
 </div>
