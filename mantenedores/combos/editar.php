@@ -1,13 +1,13 @@
 <?php
+include '../../conexion.php';
+
+// Consultar los datos del combo
 if (!isset($_GET['id_combo'])) {
     die("Error: No se proporcionó el ID del combo.");
 }
 
 $id_combo = $_GET['id_combo'];
 
-include '../../conexion.php';
-
-// Consultar los datos del combo
 $comboQuery = $conexion->prepare("SELECT * FROM combo WHERE id_combo = ?");
 $comboQuery->bind_param("i", $id_combo);
 $comboQuery->execute();
@@ -28,6 +28,7 @@ $hamburguesasSeleccionadas = $conexion->query("SELECT id_hamburguesa, cantidad F
 $acompaniamientosSeleccionados = $conexion->query("SELECT id_acompaniamiento, cantidad FROM combo_acompaniamiento WHERE id_combo = $id_combo")->fetch_all(MYSQLI_ASSOC);
 $bebidasSeleccionadas = $conexion->query("SELECT id_bebida, cantidad FROM combo_bebida WHERE id_combo = $id_combo")->fetch_all(MYSQLI_ASSOC);
 $postresSeleccionados = $conexion->query("SELECT id_postre, cantidad FROM combo_postre WHERE id_combo = $id_combo")->fetch_all(MYSQLI_ASSOC);
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre_combo = $_POST['nombre_combo'];
