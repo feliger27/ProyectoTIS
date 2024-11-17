@@ -30,6 +30,7 @@ if (!$hamburguesas_destacadas) {
     die("Error in the hamburgers query: " . mysqli_error($conexion));
 }
 
+
 // Consulta para obtener los tres acompañamientos más vendidos
 $query_acompanamientos_vendidos = "
     SELECT a.nombre_acompaniamiento AS nombre, a.imagen, SUM(pa.cantidad) AS total_vendido
