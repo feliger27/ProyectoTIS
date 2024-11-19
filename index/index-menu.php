@@ -46,7 +46,13 @@ switch ($filtroCategoria) {
 }
 
 if ($tabla) {
-    $query = "SELECT id_{$tabla} AS id, nombre_{$tabla} AS nombre, descripcion, precio, imagen FROM $tabla WHERE precio BETWEEN $filtroPrecioMin AND $filtroPrecioMax";
+    $query = "SELECT id_{$tabla} AS id, 
+                     nombre_{$tabla} AS nombre, 
+                     " . ($tabla === 'acompaniamiento' || $tabla === 'bebida' || $tabla === 'postre' ? "'' AS descripcion," : "descripcion,") . " 
+                     precio, 
+                     CONCAT('$imagenPath', imagen) AS imagen 
+              FROM $tabla 
+              WHERE precio BETWEEN $filtroPrecioMin AND $filtroPrecioMax";
 } else {
     $query = "
         SELECT id_combo AS id, nombre_combo AS nombre, descripcion, precio, CONCAT('../uploads/combos/', imagen) AS imagen FROM combo WHERE precio BETWEEN $filtroPrecioMin AND $filtroPrecioMax
@@ -104,7 +110,7 @@ $resultado = $conexion->query($query);
             flex-wrap: wrap;
         }
         .filter-button {
-            background-color: #ff8c00;
+            background-color: #d35400; /* Naranjo oscuro */
             color: #fff;
             padding: 0.5rem 1rem;
             border-radius: 5px;
@@ -116,32 +122,77 @@ $resultado = $conexion->query($query);
             gap: 0.5rem;
             transition: background-color 0.3s;
         }
+
         .filter-button:hover {
-            background-color: #e07b00;
+            background-color: #e67e22; /* Naranjo ligeramente más claro en hover */
         }
+
         .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Espacia uniformemente los elementos */
             border: none;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
         }
+
         .card:hover {
             transform: scale(1.05);
         }
+
         .card img {
-            border-radius: 10px 10px 0 0;
-            height: 200px;
-            object-fit: cover;
+            width: 100%; /* La imagen ocupará todo el ancho del contenedor */
+            height: auto; /* Ajusta la altura automáticamente para mantener proporciones */
+            object-fit: contain; /* Asegura que la imagen se vea completa */
+            border-radius: 10px 10px 0 0; /* Mantén las esquinas redondeadas superiores */
+            background-color: #f8f8f8; /* Fondo neutro para casos en los que la imagen no ocupe todo */
         }
+
+
+
+
         .card-title {
-            color: #1a202c;
-            font-weight: 600;
+            color: #2c3e50; /* Azul oscuro elegante */
+            font-weight: bold;
+            font-size: 1.2rem; /* Tamaño destacado */
+            text-align: center;
+            margin-bottom: 0.5rem;
         }
+
         .card-text {
-            font-size: 0.9rem;
-            color: #718096;
+            font-size: 0.95rem;
+            color: #7f8c8d; /* Gris medio para descripción */
+            text-align: center;
+            margin-bottom: 1rem;
         }
+
+        .text-primary.fw-bold {
+            color: #27ae60; /* Verde suave para destacar el precio */
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .btn-custom {
+            background-color: #ff8c00; /* Naranjo claro */
+            color: #fff;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-custom:hover {
+            background-color: #e67e22; /* Naranjo ligeramente más oscuro */
+            transform: scale(1.05); /* Efecto de agrandamiento */
+            color: #ffffff;
+        }
+
+
+
     </style>
 </head>
 <body>
