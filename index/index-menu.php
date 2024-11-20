@@ -270,7 +270,7 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
             font-weight: bold;
         }
         .icono-carrito {
-            background-color: #ff8c00;
+            background-color: #d35400;
             color: #fff;
             width: 40px;
             height: 40px;
