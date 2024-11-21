@@ -1,18 +1,42 @@
 <?php
 session_start();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $idProducto = $_POST['id_producto'] ?? null;
-    $categoria = $_POST['categoria'] ?? null;
+// Verificar si el carrito existe
+if (!isset($_SESSION['carrito'])) {
+    echo json_encode(['error' => 'El carrito está vacío.']);
+    exit;
+}
 
-    // Verificar si el producto existe en el carrito
-    if ($idProducto && $categoria && isset($_SESSION['carrito'][$categoria][$idProducto])) {
-        // Eliminar el producto del carrito
-        unset($_SESSION['carrito'][$categoria][$idProducto]);
+// Obtener datos del producto desde POST
+$idProducto = $_POST['idProducto'] ?? null;
+$categoria = $_POST['categoria'] ?? null;
+
+if (!$idProducto || !$categoria) {
+    echo json_encode(['error' => 'Datos inválidos para eliminar el producto.']);
+    exit;
+}
+
+// Eliminar el producto del carrito
+if (isset($_SESSION['carrito'][$categoria][$idProducto])) {
+    unset($_SESSION['carrito'][$categoria][$idProducto]);
+
+    // Eliminar la categoría si está vacía
+    if (empty($_SESSION['carrito'][$categoria])) {
+        unset($_SESSION['carrito'][$categoria]);
+    }
+} else {
+    echo json_encode(['error' => 'Producto no encontrado en el carrito.']);
+    exit;
+}
+
+// Calcular el nuevo total
+$total = 0;
+foreach ($_SESSION['carrito'] as $productos) {
+    foreach ($productos as $producto) {
+        $total += $producto['precio'] * $producto['cantidad'];
     }
 }
 
-// Redirigir de vuelta al carrito
-header('Location: ../../index/index-carrito.php');
-exit;
+// Retornar el nuevo total
+echo json_encode(['total' => $total]);
 ?>

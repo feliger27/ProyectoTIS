@@ -1,11 +1,42 @@
 <?php
 session_start();
+include('../conexion.php');
+include('../includes/header.php');
+
+// Obtener promociones activas
+$hoy = date('Y-m-d H:i:s');
+$queryPromociones = "SELECT * FROM promocion WHERE fecha_inicio <= '$hoy' AND fecha_fin >= '$hoy'";
+$resultadoPromociones = $conexion->query($queryPromociones);
+
+$promociones = [];
+if ($resultadoPromociones->num_rows > 0) {
+    while ($promo = $resultadoPromociones->fetch_assoc()) {
+        $promociones[] = $promo;
+    }
+}
+
+// Función para calcular el precio promocional
+function calcularPrecioPromocional($precio, $descuento) {
+    return $precio - ($precio * $descuento / 100);
+}
+
+// Función para buscar una promoción activa para un producto
+function obtenerPromocion($productoId, $categoria, $promociones) {
+    foreach ($promociones as $promo) {
+        if (($categoria === 'hamburguesa' && isset($promo['id_hamburguesa']) && $promo['id_hamburguesa'] == $productoId) ||
+            ($categoria === 'bebida' && isset($promo['id_bebida']) && $promo['id_bebida'] == $productoId) ||
+            ($categoria === 'acompaniamiento' && isset($promo['id_acompaniamiento']) && $promo['id_acompaniamiento'] == $productoId) ||
+            ($categoria === 'postre' && isset($promo['id_postre']) && $promo['id_postre'] == $productoId) ||
+            ($categoria === 'combo' && isset($promo['id_combo']) && $promo['id_combo'] == $productoId)) {
+            return $promo;
+        }
+    }
+    return null;
+}
 
 // Verificar si el carrito existe
 $carrito = isset($_SESSION['carrito']) ? $_SESSION['carrito'] : [];
 ?>
-
-<?php include('../includes/header.php'); // Incluir el encabezado ?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -14,150 +45,229 @@ $carrito = isset($_SESSION['carrito']) ? $_SESSION['carrito'] : [];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito - HamburGeeks</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* Mantener el footer al pie */
         body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            margin: 0;
-        }
-
-        main {
-            margin-top: 100px;
-            flex: 1;
-        }
-
-        nav.navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        footer {
-            background-color: #343a40;
-            color: white;
-            padding: 10px 0;
-            text-align: center;
-            position: relative;
-            width: 100%;
+            background-color: #f9f9f9;
+            color: #333;
+            font-family: Arial, sans-serif;
         }
 
         .carrito-container {
             max-width: 900px;
-            margin: 0 auto;
+            margin: 40px auto;
             padding: 20px;
-            background-color: #fff;
+            background-color: white;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .carrito-header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
 
         .carrito-header h1 {
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: #d35400;
+            font-weight: bold;
         }
 
         .producto-imagen {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             object-fit: cover;
-            border-radius: 5px;
+            border-radius: 10px;
         }
 
-        .vaciar-carrito {
-            background-color: #e74c3c;
+        .table th, .table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .table th {
+            background-color: #d35400;
             color: white;
         }
 
-        .vaciar-carrito:hover {
+        .btn-vaciar {
+            background-color: #e74c3c;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-vaciar:hover {
             background-color: #c0392b;
         }
+
+        .btn-seguir {
+            background-color: #27ae60;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-seguir:hover {
+            background-color: #229954;
+        }
+
+        .icono-basura {
+            color: #e74c3c;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .icono-basura:hover {
+            color: #c0392b;
+        }
+
+        .total-container {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .precio-normal {
+            font-size: 1rem;
+            color: #7f8c8d; /* Gris */
+            text-decoration: line-through;
+            margin-right: 5px;
+        }
+
+        .precio-promocional {
+            font-size: 1.1rem; /* Más grande */
+            color: #27ae60; /* Verde */
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
-    <main>
-        <div class="container carrito-container">
-            <div class="carrito-header">
-                <h1>Mi Carrito</h1>
-            </div>
-            <?php if (!empty($carrito)): ?>
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>Imagen</th>
-                            <th>Nombre</th>
-                            <th>Precio</th>
-                            <th>Cantidad</th>
-                            <th>Subtotal</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php 
-                        $total = 0;
-                        foreach ($carrito as $categoria => $productos): 
-                            foreach ($productos as $id => $producto): 
-                                $subtotal = $producto['precio'] * $producto['cantidad'];
-                                $total += $subtotal;
-
-                                // Obtener la ruta de la imagen desde la sesión
-                                $rutaImagen = "../uploads/$categoria/" . (isset($producto['imagen']) ? $producto['imagen'] : 'default.jpg');
-                        ?>
-                            <tr>
-                                <td>
-                                    <?php if (file_exists($rutaImagen)): ?>
-                                        <img src="<?php echo $rutaImagen; ?>" class="producto-imagen" alt="<?php echo $producto['nombre']; ?>">
-                                    <?php else: ?>
-                                        <img src="../uploads/default.jpg" class="producto-imagen" alt="Imagen por defecto">
-                                    <?php endif; ?>
-                                </td>
-                                <td><?php echo $producto['nombre']; ?></td>
-                                <td>$<?php echo number_format($producto['precio'], 0, ',', '.'); ?></td>
-                                <td>
-                                    <form action="../funciones/gestionar_carrito/actualizar_carrito.php" method="POST" style="display: inline-block;">
-                                        <input type="hidden" name="id_producto" value="<?php echo $id; ?>">
-                                        <input type="hidden" name="categoria" value="<?php echo $categoria; ?>">
-                                        <input type="number" name="cantidad" value="<?php echo $producto['cantidad']; ?>" min="1" style="width: 60px;">
-                                        <button type="submit" class="btn btn-sm btn-primary">Actualizar</button>
-                                    </form>
-                                </td>
-                                <td>$<?php echo number_format($subtotal, 0, ',', '.'); ?></td>
-                                <td>
-                                    <form action="../funciones/gestionar_carrito/eliminar_carrito.php" method="POST" style="display: inline-block;">
-                                        <input type="hidden" name="id_producto" value="<?php echo $id; ?>">
-                                        <input type="hidden" name="categoria" value="<?php echo $categoria; ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        <?php endforeach; endforeach; ?>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="4" class="text-end"><strong>Total</strong></td>
-                            <td colspan="2">$<?php echo number_format($total, 0, ',', '.'); ?></td>
-                        </tr>
-                    </tfoot>
-                </table>
-                <div class="d-flex justify-content-between">
-                    <form action="../funciones/gestionar_carrito/vaciar_carrito.php" method="POST">
-                        <button type="submit" class="btn vaciar-carrito">Vaciar Carrito</button>
-                    </form>
-                    <a href="../index/index-menu.php" class="btn btn-success">Seguir Comprando</a>
-                </div>
-            <?php else: ?>
-                <p class="text-center">Tu carrito está vacío. <a href="../index/index-menu.php">Explorar menú</a></p>
-            <?php endif; ?>
+<div class="container carrito-container">
+        <div class="carrito-header">
+            <h1>Mi Carrito</h1>
         </div>
-    </main>
+        <?php if (!empty($carrito)): ?>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php 
+                    $total = 0;
+                    foreach ($carrito as $categoria => $productos): 
+                        foreach ($productos as $id => $producto): 
+                            // Verificar si el producto tiene una promoción activa
+                            $promocion = obtenerPromocion($id, $categoria, $promociones);
+                            $precioUnitario = $promocion ? calcularPrecioPromocional($producto['precio'], $promocion['porcentaje_descuento']) : $producto['precio'];
+                            $subtotal = $precioUnitario * $producto['cantidad'];
+                            $total += $subtotal;
+                    ?>
+                        <tr id="producto-<?php echo $id; ?>">
+                            <td>
+                                <img src="<?php echo $producto['imagen']; ?>" class="producto-imagen" alt="<?php echo $producto['nombre']; ?>">
+                            </td>
+                            <td><?php echo $producto['nombre']; ?></td>
+                            <td>
+                                <?php if ($promocion): ?>
+                                    <span class="precio-normal">$<?php echo number_format($producto['precio'], 0, ',', '.'); ?></span>
+                                    <span class="precio-promocional">$<?php echo number_format($precioUnitario, 0, ',', '.'); ?></span>
+                                <?php else: ?>
+                                    $<?php echo number_format($producto['precio'], 0, ',', '.'); ?>
+                                <?php endif; ?>
+                            </td>
 
-    <?php include('../includes/footer.php'); // Footer ?>
+                            <td>
+                                <input type="number" name="cantidad" value="<?php echo $producto['cantidad']; ?>" min="1" 
+                                    class="form-control text-center"
+                                    onchange="actualizarCantidad('<?php echo $id; ?>', '<?php echo $categoria; ?>', this.value)">
+                            </td>
+                            <td id="subtotal-<?php echo $id; ?>">$<?php echo number_format($subtotal, 0, ',', '.'); ?></td>
+                            <td>
+                                <i class="fas fa-trash icono-basura" onclick="eliminarProducto('<?php echo $id; ?>', '<?php echo $categoria; ?>')"></i>
+                            </td>
+                        </tr>
+                    <?php endforeach; endforeach; ?>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-end total-container">Total</td>
+                        <td colspan="2" class="total-container" id="total">$<?php echo number_format($total, 0, ',', '.'); ?></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-vaciar" onclick="vaciarCarrito()">Vaciar Carrito</button>
+                <a href="../index/index-menu.php" class="btn btn-seguir">Seguir Comprando</a>
+            </div>
+        <?php else: ?>
+            <p class="text-center">Tu carrito está vacío. <a href="../index/index-menu.php">Explorar menú</a></p>
+        <?php endif; ?>
+    </div>
+
+    <script>
+        function actualizarCantidad(idProducto, categoria, cantidad) {
+            fetch('../funciones/gestionar_carrito/actualizar_carrito.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ idProducto, categoria, cantidad })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    // Actualizar el subtotal del producto
+                    document.querySelector(`#subtotal-${idProducto}`).textContent = `$${parseFloat(data.subtotal).toLocaleString('es-ES')}`;
+
+                    // Actualizar el total del carrito
+                    document.querySelector('#total').textContent = `$${parseFloat(data.total).toLocaleString('es-ES')}`;
+
+                    // Actualizar el precio si se modificó (en caso de promociones)
+                    if (data.precioPromocional) {
+                        const precioElement = document.querySelector(`#precio-${idProducto}`);
+                        if (precioElement) {
+                            precioElement.textContent = `$${parseFloat(data.precioPromocional).toLocaleString('es-ES')}`;
+                        }
+                    }
+
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+
+        function eliminarProducto(idProducto, categoria) {
+            fetch('../funciones/gestionar_carrito/eliminar_carrito.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ idProducto, categoria })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    location.reload();
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        function vaciarCarrito() {
+            fetch('../funciones/gestionar_carrito/vaciar_carrito.php', {
+                method: 'POST'
+            })
+            .then(response => location.reload())
+            .catch(err => console.error(err));
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

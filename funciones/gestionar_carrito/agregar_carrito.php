@@ -11,7 +11,7 @@ $idProducto = $_POST['idProducto'] ?? null;
 $categoria = $_POST['categoria'] ?? null;
 $nombre = $_POST['nombre'] ?? null;
 $precio = $_POST['precio'] ?? null;
-$imagen = $_POST['imagen'] ?? null; // Asegúrate de que la imagen esté incluida en el formulario
+$imagen = $_POST['imagen'] ?? null;
 
 if ($idProducto && $categoria && $nombre && $precio && $imagen) {
     // Verificar si el producto ya existe en el carrito
@@ -20,7 +20,7 @@ if ($idProducto && $categoria && $nombre && $precio && $imagen) {
             'nombre' => $nombre,
             'precio' => $precio,
             'cantidad' => 1,
-            'imagen' => $imagen, // Agregar el campo de la imagen
+            'imagen' => $imagen,
         ];
     } else {
         // Incrementar la cantidad si ya existe
