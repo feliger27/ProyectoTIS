@@ -237,7 +237,7 @@ if (count($acompanamientos) < 3) {
             <p>¡Explora nuestro menú y realiza tu pedido ahora!</p>
             <div class="cta-buttons">
                 <a href="index-menu.php" class="btn btn-warning">Ver Menú</a>
-                <a href="promociones.php" class="btn btn-light">Ver Promociones</a>
+                <a href="index-promociones.php" class="btn btn-light">Ver Promociones</a>
             </div>
         </div>
     </div>
