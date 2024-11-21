@@ -22,7 +22,7 @@ $stmt->close();
 $_SESSION['id_pedido'] = $id_pedido;
 
 // Obtener las direcciones guardadas del usuario
-$query_direcciones = "SELECT d.id_direccion, d.calle, d.numero, d.ciudad, d.codigo_postal 
+$query_direcciones = "SELECT d.id_direccion, d.calle, d.numero, d.ciudad
                       FROM direccion AS d
                       INNER JOIN direccion_usuario AS du ON d.id_direccion = du.id_direccion
                       WHERE du.id_usuario = $user_id";
@@ -47,9 +47,6 @@ $tarjetas_guardadas = mysqli_query($conexion, $query_tarjetas);
                     <?php while($direccion = mysqli_fetch_assoc($direcciones)): ?>
                         <div class="form-check">
                             <input type="radio" class="form-check-input" name="direccion_id" value="<?= $direccion['id_direccion'] ?>" required>
-                            <label class="form-check-label">
-                                <?= $direccion['calle'] ?>, <?= $direccion['numero'] ?>, <?= $direccion['ciudad'] ?>, <?= $direccion['codigo_postal'] ?>
-                            </label>
                         </div>
                     <?php endwhile; ?>
                 </div>
@@ -66,9 +63,6 @@ $tarjetas_guardadas = mysqli_query($conexion, $query_tarjetas);
                         </div>
                         <div class="col-md-4">
                             <input type="text" class="form-control" name="nueva_ciudad" placeholder="Ciudad" />
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="nuevo_codigo_postal" placeholder="Código Postal" />
                         </div>
                     </div>
                     <div class="form-check mt-2">
