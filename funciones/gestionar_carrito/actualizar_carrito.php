@@ -1,22 +1,9 @@
 <?php
 session_start();
-include('../conexion.php');
+include('../../conexion.php');
 
-// Obtener datos de la solicitud
-$idProducto = $_POST['idProducto'] ?? null;
-$categoria = $_POST['categoria'] ?? null;
-$cantidad = $_POST['cantidad'] ?? 1;
-
-if (!$idProducto || !$categoria) {
-    echo json_encode(['error' => 'Datos incompletos.']);
-    exit;
-}
-
-// Validar cantidad
-$cantidad = max(1, (int)$cantidad);
-
-// Cargar promociones activas
-$hoy = date('Y-m-d H:i:s');
+// Obtener las promociones activas
+$hoy = date('Y-m-d H:i:s'); // Fecha y hora actual
 $queryPromociones = "SELECT * FROM promocion WHERE fecha_inicio <= '$hoy' AND fecha_fin >= '$hoy'";
 $resultadoPromociones = $conexion->query($queryPromociones);
 
@@ -27,50 +14,100 @@ if ($resultadoPromociones->num_rows > 0) {
     }
 }
 
-// Función para calcular precio promocional
-function calcularPrecioPromocional($precio, $descuento) {
+// Función para calcular el precio promocional
+function calcularPrecioPromocional($precio, $descuento)
+{
     return $precio - ($precio * $descuento / 100);
 }
 
-// Función para buscar promoción activa
-function obtenerPromocion($productoId, $categoria, $promociones) {
+// Función para buscar una promoción activa para un producto
+function obtenerPromocion($productoId, $categoria)
+{
+    global $promociones; // Asegúrate de que $promociones está disponible dentro de esta función
+
     foreach ($promociones as $promo) {
-        if (($categoria === 'hamburguesa' && isset($promo['id_hamburguesa']) && $promo['id_hamburguesa'] == $productoId) ||
+        if (
+            ($categoria === 'hamburguesa' && isset($promo['id_hamburguesa']) && $promo['id_hamburguesa'] == $productoId) ||
             ($categoria === 'bebida' && isset($promo['id_bebida']) && $promo['id_bebida'] == $productoId) ||
             ($categoria === 'acompaniamiento' && isset($promo['id_acompaniamiento']) && $promo['id_acompaniamiento'] == $productoId) ||
             ($categoria === 'postre' && isset($promo['id_postre']) && $promo['id_postre'] == $productoId) ||
-            ($categoria === 'combo' && isset($promo['id_combo']) && $promo['id_combo'] == $productoId)) {
+            ($categoria === 'combo' && isset($promo['id_combo']) && $promo['id_combo'] == $productoId)
+        ) {
             return $promo;
         }
     }
     return null;
 }
 
-// Actualizar carrito
-if (isset($_SESSION['carrito'][$categoria][$idProducto])) {
-    $producto = &$_SESSION['carrito'][$categoria][$idProducto];
+if (isset($_POST['idProducto'], $_POST['categoria'], $_POST['cantidad'])) {
+    $idProducto = $_POST['idProducto'];
+    $categoria = $_POST['categoria'];
+    $cantidad = $_POST['cantidad'];
 
-    // Verificar promoción
-    $promocion = obtenerPromocion($idProducto, $categoria, $promociones);
-    $precio = $promocion ? calcularPrecioPromocional($producto['precio'], $promocion['porcentaje_descuento']) : $producto['precio'];
-
-    // Actualizar cantidad y subtotal
-    $producto['cantidad'] = $cantidad;
-    $producto['subtotal'] = $precio * $cantidad; // Asegúrate de que el subtotal también se almacene en el carrito
-
-
-    // Recalcular total
-    $total = 0;
-    foreach ($_SESSION['carrito'] as $productos) {
-        foreach ($productos as $item) {
-            $itemPromocion = obtenerPromocion($item['id'], $categoria, $promociones);
-            $itemPrecio = $itemPromocion ? calcularPrecioPromocional($item['precio'], $itemPromocion['porcentaje_descuento']) : $item['precio'];
-            $total += $itemPrecio * $item['cantidad'];
-        }        
+    // Verificar que la cantidad sea válida
+    if ($cantidad < 1) {
+        echo json_encode(['error' => 'La cantidad debe ser al menos 1']);
+        exit;
     }
 
-    echo json_encode(['subtotal' => $subtotal, 'total' => $total]);
+    // Verificar si el producto está en el carrito
+    if (isset($_SESSION['carrito'][$categoria][$idProducto])) {
+        // Actualizar la cantidad del producto
+        $_SESSION['carrito'][$categoria][$idProducto]['cantidad'] = $cantidad;
+
+        // Obtener el producto del carrito
+        $producto = $_SESSION['carrito'][$categoria][$idProducto];
+        $precioUnitario = $producto['precio'];
+
+        // Verificar si tiene promoción
+        $promocion = obtenerPromocion($idProducto, $categoria);
+        if ($promocion) {
+            $precioUnitario = calcularPrecioPromocional($producto['precio'], $promocion['porcentaje_descuento']);
+        }
+
+        // Calcular el subtotal
+        $subtotal = $precioUnitario * $cantidad;
+
+        // Calcular el total del carrito
+        $total = calcularTotalCarrito();
+
+        // Devolver los datos actualizados en JSON
+        echo json_encode([
+            'subtotal' => '$' . number_format($subtotal, 0, ',', '.'),
+            'total' => '$' . number_format($total, 0, ',', '.')
+        ]);
+    } else {
+        echo json_encode(['error' => 'Producto no encontrado en el carrito']);
+    }
 } else {
-    echo json_encode(['error' => 'Producto no encontrado en el carrito.']);
+    echo json_encode(['error' => 'Datos insuficientes']);
 }
+
+
+
+// Función para calcular el total del carrito
+function calcularTotalCarrito()
+{
+    $total = 0;
+    foreach ($_SESSION['carrito'] as $categoria => $productos) {
+        foreach ($productos as $producto) {
+            $precioUnitario = $producto['precio']; // Precio base
+
+            // Obtener la promoción activa para el producto
+            $promocion = obtenerPromocion($producto['idProducto'], $categoria);
+            // Si hay promoción, aplicar descuento
+            if ($promocion) {
+                $precioUnitario = calcularPrecioPromocional($producto['precio'], $promocion['porcentaje_descuento']);
+            }
+
+            $cantidad = $producto['cantidad'];
+
+            // Acumular en el total
+            $total += $precioUnitario * $cantidad;
+        }
+    }
+
+    return $total;
+}
+
 ?>
