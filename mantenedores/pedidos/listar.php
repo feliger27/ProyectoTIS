@@ -17,25 +17,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pedido'], $_POST['
     $stmt_actual->execute();
     $result_actual = $stmt_actual->get_result();
     $pedido = $result_actual->fetch_assoc();
-    $estado_actual = $pedido['estado_pedido'];
-    $correo_usuario = $pedido['correo_electronico'];
 
-    // Actualizar solo si el estado cambia
-    if ($estado_actual !== $nuevo_estado) {
-        $sql_update = "UPDATE pedido SET estado_pedido = ? WHERE id_pedido = ?";
-        $stmt_update = $conexion->prepare($sql_update);
-        $stmt_update->bind_param("si", $nuevo_estado, $id_pedido);
-        
-        if ($stmt_update->execute()) {
-            $mensaje_exito = "El estado del pedido #$id_pedido se actualizó correctamente a '$nuevo_estado'.";
+    if (!$pedido) {
+        $mensaje_error = "Error: No se encontró el pedido con ID #$id_pedido.";
+    } else {
+        $estado_actual = $pedido['estado_pedido'];
+        $correo_usuario = $pedido['correo_electronico'];
 
-            // Enviar notificación al cliente usando enviarCorreoNotificacion
-            $notificacion_result = enviarCorreoNotificacion($id_pedido, $nuevo_estado, $correo_usuario);
-            if ($notificacion_result !== true) {
-                $mensaje_error = "Estado actualizado, pero ocurrió un error al enviar la notificación: $notificacion_result";
+        // Actualizar solo si el estado cambia
+        if ($estado_actual !== $nuevo_estado) {
+            $sql_update = "UPDATE pedido SET estado_pedido = ? WHERE id_pedido = ?";
+            $stmt_update = $conexion->prepare($sql_update);
+            $stmt_update->bind_param("si", $nuevo_estado, $id_pedido);
+
+            if ($stmt_update->execute()) {
+                $mensaje_exito = "El estado del pedido #$id_pedido se actualizó correctamente a '$nuevo_estado'.";
+
+                // Enviar notificación al cliente usando enviarCorreoNotificacion
+                $notificacion_result = enviarCorreoNotificacion($id_pedido, $nuevo_estado, $correo_usuario);
+                if ($notificacion_result !== true) {
+                    $mensaje_error = "Estado actualizado, pero ocurrió un error al enviar la notificación: $notificacion_result";
+                }
+            } else {
+                $mensaje_error = "Error al actualizar el estado del pedido: " . $stmt_update->error;
             }
-        } else {
-            $mensaje_error = "Error al actualizar el estado del pedido: " . $stmt_update->error;
         }
     }
 }
