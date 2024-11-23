@@ -19,22 +19,18 @@ $total = 0;
                 <th>Acciones</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="carrito-body">
             <?php if (!empty($_SESSION['carrito'])): ?>
                 <?php foreach ($_SESSION['carrito'] as $tipo => $productos): ?>
                     <?php foreach ($productos as $producto): ?>
-                        <tr>
+                        <tr data-producto-id="<?= $producto['id'] ?>" data-tipo-producto="<?= $tipo ?>">
                             <td><?= $producto['nombre'] ?></td>
                             <td>
-                                <form action="../funciones/gestionar_carrito/actualizar_carrito.php" method="POST" class="d-inline">
-                                    <input type="hidden" name="producto_id" value="<?= $producto['id'] ?>">
-                                    <input type="hidden" name="tipo_producto" value="<?= $tipo ?>">
-                                    <input type="number" name="cantidad" value="<?= $producto['cantidad'] ?>" min="1" class="form-control w-50 d-inline">
-                                    <button type="submit" class="btn btn-primary btn-sm">Actualizar</button>
-                                </form>
+                                <input type="number" name="cantidad" value="<?= $producto['cantidad'] ?>" min="1" 
+                                       class="form-control w-50 cantidad-input">
                             </td>
                             <td>$<?= $producto['precio'] ?></td>
-                            <td>$<?= $producto['precio'] * $producto['cantidad'] ?></td>
+                            <td class="subtotal">$<?= $producto['precio'] * $producto['cantidad'] ?></td>
                             <td>
                                 <form action="../funciones/gestionar_carrito/eliminar_carrito.php" method="POST" class="d-inline">
                                     <input type="hidden" name="producto_id" value="<?= $producto['id'] ?>">
@@ -55,7 +51,7 @@ $total = 0;
         <tfoot>
             <tr>
                 <th colspan="3">Total</th>
-                <th colspan="2">$<?= $total ?></th>
+                <th colspan="2" id="total">$<?= $total ?></th>
             </tr>
         </tfoot>
     </table>
@@ -69,5 +65,40 @@ $total = 0;
         <a href="index-pago.php" class="btn btn-success">Proceder al Pago</a>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const cantidadInputs = document.querySelectorAll('.cantidad-input');
+        
+        cantidadInputs.forEach(input => {
+            input.addEventListener('change', function () {
+                const row = this.closest('tr');
+                const productoId = row.dataset.productoId;
+                const tipoProducto = row.dataset.tipoProducto;
+                const nuevaCantidad = this.value;
+
+                // Realizar solicitud AJAX para actualizar el carrito
+                fetch('../funciones/gestionar_carrito/actualizar_carrito.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ producto_id: productoId, tipo_producto: tipoProducto, cantidad: nuevaCantidad })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Actualizar el subtotal y el total
+                        row.querySelector('.subtotal').textContent = `$${data.subtotal}`;
+                        document.getElementById('total').textContent = `$${data.total}`;
+                    } else {
+                        alert('No se pudo actualizar el carrito.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al actualizar el carrito:', error);
+                });
+            });
+        });
+    });
+</script>
 
 <?php include '../includes/footer.php'; ?>
