@@ -3,8 +3,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-include '../includes/header.php';
-
 // Verificar si el usuario ha iniciado sesión
 if (!isset($_SESSION['username'])) {
     // Si no está logueado, redirigir al login
@@ -14,7 +12,7 @@ if (!isset($_SESSION['username'])) {
 
 // Conectar a la base de datos para obtener hamburguesas destacadas y acompañamientos más vendidos
 include '../conexion.php';
-
+include '../includes/header.php';
 // Consulta para obtener las tres hamburguesas destacadas
 $query_hamburguesas_destacadas = "
     SELECT h.nombre_hamburguesa, h.descripcion, h.imagen, AVG(v.cantidad_estrellas) AS rating
@@ -25,15 +23,14 @@ $query_hamburguesas_destacadas = "
     LIMIT 3";
 $hamburguesas_destacadas = mysqli_query($conexion, $query_hamburguesas_destacadas);
 
-// Check if the query was successful
+// Verificar si la consulta fue exitosa
 if (!$hamburguesas_destacadas) {
-    die("Error in the hamburgers query: " . mysqli_error($conexion));
+    die("Error en la consulta de hamburguesas: " . mysqli_error($conexion));
 }
-
 
 // Consulta para obtener los tres acompañamientos más vendidos
 $query_acompanamientos_vendidos = "
-    SELECT a.nombre_acompaniamiento AS nombre, a.imagen, SUM(pa.cantidad) AS total_vendido
+    SELECT a.nombre_acompaniamiento, a.imagen, SUM(pa.cantidad) AS total_vendido
     FROM acompaniamiento a
     LEFT JOIN pedido_acompaniamiento pa ON a.id_acompaniamiento = pa.id_acompaniamiento
     GROUP BY a.id_acompaniamiento
@@ -41,17 +38,18 @@ $query_acompanamientos_vendidos = "
     LIMIT 3";
 $acompanamientos_vendidos = mysqli_query($conexion, $query_acompanamientos_vendidos);
 
-// Verificar si la consulta fue exitosa
+// Verifica si la consulta fue exitosa
 if (!$acompanamientos_vendidos) {
     die("Error en la consulta de acompañamientos más vendidos: " . mysqli_error($conexion));
 }
 
-// Verificar si se encontraron menos de 3 acompañamientos vendidos y completar con otros acompañamientos si es necesario
+// Verifica el contenido de los datos (esto es opcional, puedes eliminarlo después de la verificación)
 $acompanamientos = [];
 while ($row = mysqli_fetch_assoc($acompanamientos_vendidos)) {
     $acompanamientos[] = $row;
 }
 
+// Verificar si hay menos de 3 acompañamientos y completar con otros
 if (count($acompanamientos) < 3) {
     $faltantes = 3 - count($acompanamientos);
     $query_acompanamientos_extra = "SELECT nombre_acompaniamiento AS nombre, imagen FROM acompaniamiento LIMIT $faltantes";
@@ -64,6 +62,7 @@ if (count($acompanamientos) < 3) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -96,12 +95,14 @@ if (count($acompanamientos) < 3) {
         .hero-text {
             margin-bottom: 100px;
         }
+
         .hero-text h1 {
             font-size: 3.5rem;
             font-weight: bold;
             margin: 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
         }
+
         .hero-text p {
             font-size: 1.5rem;
             margin: 10px 0 20px;
@@ -116,9 +117,11 @@ if (count($acompanamientos) < 3) {
             border-radius: 8px;
             transition: all 0.3s ease;
         }
+
         .cta-buttons .btn-warning {
             color: #000;
         }
+
         .cta-buttons .btn:hover {
             transform: scale(1.05);
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
@@ -136,6 +139,7 @@ if (count($acompanamientos) < 3) {
             flex-direction: column;
             align-items: center;
         }
+
         .products-section h2 {
             font-size: 2.5rem;
             font-weight: bold;
@@ -143,6 +147,7 @@ if (count($acompanamientos) < 3) {
             margin-bottom: 20px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
         }
+
         .products-section h3 {
             font-size: 1.8rem;
             font-weight: bold;
@@ -151,6 +156,7 @@ if (count($acompanamientos) < 3) {
             margin-top: 20px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
         }
+
         .products-section .card {
             border: none;
             background-color: transparent;
@@ -161,27 +167,31 @@ if (count($acompanamientos) < 3) {
             margin: 15px;
             border-radius: 10px;
         }
+
         .products-section .card img {
             border-radius: 10px 10px 0 0;
             width: 100%;
             height: auto;
         }
+
         .products-section .card:hover {
             transform: scale(1.05);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
         }
+
         .card-title {
             font-weight: bold;
             font-size: 1.2rem;
             text-decoration: none !important;
         }
+
         .card-text {
             font-size: 1rem;
             text-decoration: none !important;
         }
 
         .card-link {
-        text-decoration: none !important;
+            text-decoration: none !important;
         }
 
 
@@ -193,6 +203,7 @@ if (count($acompanamientos) < 3) {
             border-radius: 8px;
             transition: background-color 0.3s ease, transform 0.3s;
         }
+
         .products-section .btn-primary:hover {
             background-color: #e0a800;
             transform: scale(1.05);
@@ -204,6 +215,7 @@ if (count($acompanamientos) < 3) {
             color: gold;
             font-size: 1.5rem;
         }
+
         .stars span {
             margin-right: 5px;
         }
@@ -214,6 +226,7 @@ if (count($acompanamientos) < 3) {
         }
     </style>
 </head>
+
 <body>
 
     <!-- Contenido Flotante Principal -->
@@ -224,7 +237,7 @@ if (count($acompanamientos) < 3) {
             <p>¡Explora nuestro menú y realiza tu pedido ahora!</p>
             <div class="cta-buttons">
                 <a href="index-menu.php" class="btn btn-warning">Ver Menú</a>
-                <a href="promociones.php" class="btn btn-light">Ver Promociones</a>
+                <a href="index-promociones.php" class="btn btn-light">Ver Promociones</a>
             </div>
         </div>
     </div>
@@ -236,18 +249,20 @@ if (count($acompanamientos) < 3) {
         <div class="row justify-content-center">
             <?php while ($hamburguesa = mysqli_fetch_assoc($hamburguesas_destacadas)): ?>
                 <div class="col-md-4 mb-4 d-flex justify-content-center">
-                    <a href="detalle-producto.php?nombre=<?php echo urlencode($hamburguesa['nombre_hamburguesa']); ?>" class="card-link">
+                    <a href="detalle-producto.php?nombre=<?php echo urlencode($hamburguesa['nombre_hamburguesa']); ?>&tipo=hamburguesa"
+                        class="card-link">
                         <div class="card">
-                            <img src="<?php echo '../uploads/hamburguesas/' . $hamburguesa['imagen']; ?>" alt="Imagen de <?php echo $hamburguesa['nombre_hamburguesa']; ?>" class="card-img-top">
+                            <img src="<?php echo '../uploads/hamburguesas/' . $hamburguesa['imagen']; ?>"
+                                alt="Imagen de <?php echo $hamburguesa['nombre_hamburguesa']; ?>" class="card-img-top">
                             <div class="card-body text-center">
                                 <h5 class="card-title"><?php echo $hamburguesa['nombre_hamburguesa']; ?></h5>
                                 <p class="card-text"><?php echo $hamburguesa['descripcion']; ?></p>
                                 <div class="stars">
                                     <?php
-                                        $rating = round($hamburguesa['rating']); // Redondear la puntuación a un entero
-                                        for ($i = 1; $i <= 5; $i++) {
-                                            echo $i <= $rating ? '<span>&#9733;</span>' : '<span>&#9734;</span>';
-                                        }
+                                    $rating = round($hamburguesa['rating']); // Redondear la puntuación a un entero
+                                    for ($i = 1; $i <= 5; $i++) {
+                                        echo $i <= $rating ? '<span>&#9733;</span>' : '<span>&#9734;</span>';
+                                    }
                                     ?>
                                 </div>
                             </div>
@@ -261,11 +276,14 @@ if (count($acompanamientos) < 3) {
         <div class="row justify-content-center">
             <?php foreach ($acompanamientos as $acompanamiento): ?>
                 <div class="col-md-4 mb-4 d-flex justify-content-center">
-                    <a href="detalle-producto.php?nombre=<?php echo urlencode($acompanamiento['nombre']); ?>" class="card-link">
+                    <!-- Asegúrate de que el campo sea correcto (nombre, nombre_acompaniamiento, etc.) -->
+                    <a href="detalle-producto.php?nombre=<?php echo urlencode($acompanamiento['nombre_acompaniamiento']); ?>&tipo=acompaniamiento"
+                        class="card-link">
                         <div class="card">
-                            <img src="<?php echo '../uploads/acompaniamientos/' . $acompanamiento['imagen']; ?>" alt="Imagen de <?php echo $acompanamiento['nombre']; ?>" class="card-img-top">
+                            <img src="<?php echo '../uploads/acompaniamientos/' . $acompanamiento['imagen']; ?>"
+                                alt="Imagen de <?php echo $acompanamiento['nombre_acompaniamiento']; ?>" class="card-img-top">
                             <div class="card-body text-center">
-                                <h5 class="card-title"><?php echo $acompanamiento['nombre']; ?></h5>
+                                <h5 class="card-title"><?php echo $acompanamiento['nombre_acompaniamiento']; ?></h5>
                                 <p class="card-text">¡Uno de los más populares!</p>
                             </div>
                         </div>
@@ -275,7 +293,8 @@ if (count($acompanamientos) < 3) {
         </div>
     </section>
 
-    <?php include '../includes/footer.php'; ?>           
+    <?php include '../includes/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

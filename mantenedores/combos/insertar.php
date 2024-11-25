@@ -20,23 +20,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $postres = $_POST['postre_id'] ?? [];
     $cantidadesPostres = $_POST['cantidad_postre'] ?? [];
 
-    // Lógica de carga de imagen
-    $imagen_path = NULL;
-    if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] == UPLOAD_ERR_OK) {
-        $target_dir = "uploads/";
-        if (!file_exists($target_dir)) {
-            mkdir($target_dir, 0777, true);
-        }
-        $target_file = $target_dir . basename($_FILES['imagen']['name']);
-        if (move_uploaded_file($_FILES['imagen']['tmp_name'], $target_file)) {
-            $imagen_path = $target_file;
+    // Procesamiento de la imagen
+    $nombre_imagen = '';
+    if ($_FILES['imagen']['error'] == UPLOAD_ERR_OK) {
+        $nombre_imagen = $_FILES['imagen']['name'];
+        $ruta_temporal = $_FILES['imagen']['tmp_name'];
+        $ruta_destino = "../../uploads/combos/" . $nombre_imagen;
+
+        if (!move_uploaded_file($ruta_temporal, $ruta_destino)) {
+            echo "<div class='alert alert-danger' role='alert'>Error al subir la imagen.</div>";
+            exit;
         }
     }
 
     // Inserción del nuevo combo
     $sql = "INSERT INTO combo (nombre_combo, descripcion, precio, imagen) VALUES (?, ?, ?, ?)";
     $stmt = $conexion->prepare($sql);
-    $stmt->bind_param("ssds", $nombre_combo, $descripcion, $precio, $imagen_path);
+    $stmt->bind_param("ssds", $nombre_combo, $descripcion, $precio, $nombre_imagen);
 
     if ($stmt->execute()) {
         $id_combo = $stmt->insert_id;
@@ -68,6 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Agregar Nuevo Combo</title>
@@ -77,10 +78,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             const contenedor = document.getElementById(`${categoria}-container`);
             const selects = contenedor.querySelectorAll('select');
             const cantidades = contenedor.querySelectorAll('input[type="number"]');
-            
+
             // Verificar que todas las casillas actuales estén llenas
             const todasLlenas = Array.from(selects).every(select => select.value) &&
-                                Array.from(cantidades).every(input => input.value > 0);
+                Array.from(cantidades).every(input => input.value > 0);
 
             if (todasLlenas) {
                 const selectHTML = contenedor.querySelector('select').outerHTML;
@@ -95,12 +96,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 eliminarBtn.className = "btn btn-danger ms-2";
                 eliminarBtn.textContent = "Eliminar";
                 eliminarBtn.onclick = () => nuevoElemento.remove();
-                
+
                 nuevoElemento.appendChild(eliminarBtn);
                 contenedor.appendChild(nuevoElemento);
 
-                // Agregar evento para actualizar las opciones al cambiar la selección
-                nuevoElemento.querySelector('select').addEventListener('change', function() {
+                // Establecer cantidad a 1 por defecto y evitar menos de 1
+                const nuevoSelect = nuevoElemento.querySelector('select');
+                const nuevaCantidad = nuevoElemento.querySelector('input[type="number"]');
+                nuevaCantidad.value = 1;
+                nuevaCantidad.min = 1;
+                nuevoSelect.addEventListener('change', () => {
+                    nuevaCantidad.value = 1;
                     actualizarOpciones(categoria);
                 });
                 actualizarOpciones(categoria);
@@ -128,10 +134,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 const selects = contenedor.querySelectorAll('select');
                 const cantidades = contenedor.querySelectorAll('input[type="number"]');
 
-                // Verificar si hay algún select con un valor sin una cantidad especificada
                 for (let i = 0; i < selects.length; i++) {
-                    if (selects[i].value && (!cantidades[i].value || cantidades[i].value <= 0)) {
-                        alert(`Por favor, especifique una cantidad para cada ${categoria.slice(0, -1)} seleccionado.`);
+                    if (selects[i].value && (!cantidades[i].value || cantidades[i].value < 1)) {
+                        alert(`Por favor, especifique una cantidad válida para cada ${categoria.slice(0, -1)} seleccionado.`);
                         return false;
                     }
                 }
@@ -140,8 +145,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     </script>
 </head>
+
 <body class="container py-5">
-    <h1 class="mb-4">Agregar Nuevo Combo</h1>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Agregar Nuevo Combo</h1>
+        <button class="btn btn-secondary" onclick="window.location.href='listar.php'">Volver</button>
+    </div>
     <form action="insertar.php" method="POST" onsubmit="return validarFormulario()" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="nombre_combo" class="form-label">Nombre del Combo:</label>
@@ -165,28 +174,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <select name="hamburguesa_id[]" class="form-select" onchange="actualizarOpciones('hamburguesas')">
                     <option value="" selected disabled>Seleccione una Hamburguesa</option>
                     <?php foreach ($hamburguesas as $hamburguesa): ?>
-                        <option value="<?= $hamburguesa['id_hamburguesa'] ?>"><?= $hamburguesa['nombre_hamburguesa'] ?></option>
+                        <option value="<?= $hamburguesa['id_hamburguesa'] ?>"><?= $hamburguesa['nombre_hamburguesa'] ?>
+                        </option>
                     <?php endforeach; ?>
                 </select>
-                <input type="number" name="cantidad_hamburguesa[]" class="form-control" placeholder="Cantidad">
+                <input type="number" name="cantidad_hamburguesa[]" class="form-control" placeholder="Cantidad" value="1"
+                    min="1">
             </div>
         </div>
-        <button type="button" class="btn btn-secondary" onclick="agregarElemento('hamburguesas')">Agregar Hamburguesa</button>
+        <button type="button" class="btn btn-secondary" onclick="agregarElemento('hamburguesas')">Agregar
+            Hamburguesa</button>
 
         <!-- Acompañamientos -->
         <h2 class="my-4">Acompañamientos</h2>
         <div id="acompaniamientos-container" class="mb-3">
             <div class="input-group mb-2">
-                <select name="acompaniamiento_id[]" class="form-select" onchange="actualizarOpciones('acompaniamientos')">
+                <select name="acompaniamiento_id[]" class="form-select"
+                    onchange="actualizarOpciones('acompaniamientos')">
                     <option value="" selected disabled>Seleccione un Acompañamiento</option>
                     <?php foreach ($acompaniamientos as $acompaniamiento): ?>
-                        <option value="<?= $acompaniamiento['id_acompaniamiento'] ?>"><?= $acompaniamiento['nombre_acompaniamiento'] ?></option>
+                        <option value="<?= $acompaniamiento['id_acompaniamiento'] ?>">
+                            <?= $acompaniamiento['nombre_acompaniamiento'] ?></option>
                     <?php endforeach; ?>
                 </select>
-                <input type="number" name="cantidad_acompaniamiento[]" class="form-control" placeholder="Cantidad">
+                <input type="number" name="cantidad_acompaniamiento[]" class="form-control" placeholder="Cantidad"
+                    value="1" min="1">
             </div>
         </div>
-        <button type="button" class="btn btn-secondary" onclick="agregarElemento('acompaniamientos')">Agregar Acompañamiento</button>
+        <button type="button" class="btn btn-secondary" onclick="agregarElemento('acompaniamientos')">Agregar
+            Acompañamiento</button>
 
         <!-- Bebidas -->
         <h2 class="my-4">Bebidas</h2>
@@ -198,7 +214,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <option value="<?= $bebida['id_bebida'] ?>"><?= $bebida['nombre_bebida'] ?></option>
                     <?php endforeach; ?>
                 </select>
-                <input type="number" name="cantidad_bebida[]" class="form-control" placeholder="Cantidad">
+                <input type="number" name="cantidad_bebida[]" class="form-control" placeholder="Cantidad" value="1"
+                    min="1">
             </div>
         </div>
         <button type="button" class="btn btn-secondary" onclick="agregarElemento('bebidas')">Agregar Bebida</button>
@@ -213,18 +230,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <option value="<?= $postre['id_postre'] ?>"><?= $postre['nombre_postre'] ?></option>
                     <?php endforeach; ?>
                 </select>
-                <input type="number" name="cantidad_postre[]" class="form-control" placeholder="Cantidad">
+                <input type="number" name="cantidad_postre[]" class="form-control" placeholder="Cantidad" value="1"
+                    min="1">
             </div>
         </div>
         <button type="button" class="btn btn-secondary" onclick="agregarElemento('postres')">Agregar Postre</button>
 
         <!-- Campo de imagen opcional -->
-        <div class="mb-3 mt-5">
-            <label for="imagen" class="form-label">Imagen del Combo (Opcional):</label>
-            <input type="file" name="imagen" id="imagen" class="form-control" accept="image/*">
+        <div class="mb-3">
+            <label for="imagen" class="form-label">Imagen:</label>
+            <input type="file" name="imagen" id="imagen" class="form-control">
         </div>
 
         <button type="submit" class="btn btn-primary mt-4">Guardar Combo</button>
     </form>
 </body>
+
 </html>

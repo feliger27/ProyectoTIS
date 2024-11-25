@@ -28,6 +28,10 @@ if ($promocion['id_hamburguesa'] !== null) {
     $tipo_producto = 'acompaniamiento';
     $id_producto = $promocion['id_acompaniamiento'];
 }
+ elseif ($promocion['id_combo'] !== null) {
+    $tipo_producto = 'combo';
+    $id_producto = $promocion['id_combo'];
+}
 
 // Procesar la actualización al enviar el formulario
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -41,13 +45,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Determinar el campo id_producto para actualizar en la tabla promocion
     $sql_update = "UPDATE promocion SET nombre_promocion=?, descripcion_promocion=?, fecha_inicio=?, fecha_fin=?, porcentaje_descuento=?, 
-                   id_hamburguesa=NULL, id_postre=NULL, id_bebida=NULL, id_acompaniamiento=NULL, ";
+                   id_hamburguesa=NULL, id_postre=NULL, id_bebida=NULL, id_acompaniamiento=NULL, id_combo=NULL, ";
     $campo_id = null;
 
     if ($tipo_producto == "hamburguesa") $campo_id = 'id_hamburguesa';
     elseif ($tipo_producto == "postre") $campo_id = 'id_postre';
     elseif ($tipo_producto == "bebida") $campo_id = 'id_bebida';
     elseif ($tipo_producto == "acompaniamiento") $campo_id = 'id_acompaniamiento';
+    elseif ($tipo_producto == "combo") $campo_id = 'id_combo';
 
     $sql_update .= "$campo_id=? WHERE id_promocion=?";
     $stmt = $conexion->prepare($sql_update);
@@ -121,6 +126,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <option value="postre" <?php if ($tipo_producto == 'postre') echo 'selected'; ?>>Postre</option>
                 <option value="bebida" <?php if ($tipo_producto == 'bebida') echo 'selected'; ?>>Bebida</option>
                 <option value="acompaniamiento" <?php if ($tipo_producto == 'acompaniamiento') echo 'selected'; ?>>Acompañamiento</option>
+                <option value="combo" <?php if ($tipo_producto == 'combo') echo 'selected'; ?>>Combo</option>
             </select>
         </div>
 

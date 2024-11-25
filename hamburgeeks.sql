@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 14-11-2024 a las 17:44:04
+-- Tiempo de generación: 21-11-2024 a las 01:29:35
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -137,9 +137,12 @@ CREATE TABLE `combo` (
 --
 
 INSERT INTO `combo` (`id_combo`, `nombre_combo`, `descripcion`, `precio`, `imagen`) VALUES
-(10, 'Combo Clásico', 'Un combo tradicional con una deliciosa hamburguesa clásica, acompañada de papas fritas y una bebida refrescante.', 7500, NULL),
-(11, 'Combo Deluxe', 'Disfruta de una experiencia completa con una hamburguesa BBQ, aros de cebolla y una Fanta.', 8000, NULL),
-(12, 'Combo Familiar', 'Perfecto para compartir, incluye varias hamburguesas y acompañamientos.', 25000, NULL);
+(13, 'Combo Clásico', 'Disfruta del clásico sabor que nunca pasa de moda con nuestro Combo Clásico, que incluye una deliciosa hamburguesa clásica con ingredientes frescos, crujientes papas fritas, una refrescante Coca-Cola y un cremoso helado de vainilla para el toque dulce per', 9990, 'clasico.jpg'),
+(14, 'Combo Vegetariano', 'El Combo Vegetariano es la opción perfecta para quienes buscan sabor sin carne. Incluye una deliciosa hamburguesa vegetariana con ingredientes frescos, unas irresistibles empanaditas de queso, agua gasificada para refrescarte, y una dulce gelatina de fres', 8990, 'vegetariano.jpg'),
+(15, 'Combo Infantil', 'El Combo Infantil está diseñado para los pequeños con grandes antojos. Incluye una deliciosa hamburguesa clásica en tamaño ideal, crujientes nuggets de pollo, una refrescante Sprite, y un helado de fresa para el toque dulce que tanto les encanta.', 9490, 'infantil.jpg'),
+(16, 'Combo Duo Clásico', 'Comparte el sabor clásico con nuestro Combo Duo Clásico, perfecto para dos. Incluye dos hamburguesas clásicas, unas deliciosas empanaditas de queso, papas fritas crujientes, dos refrescantes Coca-Colas, y un helado de fresa y otro de vainilla para un dulc', 19990, 'duo_clasico.jpg'),
+(17, 'Combo Doble Energía', 'Recarga energías con el Combo Doble Energía, que combina una jugosa hamburguesa BBQ Bacon y una deliciosa hamburguesa de pollo BBQ, acompañadas de aros de cebolla, papas fritas, una Monster, un Red Bull y dos irresistibles brownies de chocolate para cerra', 21990, 'doble_energia.jpg'),
+(18, 'Combo Familiar', 'El Combo Familiar es la elección ideal para compartir momentos inolvidables. Incluye cuatro hamburguesas únicas: BBQ Bacon, Clásica, con Champiñones e Italiana, acompañadas de aros de cebolla, empanaditas de queso, dos porciones de papas fritas, refrescos', 39990, 'familiar.jpg');
 
 -- --------------------------------------------------------
 
@@ -158,10 +161,16 @@ CREATE TABLE `combo_acompaniamiento` (
 --
 
 INSERT INTO `combo_acompaniamiento` (`id_combo`, `id_acompaniamiento`, `cantidad`) VALUES
-(10, 1, 1),
-(11, 2, 1),
-(12, 1, 2),
-(12, 2, 2);
+(13, 1, 1),
+(14, 7, 1),
+(15, 4, 1),
+(16, 1, 1),
+(16, 7, 1),
+(17, 1, 1),
+(17, 2, 1),
+(18, 1, 2),
+(18, 2, 1),
+(18, 7, 1);
 
 -- --------------------------------------------------------
 
@@ -180,10 +189,15 @@ CREATE TABLE `combo_bebida` (
 --
 
 INSERT INTO `combo_bebida` (`id_combo`, `id_bebida`, `cantidad`) VALUES
-(10, 1, 1),
-(11, 2, 1),
-(12, 1, 2),
-(12, 2, 2);
+(13, 1, 1),
+(14, 9, 1),
+(15, 3, 1),
+(16, 1, 2),
+(17, 5, 1),
+(17, 6, 1),
+(18, 1, 2),
+(18, 2, 1),
+(18, 3, 1);
 
 -- --------------------------------------------------------
 
@@ -202,10 +216,16 @@ CREATE TABLE `combo_hamburguesa` (
 --
 
 INSERT INTO `combo_hamburguesa` (`id_combo`, `id_hamburguesa`, `cantidad`) VALUES
-(10, 1, 1),
-(11, 2, 1),
-(12, 1, 2),
-(12, 2, 2);
+(13, 1, 1),
+(14, 5, 1),
+(15, 1, 1),
+(16, 1, 2),
+(17, 2, 1),
+(17, 7, 1),
+(18, 1, 1),
+(18, 2, 1),
+(18, 6, 1),
+(18, 8, 1);
 
 -- --------------------------------------------------------
 
@@ -218,6 +238,22 @@ CREATE TABLE `combo_postre` (
   `id_postre` int(11) NOT NULL,
   `cantidad` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `combo_postre`
+--
+
+INSERT INTO `combo_postre` (`id_combo`, `id_postre`, `cantidad`) VALUES
+(13, 1, 1),
+(14, 7, 1),
+(15, 3, 1),
+(16, 1, 1),
+(16, 3, 1),
+(17, 6, 2),
+(18, 1, 1),
+(18, 2, 1),
+(18, 4, 1),
+(18, 5, 1);
 
 -- --------------------------------------------------------
 
@@ -288,7 +324,7 @@ INSERT INTO `hamburguesa` (`id_hamburguesa`, `nombre_hamburguesa`, `descripcion`
 (4, 'Hamburguesa Hawaiana', 'Carne de res, queso suizo, piña a la parrilla, jamón, y salsa de teriyaki.', 5990, 'hawaiana.jpg'),
 (5, 'Hamburguesa Vegetariana', 'Hamburguesa de garbanzos, queso de cabra, aguacate, tomate, y mayonesa de ajo.', 5490, 'vegetariana.jpg'),
 (6, 'Hamburguesa con Champiñones', 'Carne de res, queso suizo, champiñones salteados, cebolla caramelizada, y mayonesa de ajo.', 5990, 'champiniones.jpg'),
-(7, 'Hamburguesa de Pollo BBQ', 'Pechuga de pollo a la parrilla, queso cheddar, lechuga, tomate, y salsa BBQ.', 5990, 'pollo_bbq.jpg'),
+(7, 'Hamburguesa de Pollo BBQ', 'Pechuga de pollo a la parrilla, queso cheddar, lechuga, tomate, y salsa BBQ.', 5490, 'pollo_bbq.jpg'),
 (8, 'Hamburguesa Italiana', 'Carne de res, mozzarella, tomate, albahaca fresca, y pesto.', 6490, 'italiana.jpg');
 
 -- --------------------------------------------------------
@@ -711,15 +747,19 @@ CREATE TABLE `promocion` (
   `id_hamburguesa` int(11) DEFAULT NULL,
   `id_postre` int(11) DEFAULT NULL,
   `id_bebida` int(11) DEFAULT NULL,
-  `id_acompaniamiento` int(11) DEFAULT NULL
+  `id_acompaniamiento` int(11) DEFAULT NULL,
+  `id_combo` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `promocion`
 --
 
-INSERT INTO `promocion` (`id_promocion`, `nombre_promocion`, `descripcion_promocion`, `fecha_inicio`, `fecha_fin`, `porcentaje_descuento`, `id_hamburguesa`, `id_postre`, `id_bebida`, `id_acompaniamiento`) VALUES
-(1, 'Promoción Clásica', '20% de descuento en la hamburguesa clásica', '2024-11-14 13:22:00', '2024-11-15 13:22:00', 20, 1, NULL, NULL, NULL);
+INSERT INTO `promocion` (`id_promocion`, `nombre_promocion`, `descripcion_promocion`, `fecha_inicio`, `fecha_fin`, `porcentaje_descuento`, `id_hamburguesa`, `id_postre`, `id_bebida`, `id_acompaniamiento`, `id_combo`) VALUES
+(2, 'Promoción Clásica', 'asdfasdfasd', '2024-11-19 00:28:00', '2024-11-20 00:28:00', 10, 1, NULL, NULL, NULL, NULL),
+(3, 'asdfasdf', 'asdfasdfasdf', '2024-11-18 00:33:00', '2024-11-27 00:33:00', 50, 2, NULL, NULL, NULL, NULL),
+(4, 'wqf3qefqwefqwef', 'qrqwerqwer', '2024-11-20 12:50:00', '2024-11-29 12:50:00', 90, NULL, NULL, NULL, 1, NULL),
+(5, 'comboooo', 'asfdasdfasdfa', '2024-11-20 14:15:00', '2024-11-29 14:15:00', 50, NULL, NULL, NULL, NULL, 18);
 
 -- --------------------------------------------------------
 
@@ -1154,7 +1194,8 @@ ALTER TABLE `promocion`
   ADD KEY `id_hamburguesa` (`id_hamburguesa`),
   ADD KEY `id_postre` (`id_postre`),
   ADD KEY `id_bebida` (`id_bebida`),
-  ADD KEY `id_acompaniamiento` (`id_acompaniamiento`);
+  ADD KEY `id_acompaniamiento` (`id_acompaniamiento`),
+  ADD KEY `fk_id_combo` (`id_combo`);
 
 --
 -- Indices de la tabla `recompensa`
@@ -1252,7 +1293,7 @@ ALTER TABLE `boleta`
 -- AUTO_INCREMENT de la tabla `combo`
 --
 ALTER TABLE `combo`
-  MODIFY `id_combo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_combo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `direccion`
@@ -1312,7 +1353,7 @@ ALTER TABLE `postre`
 -- AUTO_INCREMENT de la tabla `promocion`
 --
 ALTER TABLE `promocion`
-  MODIFY `id_promocion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_promocion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `recompensa`
@@ -1449,6 +1490,7 @@ ALTER TABLE `pedido_postre`
 -- Filtros para la tabla `promocion`
 --
 ALTER TABLE `promocion`
+  ADD CONSTRAINT `fk_id_combo` FOREIGN KEY (`id_combo`) REFERENCES `combo` (`id_combo`),
   ADD CONSTRAINT `promocion_ibfk_1` FOREIGN KEY (`id_hamburguesa`) REFERENCES `hamburguesa` (`id_hamburguesa`) ON DELETE CASCADE,
   ADD CONSTRAINT `promocion_ibfk_2` FOREIGN KEY (`id_postre`) REFERENCES `postre` (`id_postre`) ON DELETE CASCADE,
   ADD CONSTRAINT `promocion_ibfk_3` FOREIGN KEY (`id_bebida`) REFERENCES `bebida` (`id_bebida`) ON DELETE CASCADE,

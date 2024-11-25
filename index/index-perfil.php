@@ -51,22 +51,6 @@ $stmt_metodos_pago->execute();
 $result_metodos_pago = $stmt_metodos_pago->get_result();
 $metodos_pago = $result_metodos_pago->fetch_all(MYSQLI_ASSOC);
 $stmt_metodos_pago->close();
-
-// sugerenncia de productos
-$suggestion_query = "SELECT p.id_producto, p.nombre_producto, p.imagen_producto, COUNT(*) AS total
-                     FROM pedido_producto pp
-                     JOIN producto p ON pp.id_producto = p.id_producto
-                     WHERE pp.id_usuario = ?
-                     GROUP BY p.id_producto
-                     ORDER BY total DESC
-                     LIMIT 5";
-$stmt_sugerencia = $conexion->prepare($suggestion_query);
-$stmt_sugerencia->bind_param("i", $user_id);
-$stmt_sugerencia->execute();
-$result = $stmt->get_result();
-$suggestions = $result->fetch_all(MYSQLI_ASSOC);
-$stmt_sugerencia->close();                     
-
 ?>
 
 <!DOCTYPE html>
@@ -289,24 +273,7 @@ $stmt_sugerencia->close();
                 </div>
             </div>
         </div>
-        <h2>Sugerencias Basadas en tus Compras Anteriores</h2>
-        <div class="row">
-            <?php foreach ($suggestions as $suggestion): ?>
-                <div class="col-md-4">
-                    <div class="card mb-4">
-                        <img class="card-img-top" src="../uploads/<?= htmlspecialchars($suggestion['imagen_producto']) ?>" alt="<?= htmlspecialchars($suggestion['nombre_producto']) ?>">
-                        <div class="card-body">
-                            <h5 class="card-title"><?= htmlspecialchars($suggestion['nombre_producto']) ?></h5>
-                            <p class="card-text">Recomendado basado en tus compras anteriores.</p>
-                            <a href="producto.php?id_producto=<?= $suggestion['id_producto'] ?>" class="btn btn-primary">Ver Producto</a>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
     </div>
-
-    
 
     <script>
         setTimeout(function () {

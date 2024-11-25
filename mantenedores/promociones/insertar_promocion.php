@@ -16,6 +16,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     elseif ($tipo_producto == "postre") $campo_id = 'id_postre';
     elseif ($tipo_producto == "bebida") $campo_id = 'id_bebida';
     elseif ($tipo_producto == "acompaniamiento") $campo_id = 'id_acompaniamiento';
+    elseif ($tipo_producto == "combo") $campo_id = 'id_combo';
+
 
     // Convertir las fechas a formato Y-m-d H:i:s para la base de datos
     $fecha_inicio = date('Y-m-d H:i:s', strtotime($fecha_inicio));
@@ -105,6 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <option value="postre">Postre</option>
                 <option value="bebida">Bebida</option>
                 <option value="acompaniamiento">Acompañamiento</option>
+                <option value="combo">combo</option>
             </select>
         </div>
 

@@ -7,12 +7,15 @@ $sql = "
            h.nombre_hamburguesa, 
            b.nombre_bebida, 
            po.nombre_postre, 
-           a.nombre_acompaniamiento
+           a.nombre_acompaniamiento,
+           c.nombre_combo
     FROM promocion p
     LEFT JOIN hamburguesa h ON p.id_hamburguesa = h.id_hamburguesa
     LEFT JOIN bebida b ON p.id_bebida = b.id_bebida
     LEFT JOIN postre po ON p.id_postre = po.id_postre
     LEFT JOIN acompaniamiento a ON p.id_acompaniamiento = a.id_acompaniamiento
+    LEFT JOIN combo c ON p.id_combo = c.id_combo
+
 ";
 $result = $conexion->query($sql);
 ?>
@@ -76,6 +79,8 @@ $result = $conexion->query($sql);
                                 echo 'Postre: ' . htmlspecialchars($row['nombre_postre']);
                             } elseif ($row['nombre_acompaniamiento']) {
                                 echo 'Acompañamiento: ' . htmlspecialchars($row['nombre_acompaniamiento']);
+                            } elseif ($row['nombre_combo']) {
+                                echo 'combo: ' . htmlspecialchars($row['nombre_combo']);
                             } else {
                                 echo 'No asignado';
                             }
