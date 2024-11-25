@@ -1,6 +1,7 @@
 <?php
 include '../conexion.php';
 session_start();
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login/login.php");
     exit();
@@ -44,11 +45,16 @@ $tarjetas_guardadas = mysqli_query($conexion, $query_tarjetas);
             <h3 class="card-title">Seleccionar Dirección de Envío</h3>
             <form action="../funciones/procesamiento/procesar-pago.php" method="POST">
                 <div class="mb-3">
-                    <?php while($direccion = mysqli_fetch_assoc($direcciones)): ?>
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" name="direccion_id" value="<?= $direccion['id_direccion'] ?>" required>
-                        </div>
-                    <?php endwhile; ?>
+                    <?php if ($direcciones && mysqli_num_rows($direcciones) > 0): ?>
+                        <?php while($direccion = mysqli_fetch_assoc($direcciones)): ?>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="direccion_id" value="<?= $direccion['id_direccion'] ?>" required>
+                                <label class="form-check-label"><?= $direccion['calle'] ?>, <?= $direccion['numero'] ?> - <?= $direccion['ciudad'] ?></label>
+                            </div>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <p>No se encontraron direcciones guardadas. Por favor, agrega una nueva dirección.</p>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Opción para agregar una nueva dirección -->
@@ -59,16 +65,16 @@ $tarjetas_guardadas = mysqli_query($conexion, $query_tarjetas);
                     <h4>Agregar Nueva Dirección</h4>
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <input type="text" class="form-control" name="nueva_calle" placeholder="Calle" />
+                            <input type="text" class="form-control" id="nueva_calle" name="nueva_calle" placeholder="Calle" required />
                         </div>
                         <div class="col-md-4">
-                            <input type="text" class="form-control" name="nueva_ciudad" placeholder="Ciudad" />
+                            <input type="text" class="form-control" id="nueva_numero" name="nueva_numero" placeholder="Número" required />
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="nueva_ciudad" name="nueva_ciudad" placeholder="Ciudad" required />
                         </div>
                     </div>
-                    <div class="form-check mt-2">
-                        <input type="checkbox" class="form-check-input" name="recordar_direccion" value="1">
-                        <label class="form-check-label">Recordar esta dirección para futuros pedidos</label>
-                    </div>
+                    <button type="button" class="btn btn-success mt-3" id="guardarDireccion">Guardar Dirección</button>
                 </div>
 
                 <h4 class="mt-4">Seleccionar Método de Pago</h4>
@@ -88,56 +94,28 @@ $tarjetas_guardadas = mysqli_query($conexion, $query_tarjetas);
                 </div>
 
                 <!-- Selección de tarjeta guardada -->
-                <div id="tarjetas-guardadas" style="display: none;">
+                <div id="tarjetas-guardadas">
                     <h4>Seleccione una Tarjeta Guardada</h4>
                     <select id="tarjeta_guardada_select" class="form-select">
                         <option value="">Seleccione una tarjeta</option>
-                        <?php while($tarjeta = mysqli_fetch_assoc($tarjetas_guardadas)): ?>
-                            <option value="<?= $tarjeta['id_pago'] ?>"
-                                    data-tipo="<?= $tarjeta['tipo_tarjeta'] ?>"
-                                    data-nombre="<?= $tarjeta['nombre_titular'] ?>"
-                                    data-numero="<?= $tarjeta['numero_tarjeta'] ?>"
-                                    data-fecha="<?= date('m/y', strtotime($tarjeta['fecha_expiracion'])) ?>">
-                                <?= $tarjeta['nombre_titular'] ?> - **** **** **** <?= substr($tarjeta['numero_tarjeta'], -4) ?> (<?= ucfirst($tarjeta['tipo_tarjeta']) ?>)
+                        <?php while ($tarjeta = mysqli_fetch_assoc($tarjetas_guardadas)): ?>
+                            <option 
+                                value="<?= $tarjeta['id_pago'] ?>"
+                                data-tipo="<?= $tarjeta['tipo_tarjeta'] ?>"
+                                data-nombre="<?= $tarjeta['nombre_titular'] ?>"
+                                data-numero="<?= $tarjeta['numero_tarjeta'] ?>"
+                                data-fecha="<?= date('m/y', strtotime($tarjeta['fecha_expiracion'])) ?>">
+                                <?= ucfirst($tarjeta['tipo_tarjeta']) ?> - **** **** **** <?= substr($tarjeta['numero_tarjeta'], -4) ?> - <?= $tarjeta['nombre_titular'] ?>
                             </option>
                         <?php endwhile; ?>
                     </select>
                 </div>
 
-                <!-- Información adicional para tarjeta -->
-                <div id="tarjeta-info" style="display: none;">
-                    <h4>Detalles de Tarjeta</h4>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" id="nombre_titular" name="nombre_titular" placeholder="Nombre del titular" />
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" id="numero_tarjeta" name="numero_tarjeta" placeholder="Número de tarjeta" />
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" id="fecha_expiracion" name="fecha_expiracion" placeholder="Fecha de expiración (MM/AA)" />
-                        </div>
-                        <div class="col-md-4" id="cuotas" style="display: none;">
-                            <label for="num_cuotas">Cuotas:</label>
-                            <select name="num_cuotas" class="form-select">
-                                <?php for ($i = 1; $i <= 12; $i++): ?>
-                                    <option value="<?= $i ?>"><?= $i ?> cuota<?= $i > 1 ? 's' : '' ?></option>
-                                <?php endfor; ?>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-check mt-2">
-                        <input type="checkbox" class="form-check-input" name="recordar_metodo_pago" value="1">
-                        <label class="form-check-label">Recordar este método de pago</label>
-                    </div>
-                </div>
-
-                <!-- Botón para enviar el formulario -->
-                <input type="hidden" name="monto" value="<?= $monto_total ?>"> <!-- Usar el monto del carrito -->
-                <input type="hidden" name="pedido_id" value="<?= $id_pedido ?>"> <!-- Incluir el ID del pedido -->
-                <button type="submit" class="btn btn-primary w-100">Confirmar y Pagar</button>
+                <!-- Botón para sistema de prueba de pago -->
                 <a href="../funciones/transbank/crear_transaccion.php?monto=<?= $monto_total ?>" class="btn btn-secondary w-100 mt-2" id="sistemaPruebaPago">Ir al Sistema Prueba de Pago</a>
-                </form>
+                <!-- Botón para confirmar pago -->
+                <button type="submit" class="btn btn-primary w-100 mt-3">Confirmar y Pagar</button>
+            </form>
         </div>
     </div>
 </div>
@@ -149,27 +127,60 @@ $tarjetas_guardadas = mysqli_query($conexion, $query_tarjetas);
         nuevaDireccionForm.style.display = nuevaDireccionForm.style.display === 'none' ? 'block' : 'none';
     });
 
-    // Cambiar formulario según método de pago y mostrar/ocultar elementos
+    // Cambiar formulario según método de pago
     document.querySelectorAll('input[name="metodo_pago"]').forEach((radio) => {
         radio.addEventListener('change', function() {
             const tarjetaInfo = document.getElementById('tarjeta-info');
-            const cuotas = document.getElementById('cuotas');
             const tarjetasGuardadas = document.getElementById('tarjetas-guardadas');
             const sistemaPruebaPago = document.getElementById('sistemaPruebaPago');
 
             if (this.value === 'efectivo') {
-                sistemaPruebaPago.style.display = 'none';   // Oculta el botón de sistema de pruebas
+                sistemaPruebaPago.style.display = 'none';   // Oculta el botón de prueba
                 tarjetaInfo.style.display = 'none';         // Oculta el formulario de tarjeta
-                tarjetasGuardadas.style.display = 'none';   // Oculta la selección de tarjetas guardadas
+                tarjetasGuardadas.style.display = 'none';   // Oculta las tarjetas guardadas
             } else {
-                sistemaPruebaPago.style.display = 'block';  // Muestra el botón de sistema de pruebas
+                sistemaPruebaPago.style.display = 'block';  // Muestra el botón de prueba
                 tarjetaInfo.style.display = 'block';        // Muestra el formulario de tarjeta
-                tarjetasGuardadas.style.display = 'block';  // Muestra la selección de tarjetas guardadas
-
-                // Mostrar u ocultar el campo de cuotas solo para crédito
-                cuotas.style.display = (this.value === 'credito') ? 'block' : 'none';
+                tarjetasGuardadas.style.display = 'block';  // Muestra las tarjetas guardadas
             }
         });
+    });
+
+    // Guardar nueva dirección con AJAX
+    document.getElementById('guardarDireccion').addEventListener('click', function() {
+        const calle = document.getElementById('nueva_calle').value;
+        const numero = document.getElementById('nueva_numero').value;
+        const ciudad = document.getElementById('nueva_ciudad').value;
+
+        if (!calle || !numero || !ciudad) {
+            alert("Por favor, complete todos los campos.");
+            return;
+        }
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '../funciones/procesamiento/insertar_direccion.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    const direccionesContainer = document.querySelector('.mb-3');
+                    const nuevaDireccionHTML = `
+                        <div class="form-check">
+                            <input type="radio" class="form-check-input" name="direccion_id" value="${response.id_direccion}" required>
+                            <label class="form-check-label">${calle}, ${numero} - ${ciudad}</label>
+                        </div>`;
+                    direccionesContainer.insertAdjacentHTML('beforeend', nuevaDireccionHTML);
+                    document.getElementById('nuevaDireccionForm').style.display = 'none';
+                    alert("Dirección guardada exitosamente.");
+                } else {
+                    alert(response.error || "Error al guardar la dirección.");
+                }
+            } else {
+                alert("Error en la solicitud. Inténtelo nuevamente.");
+            }
+        };
+        xhr.send(`calle=${encodeURIComponent(calle)}&numero=${encodeURIComponent(numero)}&ciudad=${encodeURIComponent(ciudad)}`);
     });
 </script>
 
