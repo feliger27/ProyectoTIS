@@ -39,6 +39,18 @@ $stmt_direcciones->execute();
 $result_direcciones = $stmt_direcciones->get_result();
 $direcciones = $result_direcciones->fetch_all(MYSQLI_ASSOC);
 $stmt_direcciones->close();
+
+// Consulta para obtener pedidos del usuario actual
+$query_pedidos = "SELECT p.id_pedido, p.fecha_pedido, p.total, p.estado_pedido
+                  FROM pedido p
+                  WHERE p.id_usuario = ?
+                  ORDER BY p.fecha_pedido DESC";
+$stmt_pedidos = $conexion->prepare($query_pedidos);
+$stmt_pedidos->bind_param("i", $user_id);
+$stmt_pedidos->execute();
+$result_pedidos = $stmt_pedidos->get_result();
+$pedidos = $result_pedidos->fetch_all(MYSQLI_ASSOC);
+$stmt_pedidos->close();
 ?>
 
 <!DOCTYPE html>
@@ -75,6 +87,10 @@ $stmt_direcciones->close();
                 <button class="nav-link" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings"
                     type="button" role="tab">Configuración</button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="orders-tab" data-bs-toggle="pill" data-bs-target="#orders"
+                    type="button" role="tab">Pedidos</button>
+            </li>
         </ul>
 
         <!-- Contenido de las pestañas en tarjetas -->
@@ -86,8 +102,7 @@ $stmt_direcciones->close();
                         <h4>Información Personal</h4>
                         <p><strong>Nombre:</strong> <?= htmlspecialchars($user_data['nombre']); ?></p>
                         <p><strong>Apellido:</strong> <?= htmlspecialchars($user_data['apellido']); ?></p>
-                        <p><strong>Correo Electrónico:</strong>
-                            <?= htmlspecialchars($user_data['correo_electronico']); ?></p>
+                        <p><strong>Correo Electrónico:</strong> <?= htmlspecialchars($user_data['correo_electronico']); ?></p>
                         <p><strong>Teléfono:</strong> <?= htmlspecialchars($user_data['telefono']); ?></p>
                         <button class="btn btn-primary mt-3" data-bs-toggle="modal"
                             data-bs-target="#editPersonalInfoModal">Editar</button>
@@ -216,6 +231,32 @@ $stmt_direcciones->close();
                     <div class="card-body">
                         <h4>Configuración</h4>
                         <p>Opciones de configuración del perfil.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pedidos -->
+            <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Pedidos</h4>
+                        <?php if (count($pedidos) > 0): ?>
+                            <ul class="list-group">
+                                <?php foreach ($pedidos as $pedido): ?>
+                                    <li class="list-group-item">
+                                        <p><strong>ID Pedido:</strong> <?= htmlspecialchars($pedido['id_pedido']); ?></p>
+                                        <p><strong>Fecha:</strong> <?= htmlspecialchars($pedido['fecha_pedido']); ?></p>
+                                        <p><strong>Total:</strong> <?= htmlspecialchars($pedido['total']); ?></p>
+                                        <p><strong>Estado:</strong> <?= htmlspecialchars($pedido['estado_pedido']); ?></p>
+                                        <?php if ($pedido['estado_pedido'] === 'entregado'): ?>
+                                            <a href="../valoraciones/agregar.php?id_pedido=<?= $pedido['id_pedido']; ?>" class="btn btn-success btn-sm">Agregar Reseña</a>
+                                        <?php endif; ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php else: ?>
+                            <p>No tienes pedidos registrados.</p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
