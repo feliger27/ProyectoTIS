@@ -13,6 +13,8 @@ if (!isset($_SESSION['username'])) {
 // Conectar a la base de datos para obtener hamburguesas destacadas y acompañamientos más vendidos
 include '../conexion.php';
 include '../includes/header.php';
+include '../funciones/generar_sugerencias/generar_sugerencias.php';
+
 // Consulta para obtener las tres hamburguesas destacadas
 $query_hamburguesas_destacadas = "
     SELECT h.nombre_hamburguesa, h.descripcion, h.imagen, AVG(v.cantidad_estrellas) AS rating
@@ -58,6 +60,18 @@ if (count($acompanamientos) < 3) {
         $acompanamientos[] = $row;
     }
 }
+
+$sugerencias = [];
+if (isset($_SESSION['user_id'])) {  // Verifica si el usuario ha iniciado sesión
+    $userId = $_SESSION['user_id'];
+    $sugerencias = generarSugerencias($userId);
+}
+$sugerencias = generarSugerencias($userId);
+
+?>
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -246,6 +260,29 @@ if (count($acompanamientos) < 3) {
     <section class="products-section">
         <h2>Nuestros Productos Destacados</h2>
         <h3>Hamburguesas</h3>
+        <!-- Mostrar las sugerencias generadas -->
+        <div class="row justify-content-center">
+    <?php if (count($sugerencias) > 0): ?>
+        <?php foreach ($sugerencias as $sugerencia): ?>
+            <div class="col-md-4 mb-4 d-flex justify-content-center">
+                <!-- Enlace actualizado para redirigir a index-menu.php con el nombre de la hamburguesa -->
+                <a href="index-menu.php?hamburguesa=<?php echo urlencode($sugerencia); ?>" class="card-link">
+                    <div class="card">
+                        <!-- Imagen de la hamburguesa: ajustamos la ruta de la imagen -->
+                        <img src="<?php echo '../uploads/hamburguesas/' . strtolower(str_replace(' ', '_', $sugerencia)) . '.jpg'; ?>"
+                             alt="Imagen de <?php echo $sugerencia; ?>" class="card-img-top">
+                        <div class="card-body text-center">
+                            <h5 class="card-title"><?php echo $sugerencia; ?></h5>
+                            <p class="card-text">¡¡Uno de los más populares!!</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p>No hay sugerencias disponibles en este momento.</p>
+    <?php endif; ?>
+</div>
         <div class="row justify-content-center">
             <?php while ($hamburguesa = mysqli_fetch_assoc($hamburguesas_destacadas)): ?>
                 <div class="col-md-4 mb-4 d-flex justify-content-center">
