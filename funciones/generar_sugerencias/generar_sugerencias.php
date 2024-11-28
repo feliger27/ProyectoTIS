@@ -4,7 +4,7 @@ function generarSugerencias($userId) {
     include '../conexion.php';  // Asegúrate de ajustar la ruta al archivo de conexión
 
     // Paso 1: Obtener los productos más comprados por el usuario
-    $sql = "SELECT h.nombre_hamburguesa, COUNT(ph.id_hamburguesa) AS cantidad
+    $sql = "SELECT h.nombre_hamburguesa, h.imagen, COUNT(ph.id_hamburguesa) AS cantidad
             FROM pedido_hamburguesa ph
             JOIN hamburguesa h ON ph.id_hamburguesa = h.id_hamburguesa
             JOIN pedido p ON ph.id_pedido = p.id_pedido
@@ -21,7 +21,10 @@ function generarSugerencias($userId) {
     // Almacenamos los productos más comprados
     $productos = [];
     while ($row = $result->fetch_assoc()) {
-        $productos[] = $row['nombre_hamburguesa'];
+        $productos[] = [
+            'nombre' => $row['nombre_hamburguesa'],
+            'imagen' => $row['imagen'] // Guardamos también la imagen
+        ];
     }
     $stmt->close();
 
@@ -29,20 +32,23 @@ function generarSugerencias($userId) {
     $sugerencias = [];
     foreach ($productos as $producto) {
         // Obtener productos similares que no sean los más comprados (por nombre)
-        $sql = "SELECT h.nombre_hamburguesa
+        $sql = "SELECT h.nombre_hamburguesa, h.imagen
                 FROM hamburguesa h
                 WHERE h.nombre_hamburguesa != ?
                 LIMIT 3";  // Obtener 3 productos diferentes
 
         $stmt = $conexion->prepare($sql);
-        $stmt->bind_param("s", $producto);
+        $stmt->bind_param("s", $producto['nombre']);
         $stmt->execute();
         $result = $stmt->get_result();
 
         // Añadir las sugerencias
         while ($row = $result->fetch_assoc()) {
-            if (!in_array($row['nombre_hamburguesa'], $sugerencias)) {  // Evitar duplicados
-                $sugerencias[] = $row['nombre_hamburguesa'];
+            if (!in_array($row['nombre_hamburguesa'], array_column($sugerencias, 'nombre'))) {  // Evitar duplicados
+                $sugerencias[] = [
+                    'nombre' => $row['nombre_hamburguesa'],
+                    'imagen' => $row['imagen'] // Añadir imagen de la sugerencia
+                ];
             }
         }
 
@@ -50,7 +56,7 @@ function generarSugerencias($userId) {
     }
 
     // Paso 3: Sugerir productos del mismo pedido anterior (opción para volver a pedir)
-    $sql = "SELECT ph.id_hamburguesa, ph.cantidad, ph.precio, h.nombre_hamburguesa
+    $sql = "SELECT ph.id_hamburguesa, ph.cantidad, ph.precio, h.nombre_hamburguesa, h.imagen
             FROM pedido_hamburguesa ph
             JOIN hamburguesa h ON ph.id_hamburguesa = h.id_hamburguesa
             JOIN pedido p ON ph.id_pedido = p.id_pedido
@@ -64,7 +70,10 @@ function generarSugerencias($userId) {
 
     // Si encontramos un pedido previo, agregamos la opción de volver a pedir lo mismo
     while ($row = $result->fetch_assoc()) {
-        $sugerencias[] = "Repetir: " . $row['nombre_hamburguesa'] . " (Cantidad: " . $row['cantidad'] . ", Precio: " . $row['precio'] . ")";
+        $sugerencias[] = [
+            'nombre' => "Repetir: " . $row['nombre_hamburguesa'] . " (Cantidad: " . $row['cantidad'] . ", Precio: " . $row['precio'] . ")",
+            'imagen' => $row['imagen'] // Añadir imagen de la hamburguesa repetida
+        ];
     }
     $stmt->close();
 
@@ -72,4 +81,3 @@ function generarSugerencias($userId) {
 }
 
 ?>
-

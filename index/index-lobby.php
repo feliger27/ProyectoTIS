@@ -259,30 +259,27 @@ $sugerencias = generarSugerencias($userId);
     <!-- Sección de Productos Destacados -->
     <section class="products-section">
         <h2>Nuestros Productos Destacados</h2>
-        <h3>Hamburguesas</h3>
+        <h3>Sugerencias</h3>
         <!-- Mostrar las sugerencias generadas -->
         <div class="row justify-content-center">
-    <?php if (count($sugerencias) > 0): ?>
-        <?php foreach ($sugerencias as $sugerencia): ?>
-            <div class="col-md-4 mb-4 d-flex justify-content-center">
-                <!-- Enlace actualizado para redirigir a index-menu.php con el nombre de la hamburguesa -->
-                <a href="index-menu.php?hamburguesa=<?php echo urlencode($sugerencia); ?>" class="card-link">
-                    <div class="card">
-                        <!-- Imagen de la hamburguesa: ajustamos la ruta de la imagen -->
-                        <img src="<?php echo '../uploads/hamburguesas/' . strtolower(str_replace(' ', '_', $sugerencia)) . '.jpg'; ?>"
-                             alt="Imagen de <?php echo $sugerencia; ?>" class="card-img-top">
-                        <div class="card-body text-center">
-                            <h5 class="card-title"><?php echo $sugerencia; ?></h5>
-                            <p class="card-text">¡¡Uno de los más populares!!</p>
-                        </div>
-                    </div>
-                </a>
+             <?php if (count($sugerencias) > 0): ?>
+                <?php foreach ($sugerencias as $sugerencia): ?>
+    <div class="col-md-4 mb-4 d-flex justify-content-center">
+        <<a href="index-menu.php?hamburguesa=<?php echo urlencode($sugerencia['nombre']); ?>" class="card-link">
+            <div class="card">
+                <img src="<?php echo '../uploads/hamburguesas/' . $sugerencia['imagen']; ?>"
+                     alt="Imagen de <?php echo $sugerencia['nombre']; ?>" class="card-img-top">
+                <div class="card-body text-center">
+                    <h5 class="card-title"><?php echo $sugerencia['nombre']; ?></h5>
+                </div>
             </div>
-        <?php endforeach; ?>
+        </a>
+    </div>
+    <?php endforeach; ?>
     <?php else: ?>
-        <p>No hay sugerencias disponibles en este momento.</p>
     <?php endif; ?>
 </div>
+        <h3>Hamburguesas</h3>
         <div class="row justify-content-center">
             <?php while ($hamburguesa = mysqli_fetch_assoc($hamburguesas_destacadas)): ?>
                 <div class="col-md-4 mb-4 d-flex justify-content-center">

@@ -25,12 +25,22 @@ $stmt->execute();
 $result = $stmt->get_result();
 $stmt->close();
 
+// Consulta para obtener las ventas por mes
+$sql_ventas_mes = "SELECT MONTH(p.fecha_pedido) AS mes, SUM(p.total) AS ventas_totales
+                   FROM pedido p
+                   WHERE YEAR(p.fecha_pedido) = YEAR(CURRENT_DATE) 
+                   GROUP BY mes
+                   ORDER BY mes";
+$result_ventas_mes = $conexion->query($sql_ventas_mes);
+
+// Si se solicita el reporte PDF
 if (isset($_POST['download_pdf']) && $mes_filtro) {
     // Crear instancia de FPDF
     $pdf = new FPDF();
     $pdf->AddPage();
     $pdf->SetFont('Arial', 'B', 12);
-    $pdf->Cell(40, 10, 'Reporte de Pedidos para el Mes: ' . strftime('%B', mktime(0, 0, 0, $mes_filtro, 1)));
+    $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    $pdf->Cell(40, 10, 'Reporte de Pedidos para el Mes: ' . $meses[$mes_filtro - 1]);
     $pdf->Ln(20);
 
     // Encabezados de la tabla
@@ -53,6 +63,22 @@ if (isset($_POST['download_pdf']) && $mes_filtro) {
         $pdf->Ln();
     }
 
+    // Mostrar las ventas por mes en el PDF
+    $ventas_mes = array_fill(0, 12, 0);  // Inicializar un array con 12 valores de ventas por mes en cero
+    while ($row = $result_ventas_mes->fetch_assoc()) {
+        $ventas_mes[$row['mes'] - 1] = $row['ventas_totales'];
+    }
+    
+
+    // Añadir ventas por mes al reporte PDF
+    $pdf->Ln(10);
+    $pdf->Cell(0, 10, 'Ventas Totales por Mes:', 0, 1);
+    $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    foreach ($ventas_mes as $index => $ventas) {
+        $pdf->Cell(0, 10, $meses[$index] . ': $' . number_format($ventas, 2), 0, 1);
+    }
+
+    // Generar el archivo PDF
     $pdf->Output('D', 'Reporte_Mes_' . $mes_filtro . '.pdf');
     exit;
 }
@@ -65,6 +91,7 @@ if (isset($_POST['download_pdf']) && $mes_filtro) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listado de Pedidos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container mt-4">
@@ -78,13 +105,20 @@ if (isset($_POST['download_pdf']) && $mes_filtro) {
             <div class="mb-3">
                 <label for="mes_filtro" class="form-label">Filtrar por mes:</label>
                 <select id="mes_filtro" name="mes_filtro" class="form-select" onchange="this.form.submit()">
-                    <option value="">Seleccione un mes</option>
-                    <?php for ($i = 1; $i <= 12; $i++): ?>
-                        <option value="<?= $i; ?>" <?= (int)$mes_filtro === $i ? 'selected' : ''; ?>>
-                            <?= strftime('%B', mktime(0, 0, 0, $i, 1)); ?>
-                        </option>
-                    <?php endfor; ?>
-                </select>
+                <option value="">Seleccione un mes</option>
+                <?php 
+        // Reemplazar la variable $mes_filtro con los nombres de los meses en español
+                for ($i = 1; $i <= 12; $i++): 
+            // Asegúrate de que 'strftime' está dando el nombre del mes en español
+            $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            ?>
+                <option value="<?= $i; ?>" <?= (int)$mes_filtro === $i ? 'selected' : ''; ?>>
+    <?= $meses[$i - 1]; ?>
+</option>
+        </option>
+    <?php endfor; ?>
+</select>
+
             </div>
             <?php if ($mes_filtro): ?>
                 <button type="submit" name="download_pdf" class="btn btn-primary">Descargar PDF</button>
@@ -127,8 +161,9 @@ if (isset($_POST['download_pdf']) && $mes_filtro) {
     <?php endif; ?>
 </tbody>
         </table>
-    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
