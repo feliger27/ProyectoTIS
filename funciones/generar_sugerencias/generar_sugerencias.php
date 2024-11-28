@@ -11,7 +11,7 @@ function generarSugerencias($userId) {
             WHERE p.id_usuario = ?
             GROUP BY h.id_hamburguesa
             ORDER BY cantidad DESC
-            LIMIT 3";  // Obtener los 3 productos más comprados
+            LIMIT 5";  // Obtener los 3 productos más comprados
 
     $stmt = $conexion->prepare($sql);
     $stmt->bind_param("i", $userId);
