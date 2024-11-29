@@ -68,6 +68,7 @@ $carrito = isset($_SESSION['carrito']) ? $_SESSION['carrito'] : [];
         }
 
         .carrito-header {
+            margin-top: 20px;
             text-align: center;
             margin-bottom: 30px;
         }

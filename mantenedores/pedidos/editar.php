@@ -14,7 +14,7 @@ if (isset($_GET['id'])) {
 
     // Obtener usuarios y promociones para el formulario
     $usuarios = $conexion->query("SELECT id_usuario, nombre FROM usuario");
-    $promociones = $conexion->query("SELECT id_promocion, codigo_promocion FROM promocion");
+    $promociones = $conexion->query("SELECT id_promocion FROM promocion");
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Recibir datos del formulario
