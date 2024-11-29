@@ -1,6 +1,6 @@
 <?php
 include '../../conexion.php';
-require_once '../../funciones/notificar usuario/enviar_notificacion.php'; // Incluye el archivo correcto
+require_once '../../funciones/notificar_usuario/enviar_notificacion_compra.php'; // Incluye el archivo correcto
 
 // Actualizar el estado del pedido si se envía el formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pedido'], $_POST['estado_pedido'])) {

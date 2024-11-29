@@ -28,7 +28,7 @@ $result = $conexion->query($sql);
     
     <div class="d-flex justify-content-between align-items-center">
         <h1>Listado de Usuarios</h1>
-        <button class="btn btn-secondary" onclick="window.location.href='../../index/index.php'">Volver</button>
+        <button class="btn btn-secondary" onclick="window.location.href='../../index/index-mantenedores.php'">Volver</button>
     </div>
     
     <a href="insertar.php" class="btn btn-success mb-3">Agregar Nuevo Usuario</a>

@@ -40,17 +40,17 @@ $result_direcciones = $stmt_direcciones->get_result();
 $direcciones = $result_direcciones->fetch_all(MYSQLI_ASSOC);
 $stmt_direcciones->close();
 
-// Consulta para obtener pedidos del usuario actual
-$query_pedidos = "SELECT p.id_pedido, p.fecha_pedido, p.total, p.estado_pedido
-                  FROM pedido p
-                  WHERE p.id_usuario = ?
-                  ORDER BY p.fecha_pedido DESC";
-$stmt_pedidos = $conexion->prepare($query_pedidos);
-$stmt_pedidos->bind_param("i", $user_id);
-$stmt_pedidos->execute();
-$result_pedidos = $stmt_pedidos->get_result();
-$pedidos = $result_pedidos->fetch_all(MYSQLI_ASSOC);
-$stmt_pedidos->close();
+// Consulta para obtener métodos de pago del usuario actual
+$query_metodos_pago = "SELECT mp.id_pago, mp.tipo_tarjeta, mp.numero_tarjeta, mp.fecha_expiracion, mp.nombre_titular 
+                       FROM metodo_pago mp
+                       JOIN usuario_metodo_pago ump ON mp.id_pago = ump.id_pago
+                       WHERE ump.id_usuario = ?";
+$stmt_metodos_pago = $conexion->prepare($query_metodos_pago);
+$stmt_metodos_pago->bind_param("i", $user_id);
+$stmt_metodos_pago->execute();
+$result_metodos_pago = $stmt_metodos_pago->get_result();
+$metodos_pago = $result_metodos_pago->fetch_all(MYSQLI_ASSOC);
+$stmt_metodos_pago->close();
 ?>
 
 <!DOCTYPE html>
@@ -61,14 +61,55 @@ $stmt_pedidos->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Mi Perfil - HamburGeeks</title>
+    <style>
+    .container .btn-primary, .container .btn-warning, .container .btn-danger, .container .btn-success {
+    background-color: #fd7e14; 
+    border-color: #fd7e14; 
+    }
+
+    .container .btn-primary:hover, .container .btn-warning:hover, .container .btn-danger:hover, .container .btn-success:hover {
+    background-color: #e69500; 
+    border-color: #e69500;
+    }
+
+
+    .container h2, .container h4, .container .nav-link.active {
+    color: #fd7e14; /
+    }
+
+    .container .nav-link.active {
+    background-color: #fd7e14;
+    color: white;
+    }
+    .nav-pills .nav-link {
+    color: black; 
+    }
+
+    /* Asegura que el contenido del cuerpo y html ocupe toda la altura */
+    html, body {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Permite que el contenido ocupe el espacio disponible */
+    body {
+        flex-grow: 1;
+    }
+
+    /* Asegura que el footer siempre se quede en la parte inferior */
+    footer {
+        margin-top: auto; /* Empuja el footer al final si el contenido es corto */
+        width: 100%; /* Asegura que ocupe todo el ancho de la pantalla */
+    }
+    </style>
 </head>
 
 <body>
-    <div class="container my-5">
+    <div class="container pt-4 my-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="text-center">Mi Perfil</h2>
             <div>
-                <a href="../index/index-lobby.php" class="btn btn-secondary me-2">Volver al Lobby</a>
                 <a href="../login/logout.php" class="btn btn-danger">Cerrar Sesión</a>
             </div>
         </div>
@@ -87,10 +128,6 @@ $stmt_pedidos->close();
                 <button class="nav-link" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings"
                     type="button" role="tab">Configuración</button>
             </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="orders-tab" data-bs-toggle="pill" data-bs-target="#orders"
-                    type="button" role="tab">Pedidos</button>
-            </li>
         </ul>
 
         <!-- Contenido de las pestañas en tarjetas -->
@@ -102,7 +139,8 @@ $stmt_pedidos->close();
                         <h4>Información Personal</h4>
                         <p><strong>Nombre:</strong> <?= htmlspecialchars($user_data['nombre']); ?></p>
                         <p><strong>Apellido:</strong> <?= htmlspecialchars($user_data['apellido']); ?></p>
-                        <p><strong>Correo Electrónico:</strong> <?= htmlspecialchars($user_data['correo_electronico']); ?></p>
+                        <p><strong>Correo Electrónico:</strong>
+                            <?= htmlspecialchars($user_data['correo_electronico']); ?></p>
                         <p><strong>Teléfono:</strong> <?= htmlspecialchars($user_data['telefono']); ?></p>
                         <button class="btn btn-primary mt-3" data-bs-toggle="modal"
                             data-bs-target="#editPersonalInfoModal">Editar</button>
@@ -234,32 +272,6 @@ $stmt_pedidos->close();
                     </div>
                 </div>
             </div>
-
-            <!-- Pedidos -->
-            <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
-                <div class="card">
-                    <div class="card-body">
-                        <h4>Pedidos</h4>
-                        <?php if (count($pedidos) > 0): ?>
-                            <ul class="list-group">
-                                <?php foreach ($pedidos as $pedido): ?>
-                                    <li class="list-group-item">
-                                        <p><strong>ID Pedido:</strong> <?= htmlspecialchars($pedido['id_pedido']); ?></p>
-                                        <p><strong>Fecha:</strong> <?= htmlspecialchars($pedido['fecha_pedido']); ?></p>
-                                        <p><strong>Total:</strong> <?= htmlspecialchars($pedido['total']); ?></p>
-                                        <p><strong>Estado:</strong> <?= htmlspecialchars($pedido['estado_pedido']); ?></p>
-                                        <?php if ($pedido['estado_pedido'] === 'entregado'): ?>
-                                            <a href="../valoraciones/agregar.php?id_pedido=<?= $pedido['id_pedido']; ?>" class="btn btn-success btn-sm">Agregar Reseña</a>
-                                        <?php endif; ?>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        <?php else: ?>
-                            <p>No tienes pedidos registrados.</p>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -273,29 +285,23 @@ $stmt_pedidos->close();
         }, 5000);
     </script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var lastTab = localStorage.getItem('activeTab');
-            if (lastTab) {
-                var selectedTab = document.querySelector(`#perfil-tabs button[data-bs-target="${lastTab}"]`);
-                var selectedTabContent = document.querySelector(lastTab);
-                if (selectedTab && selectedTabContent) {
-                    document.querySelector(`#perfil-tabs .nav-link.active`).classList.remove('active');
-                    document.querySelector(`.tab-content .tab-pane.show.active`).classList.remove('show', 'active');
-                    selectedTab.classList.add('active');
-                    selectedTabContent.classList.add('show', 'active');
+        document.getElementById('fecha_expiracion').addEventListener('input', function (e) {
+            var input = e.target;
+            var value = input.value.replace(/\D/g, ''); // Remover caracteres no numéricos
+            var formattedValue = '';
+
+            // Si se ingresan los primeros dos dígitos (MM)
+            if (value.length > 0) {
+                formattedValue = value.substring(0, 2);
+                if (value.length >= 3) {
+                    formattedValue += '/' + value.substring(2, 4); // Agregar '/' y los siguientes dos dígitos (YY)
                 }
             }
 
-            document.querySelectorAll('#perfil-tabs button').forEach(function (tabButton) {
-                tabButton.addEventListener('click', function () {
-                    var target = tabButton.getAttribute('data-bs-target');
-                    localStorage.setItem('activeTab', target);
-                });
-            });
+            input.value = formattedValue; // Asignar el valor formateado al campo
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
 <?php include '../includes/footer.php'; ?>

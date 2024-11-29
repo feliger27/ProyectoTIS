@@ -25,7 +25,7 @@ $roles = $conexion->query($query_roles);
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center">
         <h1>Roles</h1>
-        <button class="btn btn-secondary" onclick="window.location.href='../../index/index.php'">Volver</button>
+        <button class="btn btn-secondary" onclick="window.location.href='../../index/index-mantenedores.php'">Volver</button>
     </div>
     <a href="crear_rol.php" class="btn btn-primary mb-3">Crear Rol</a>
     
