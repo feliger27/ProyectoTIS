@@ -1,7 +1,7 @@
 <?php
 // Conexión a la base de datos
 include('../conexion.php');
-include('../includes/header.php');
+include('../includes/header.php'); // Incluyendo el nuevo header
 
 // Obtener la categoría seleccionada
 $filtroCategoria = isset($_GET['categoria']) ? $_GET['categoria'] : 'Todas';
@@ -26,10 +26,9 @@ switch ($filtroCategoria) {
                 c.id_combo AS id_producto,
                 c.nombre_combo AS nombre_producto,
                 c.precio AS precio_producto,
-                CONCAT('../uploads/combos/', c.imagen) AS imagen_producto,
-                1 AS orden
+                CONCAT('../uploads/combos/', c.imagen) AS imagen_producto
             FROM combo c
-            ORDER BY orden";
+            ORDER BY c.id_combo";
         break;
 
     case "Hamburguesas":
@@ -39,10 +38,9 @@ switch ($filtroCategoria) {
                 h.id_hamburguesa AS id_producto,
                 h.nombre_hamburguesa AS nombre_producto,
                 h.precio AS precio_producto,
-                CONCAT('../uploads/hamburguesas/', h.imagen) AS imagen_producto,
-                2 AS orden
+                CONCAT('../uploads/hamburguesas/', h.imagen) AS imagen_producto
             FROM hamburguesa h
-            ORDER BY orden";
+            ORDER BY h.id_hamburguesa";
         break;
 
     case "Acompañamientos":
@@ -52,10 +50,9 @@ switch ($filtroCategoria) {
                 a.id_acompaniamiento AS id_producto,
                 a.nombre_acompaniamiento AS nombre_producto,
                 a.precio AS precio_producto,
-                CONCAT('../uploads/acompaniamientos/', a.imagen) AS imagen_producto,
-                3 AS orden
+                CONCAT('../uploads/acompaniamientos/', a.imagen) AS imagen_producto
             FROM acompaniamiento a
-            ORDER BY orden";
+            ORDER BY a.id_acompaniamiento";
         break;
 
     case "Bebidas":
@@ -65,10 +62,9 @@ switch ($filtroCategoria) {
                 b.id_bebida AS id_producto,
                 b.nombre_bebida AS nombre_producto,
                 b.precio AS precio_producto,
-                CONCAT('../uploads/bebidas/', b.imagen) AS imagen_producto,
-                4 AS orden
+                CONCAT('../uploads/bebidas/', b.imagen) AS imagen_producto
             FROM bebida b
-            ORDER BY orden";
+            ORDER BY b.id_bebida";
         break;
 
     case "Postres":
@@ -78,10 +74,9 @@ switch ($filtroCategoria) {
                 ps.id_postre AS id_producto,
                 ps.nombre_postre AS nombre_producto,
                 ps.precio AS precio_producto,
-                CONCAT('../uploads/postres/', ps.imagen) AS imagen_producto,
-                5 AS orden
+                CONCAT('../uploads/postres/', ps.imagen) AS imagen_producto
             FROM postre ps
-            ORDER BY orden";
+            ORDER BY ps.id_postre";
         break;
 
     default:
@@ -91,8 +86,7 @@ switch ($filtroCategoria) {
                 c.id_combo AS id_producto,
                 c.nombre_combo AS nombre_producto,
                 c.precio AS precio_producto,
-                CONCAT('../uploads/combos/', c.imagen) AS imagen_producto,
-                1 AS orden
+                CONCAT('../uploads/combos/', c.imagen) AS imagen_producto
             FROM combo c
             UNION ALL
             SELECT 
@@ -100,8 +94,7 @@ switch ($filtroCategoria) {
                 h.id_hamburguesa AS id_producto,
                 h.nombre_hamburguesa AS nombre_producto,
                 h.precio AS precio_producto,
-                CONCAT('../uploads/hamburguesas/', h.imagen) AS imagen_producto,
-                2 AS orden
+                CONCAT('../uploads/hamburguesas/', h.imagen) AS imagen_producto
             FROM hamburguesa h
             UNION ALL
             SELECT 
@@ -109,8 +102,7 @@ switch ($filtroCategoria) {
                 a.id_acompaniamiento AS id_producto,
                 a.nombre_acompaniamiento AS nombre_producto,
                 a.precio AS precio_producto,
-                CONCAT('../uploads/acompaniamientos/', a.imagen) AS imagen_producto,
-                3 AS orden
+                CONCAT('../uploads/acompaniamientos/', a.imagen) AS imagen_producto
             FROM acompaniamiento a
             UNION ALL
             SELECT 
@@ -118,8 +110,7 @@ switch ($filtroCategoria) {
                 b.id_bebida AS id_producto,
                 b.nombre_bebida AS nombre_producto,
                 b.precio AS precio_producto,
-                CONCAT('../uploads/bebidas/', b.imagen) AS imagen_producto,
-                4 AS orden
+                CONCAT('../uploads/bebidas/', b.imagen) AS imagen_producto
             FROM bebida b
             UNION ALL
             SELECT 
@@ -127,10 +118,8 @@ switch ($filtroCategoria) {
                 ps.id_postre AS id_producto,
                 ps.nombre_postre AS nombre_producto,
                 ps.precio AS precio_producto,
-                CONCAT('../uploads/postres/', ps.imagen) AS imagen_producto,
-                5 AS orden
-            FROM postre ps
-            ORDER BY orden";
+                CONCAT('../uploads/postres/', ps.imagen) AS imagen_producto
+            FROM postre ps";
         break;
 }
 
@@ -183,22 +172,26 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
             color: #333;
             margin-top: 80px;
         }
+
         .header-section {
             text-align: center;
             padding: 2rem;
             color: #2d3748;
         }
+
         .header-section h1 {
             font-weight: bold;
             font-size: 2.5rem;
             color: #1a202c;
         }
+
         .filter-buttons {
             display: flex;
             justify-content: center;
             gap: 1rem;
             flex-wrap: wrap;
         }
+
         .filter-button {
             background-color: #d35400;
             color: #fff;
@@ -212,64 +205,60 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
             gap: 0.5rem;
             transition: background-color 0.3s;
         }
+
         .filter-button:hover {
             background-color: #e67e22;
         }
+
         .card {
             border: none;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
-            position: relative; /* Necesario para posicionar el botón dentro de la tarjeta */
         }
+
         .card:hover {
             transform: scale(1.05);
         }
+
         .card img {
             width: 100%;
             object-fit: cover;
         }
+
         .card-title {
             color: #2c3e50;
             font-weight: bold;
             font-size: 1.2rem;
             text-align: center;
         }
-        .descripcion-producto {
-            font-size: 0.95rem;
-            color: #555;
-            text-align: center;
-            margin: 0.5rem 0;
-        }
+
         .precios-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-        .precios {
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-grow: 1;
             gap: 8px;
         }
+
         .precio-normal {
             font-size: 1.2rem;
-            color: #7f8c8d; /* Gris */
+            color: #7f8c8d;
             text-decoration: line-through;
         }
+
         .precio-promocional {
             font-size: 1.4rem;
-            color: #27ae60; /* Verde */
+            color: #27ae60;
             font-weight: bold;
         }
+
         .precio-destacado {
             font-size: 1.4rem;
-            color: #d35400; /* Naranjo */
+            color: #d35400;
             font-weight: bold;
         }
+
         .icono-carrito {
             background-color: #d35400;
             color: #fff;
@@ -282,10 +271,10 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
             font-size: 1.2rem;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            position: absolute; /* Para colocarlo encima del card */
-            bottom: 15px; /* Ajustar al borde inferior del card */
-            right: 15px; /* Ajustar al borde derecho del card */
-            z-index: 10; /* Asegura que el botón esté sobre otros elementos */
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            z-index: 10;
         }
 
         .icono-carrito:hover {
@@ -294,8 +283,8 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
         }
 
         .notification {
-            background-color: #343a40; /* Fondo oscuro */
-            color: #fff; /* Texto blanco */
+            background-color: #343a40;
+            color: #fff;
             padding: 15px 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -323,7 +312,7 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
         }
 
         .notification .close-btn:hover {
-            color: #e67e22; /* Naranja del diseño */
+            color: #e67e22;
         }
 
         @keyframes fadeIn {
@@ -336,7 +325,6 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
                 transform: translateY(0);
             }
         }
-
     </style>
 </head>
 <body>
@@ -346,7 +334,6 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
             <p>Explora nuestro menú y encuentra algo delicioso para ordenar</p>
         </div>
 
-        <!-- Botones de Filtro -->
         <div class="filter-buttons">
             <?php foreach ($categorias as $categoria => $icono): ?>
                 <form action="index-menu.php" method="GET" style="display: inline;">
@@ -358,7 +345,6 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
             <?php endforeach; ?>
         </div>
 
-        <!-- Listado de productos -->
         <div class="row my-4">
             <?php if ($resultado->num_rows > 0): ?>
                 <?php while ($producto = $resultado->fetch_assoc()): ?>
@@ -367,91 +353,77 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
                     $precioPromocional = $promocion ? calcularPrecioPromocional($producto['precio_producto'], $promocion['porcentaje_descuento']) : null;
                     ?>
                     <div class="col-md-4 mb-4">
-                        <div class="card h-100 shadow-sm">
-                            <!-- Enlace que envuelve solo la tarjeta (sin el botón "+") -->
-                            <a href="detalle-producto.php?nombre=<?php echo urlencode($producto['nombre_producto']); ?>&tipo=<?php echo $producto['categoria']; ?>" style="text-decoration: none; color: inherit;">
-                                <img src="<?php echo file_exists($producto['imagen_producto']) ? $producto['imagen_producto'] : '../uploads/default.jpg'; ?>" class="card-img-top" alt="<?php echo $producto['nombre_producto']; ?>">
-                                <div class="card-body">
-                                    <h5 class="card-title"><?php echo $producto['nombre_producto']; ?></h5>
-                                    <?php if (!empty($producto['descripcion'])): ?>
-                                        <p class="descripcion-producto"><?php echo $producto['descripcion']; ?></p>
+                        <div class="card h-100">
+                            <img src="<?php echo file_exists($producto['imagen_producto']) ? $producto['imagen_producto'] : '../uploads/default.jpg'; ?>" class="card-img-top" alt="<?php echo $producto['nombre_producto']; ?>">
+                            <div class="card-body text-center">
+                                <h5 class="card-title"><?php echo $producto['nombre_producto']; ?></h5>
+                                <div class="precios-container">
+                                    <?php if ($precioPromocional): ?>
+                                        <span class="precio-normal">$<?php echo number_format($producto['precio_producto'], 0, ',', '.'); ?></span>
+                                        <span class="precio-promocional">$<?php echo number_format($precioPromocional, 0, ',', '.'); ?></span>
+                                    <?php else: ?>
+                                        <span class="precio-destacado">$<?php echo number_format($producto['precio_producto'], 0, ',', '.'); ?></span>
                                     <?php endif; ?>
-                                    <div class="precios-container">
-                                        <div class="precios">
-                                            <?php if ($precioPromocional): ?>
-                                                <span class="precio-normal">$<?php echo number_format($producto['precio_producto'], 0, ',', '.'); ?></span>
-                                                <span class="precio-promocional">$<?php echo number_format($precioPromocional, 0, ',', '.'); ?></span>
-                                            <?php else: ?>
-                                                <span class="precio-destacado">$<?php echo number_format($producto['precio_producto'], 0, ',', '.'); ?></span>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
                                 </div>
-                            </a>
-                            <!-- Botón "+" fuera del enlace -->
-                            <div class="icono-carrito" onclick="agregarAlCarrito(
-                                '<?php echo $producto['id_producto']; ?>',
-                                '<?php echo $producto['categoria']; ?>',
-                                '<?php echo $producto['nombre_producto']; ?>',
-                                '<?php echo $producto['precio_producto']; ?>',
-                                '<?php echo $producto['imagen_producto']; ?>'
-                            )">
+                            </div>
+                            <div class="icono-carrito" 
+                                data-id="<?php echo $producto['id_producto']; ?>" 
+                                data-categoria="<?php echo $producto['categoria']; ?>" 
+                                onclick="agregarAlCarrito(this)">
                                 <i class="fas fa-plus"></i>
                             </div>
-
                         </div>
                     </div>
-
                 <?php endwhile; ?>
             <?php else: ?>
                 <p class="text-center">No se encontraron productos.</p>
             <?php endif; ?>
         </div>
-
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function agregarAlCarrito(idProducto, categoria, nombre, precio, imagen) {
-            // Enviar una solicitud AJAX para agregar el producto al carrito
-            fetch('../funciones/gestionar_carrito/agregar_carrito.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    idProducto: idProducto,
-                    categoria: categoria,
-                    nombre: nombre,
-                    precio: precio,
-                    imagen: imagen // Incluir el campo imagen
+        document.querySelectorAll('.icono-carrito').forEach(button => {
+            button.addEventListener('click', function () {
+                const idProducto = this.dataset.id; // Usar 'id' en lugar de 'idProducto'
+                const categoria = this.dataset.categoria;
+
+                // Realizar la solicitud AJAX para agregar al carrito
+                fetch('../funciones/gestionar_carrito/agregar_carrito.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idProducto, categoria }) // Enviar datos en formato JSON
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Actualizar el contador del carrito
-                const cartCountElement = document.querySelector('.cart-count');
-                if (cartCountElement) {
-                    cartCountElement.textContent = data.totalProductos;
-                } else {
-                    const newCartCount = document.createElement('span');
-                    newCartCount.classList.add('cart-count');
-                    newCartCount.textContent = data.totalProductos;
-                    document.querySelector('.cart-icon').appendChild(newCartCount);
-                }
-                // Mostrar la notificación
-                mostrarNotificacion(`${nombre} ha sido agregado al carrito exitosamente`);
-            })
-            .catch(error => {
-                console.error('Error:', error);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Mostrar notificación temporal
+                        mostrarNotificacion(data.message);
+
+                        // Actualizar el contador del carrito en el header
+                        const cartCountElement = document.getElementById('cart-count');
+                        if (cartCountElement) {
+                            cartCountElement.textContent = data.cartCount > 0 ? data.cartCount : '';
+                        } else if (data.cartCount > 0) {
+                            const newCartCount = document.createElement('span');
+                            newCartCount.id = 'cart-count';
+                            newCartCount.className = 'cart-count';
+                            newCartCount.textContent = data.cartCount;
+                            document.querySelector('.bi-cart-fill').parentElement.appendChild(newCartCount);
+                        }
+                    } else {
+                        mostrarNotificacion('Error al agregar el producto al carrito.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    mostrarNotificacion('Ocurrió un error al procesar la solicitud.');
+                });
             });
-        }
+        });
 
-
+        // Función para mostrar notificaciones temporales
         function mostrarNotificacion(mensaje) {
             const container = document.getElementById('notification-container');
-
-            // Crear el elemento de notificación
             const notification = document.createElement('div');
             notification.className = 'notification';
             notification.innerHTML = `
@@ -459,18 +431,16 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
                 <button class="close-btn" onclick="this.parentElement.remove()">×</button>
             `;
 
-            // Agregar la notificación al contenedor
             container.appendChild(notification);
 
-            // Remover automáticamente después de 5 segundos
+            // Remover automáticamente la notificación después de 5 segundos
             setTimeout(() => {
                 if (notification.parentElement) {
                     notification.remove();
                 }
             }, 5000);
         }
-        </script>
-        
+    </script>
     <div id="notification-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;"></div>
     <?php include '../includes/footer.php'; ?>
 </body>

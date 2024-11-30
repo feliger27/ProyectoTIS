@@ -25,5 +25,3 @@ function verificarPermisos($permisos_requeridos) {
 
     return $result['permiso_count'] > 0;
 }
-
-

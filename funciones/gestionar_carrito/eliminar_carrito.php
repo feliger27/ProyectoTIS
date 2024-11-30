@@ -1,42 +1,38 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// Verificar si el carrito existe
-if (!isset($_SESSION['carrito'])) {
-    echo json_encode(['error' => 'El carrito está vacío.']);
+// Verificar que se reciban los datos necesarios
+if (!isset($_POST['id_producto'], $_POST['categoria'])) {
+    http_response_code(400);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Faltan datos necesarios para eliminar el producto.'
+    ]);
     exit;
 }
 
-// Obtener datos del producto desde POST
-$idProducto = $_POST['idProducto'] ?? null;
-$categoria = $_POST['categoria'] ?? null;
+$idProducto = $_POST['id_producto'];
+$categoria = $_POST['categoria'];
 
-if (!$idProducto || !$categoria) {
-    echo json_encode(['error' => 'Datos inválidos para eliminar el producto.']);
-    exit;
-}
-
-// Eliminar el producto del carrito
+// Verificar si el carrito y la categoría existen
 if (isset($_SESSION['carrito'][$categoria][$idProducto])) {
+    // Eliminar el producto del carrito
     unset($_SESSION['carrito'][$categoria][$idProducto]);
 
-    // Eliminar la categoría si está vacía
+    // Si la categoría queda vacía, eliminarla también
     if (empty($_SESSION['carrito'][$categoria])) {
         unset($_SESSION['carrito'][$categoria]);
     }
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Producto eliminado del carrito exitosamente.'
+    ]);
 } else {
-    echo json_encode(['error' => 'Producto no encontrado en el carrito.']);
-    exit;
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'El producto no existe en el carrito.'
+    ]);
 }
-
-// Calcular el nuevo total
-$total = 0;
-foreach ($_SESSION['carrito'] as $productos) {
-    foreach ($productos as $producto) {
-        $total += $producto['precio'] * $producto['cantidad'];
-    }
-}
-
-// Retornar el nuevo total
-echo json_encode(['total' => $total]);
-?>

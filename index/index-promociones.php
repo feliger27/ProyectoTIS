@@ -1,7 +1,7 @@
 <?php
 // Conexión a la base de datos
 include('../conexion.php');
-include('../includes/header.php');
+include('../includes/header.php'); // Incluyendo el nuevo header
 
 // Obtener la categoría seleccionada
 $filtroCategoria = isset($_GET['categoria']) ? $_GET['categoria'] : 'Todas';
@@ -117,7 +117,6 @@ $query = "
     ) productos WHERE 1=1 $whereCategoria";
 
 $resultado = $conexion->query($query);
-
 ?>
 
 <!DOCTYPE html>
@@ -129,29 +128,11 @@ $resultado = $conexion->query($query);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        html, body {
+        body {
             background: linear-gradient(to right, #f8fafc, #e2e8f0);
             color: #333;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            margin-top: 40px;
+            margin-top: 80px;
         }
-
-        .container {
-            flex: 1; /* Hace que este contenedor tome el espacio disponible entre el header y el footer */
-        }
-
-        footer {
-            background-color: #d35400; /* Color del footer */
-            color: #fff; /* Texto blanco */
-            text-align: center;
-            padding: 1rem 0;
-            position: relative; /* Necesario si hay elementos posicionados dentro */
-            bottom: 0;
-            width: 100%;
-        }
-
         .header-section {
             text-align: center;
             padding: 2rem;
@@ -190,7 +171,6 @@ $resultado = $conexion->query($query);
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
-            position: relative; /* Necesario para posicionar el botón dentro de la tarjeta */
         }
         .card:hover {
             transform: scale(1.05);
@@ -205,38 +185,25 @@ $resultado = $conexion->query($query);
             font-size: 1.2rem;
             text-align: center;
         }
-        .descripcion-producto {
-            font-size: 0.95rem;
-            color: #555;
-            text-align: center;
-            margin: 0.5rem 0;
-        }
         .precios-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-        .precios {
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-grow: 1;
             gap: 8px;
         }
         .precio-normal {
             font-size: 1.2rem;
-            color: #7f8c8d; /* Gris */
+            color: #7f8c8d;
             text-decoration: line-through;
         }
         .precio-promocional {
             font-size: 1.4rem;
-            color: #27ae60; /* Verde */
+            color: #27ae60;
             font-weight: bold;
         }
         .precio-destacado {
             font-size: 1.4rem;
-            color: #d35400; /* Naranjo */
+            color: #d35400;
             font-weight: bold;
         }
         .icono-carrito {
@@ -251,61 +218,16 @@ $resultado = $conexion->query($query);
             font-size: 1.2rem;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            position: absolute; /* Para colocarlo encima del card */
-            bottom: 15px; /* Ajustar al borde inferior del card */
-            right: 15px; /* Ajustar al borde derecho del card */
-            z-index: 10; /* Asegura que el botón esté sobre otros elementos */
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            z-index: 10;
         }
-
         .icono-carrito:hover {
             background-color: #e67e22;
             transform: scale(1.1);
         }
-
-        .notification {
-            background-color: #343a40; /* Fondo oscuro */
-            color: #fff; /* Texto blanco */
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 14px;
-            font-family: 'Arial', sans-serif;
-            max-width: 300px;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .notification span {
-            flex-grow: 1;
-        }
-
-        .notification .close-btn {
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 16px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .notification .close-btn:hover {
-            color: #e67e22; /* Naranja del diseño */
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        </style>
+    </style>
 </head>
 <body>
     <div class="container">
@@ -313,8 +235,6 @@ $resultado = $conexion->query($query);
             <h1>Promociones Exclusivas</h1>
             <p>Descubre nuestras mejores ofertas y descuentos.</p>
         </div>
-
-        <!-- Botones de Filtro -->
         <div class="filter-buttons">
             <?php foreach ($categorias as $categoria => $icono): ?>
                 <form action="index-promociones.php" method="GET" style="display: inline;">
@@ -325,45 +245,27 @@ $resultado = $conexion->query($query);
                 </form>
             <?php endforeach; ?>
         </div>
-
-        <!-- Listado de productos -->
         <div class="row my-4">
             <?php if ($resultado->num_rows > 0): ?>
                 <?php while ($producto = $resultado->fetch_assoc()): ?>
-                    <?php
-                    $promocion = obtenerPromocion($producto['id_producto'], $producto['categoria'], $promociones);
-                    $precioPromocional = $promocion ? calcularPrecioPromocional($producto['precio_producto'], $promocion['porcentaje_descuento']) : null;
-                    ?>
                     <div class="col-md-4 mb-4">
-                        <div class="card h-100 shadow-sm">
-                            <!-- Enlace que envuelve solo la tarjeta (sin el botón "+") -->
-                            <a href="detalle-producto.php?nombre=<?php echo urlencode($producto['nombre_producto']); ?>&tipo=<?php echo $producto['categoria']; ?>" style="text-decoration: none; color: inherit;">
-                                <img src="<?php echo file_exists($producto['imagen_producto']) ? $producto['imagen_producto'] : '../uploads/default.jpg'; ?>" class="card-img-top" alt="<?php echo $producto['nombre_producto']; ?>">
-                                <div class="card-body">
-                                    <h5 class="card-title"><?php echo $producto['nombre_producto']; ?></h5>
-                                    <?php if (!empty($producto['descripcion'])): ?>
-                                        <p class="descripcion-producto"><?php echo $producto['descripcion']; ?></p>
+                        <div class="card h-100">
+                            <img src="<?php echo file_exists($producto['imagen_producto']) ? $producto['imagen_producto'] : '../uploads/default.jpg'; ?>" class="card-img-top" alt="<?php echo $producto['nombre_producto']; ?>">
+                            <div class="card-body text-center">
+                                <h5 class="card-title"><?php echo $producto['nombre_producto']; ?></h5>
+                                <div class="precios-container">
+                                    <?php if ($promocion = obtenerPromocion($producto['id_producto'], $producto['categoria'], $promociones)): ?>
+                                        <span class="precio-normal">$<?php echo number_format($producto['precio_producto'], 0, ',', '.'); ?></span>
+                                        <span class="precio-promocional">$<?php echo number_format(calcularPrecioPromocional($producto['precio_producto'], $promocion['porcentaje_descuento']), 0, ',', '.'); ?></span>
+                                    <?php else: ?>
+                                        <span class="precio-destacado">$<?php echo number_format($producto['precio_producto'], 0, ',', '.'); ?></span>
                                     <?php endif; ?>
-                                    <div class="precios-container">
-                                        <div class="precios">
-                                            <?php if ($precioPromocional): ?>
-                                                <span class="precio-normal">$<?php echo number_format($producto['precio_producto'], 0, ',', '.'); ?></span>
-                                                <span class="precio-promocional">$<?php echo number_format($precioPromocional, 0, ',', '.'); ?></span>
-                                            <?php else: ?>
-                                                <span class="precio-destacado">$<?php echo number_format($producto['precio_producto'], 0, ',', '.'); ?></span>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
                                 </div>
-                            </a>
-                            <!-- Botón "+" fuera del enlace -->
-                            <div class="icono-carrito" onclick="agregarAlCarrito(
-                                '<?php echo $producto['id_producto']; ?>',
-                                '<?php echo $producto['categoria']; ?>',
-                                '<?php echo $producto['nombre_producto']; ?>',
-                                '<?php echo $producto['precio_producto']; ?>',
-                                '<?php echo $producto['imagen_producto']; ?>'
-                            )">
+                            </div>
+                            <div class="icono-carrito" 
+                                data-id="<?php echo $producto['id_producto']; ?>" 
+                                data-categoria="<?php echo $producto['categoria']; ?>" 
+                                onclick="agregarAlCarrito(this)">
                                 <i class="fas fa-plus"></i>
                             </div>
                         </div>
@@ -373,50 +275,51 @@ $resultado = $conexion->query($query);
                 <p class="text-center">No hay promociones disponibles en este momento.</p>
             <?php endif; ?>
         </div>
-
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-|   <script>
-        function agregarAlCarrito(idProducto, categoria, nombre, precio, imagen) {
-            // Enviar una solicitud AJAX para agregar el producto al carrito
-            fetch('../funciones/gestionar_carrito/agregar_carrito.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    idProducto: idProducto,
-                    categoria: categoria,
-                    nombre: nombre,
-                    precio: precio,
-                    imagen: imagen // Incluir el campo imagen
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Actualizar el contador del carrito
-                const cartCountElement = document.querySelector('.cart-count');
-                if (cartCountElement) {
-                    cartCountElement.textContent = data.totalProductos;
-                } else {
-                    const newCartCount = document.createElement('span');
-                    newCartCount.classList.add('cart-count');
-                    newCartCount.textContent = data.totalProductos;
-                    document.querySelector('.cart-icon').appendChild(newCartCount);
-                }
-                // Mostrar la notificación
-                mostrarNotificacion(`${nombre} ha sido agregado al carrito exitosamente`);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
+    <script>
+        document.querySelectorAll('.icono-carrito').forEach(button => {
+            button.addEventListener('click', function () {
+                const idProducto = this.dataset.id; // Usar 'id' en lugar de 'idProducto'
+                const categoria = this.dataset.categoria;
 
+                // Realizar la solicitud AJAX para agregar al carrito
+                fetch('../funciones/gestionar_carrito/agregar_carrito.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idProducto, categoria }) // Enviar datos en formato JSON
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Mostrar notificación temporal
+                        mostrarNotificacion(data.message);
+
+                        // Actualizar el contador del carrito en el header
+                        const cartCountElement = document.getElementById('cart-count');
+                        if (cartCountElement) {
+                            cartCountElement.textContent = data.cartCount > 0 ? data.cartCount : '';
+                        } else if (data.cartCount > 0) {
+                            const newCartCount = document.createElement('span');
+                            newCartCount.id = 'cart-count';
+                            newCartCount.className = 'cart-count';
+                            newCartCount.textContent = data.cartCount;
+                            document.querySelector('.bi-cart-fill').parentElement.appendChild(newCartCount);
+                        }
+                    } else {
+                        mostrarNotificacion('Error al agregar el producto al carrito.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    mostrarNotificacion('Ocurrió un error al procesar la solicitud.');
+                });
+            });
+        });
+
+        // Función para mostrar notificaciones temporales
         function mostrarNotificacion(mensaje) {
             const container = document.getElementById('notification-container');
-
-            // Crear el elemento de notificación
             const notification = document.createElement('div');
             notification.className = 'notification';
             notification.innerHTML = `
@@ -424,19 +327,17 @@ $resultado = $conexion->query($query);
                 <button class="close-btn" onclick="this.parentElement.remove()">×</button>
             `;
 
-            // Agregar la notificación al contenedor
             container.appendChild(notification);
 
-            // Remover automáticamente después de 5 segundos
+            // Remover automáticamente la notificación después de 5 segundos
             setTimeout(() => {
                 if (notification.parentElement) {
                     notification.remove();
                 }
             }, 5000);
         }
-        </script>
-        
+    </script>
+
     <div id="notification-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;"></div>
-    <?php include '../includes/footer.php'; ?>
 </body>
 </html>
