@@ -35,7 +35,7 @@ function generarSugerencias($userId) {
         $sql = "SELECT h.nombre_hamburguesa, h.imagen
                 FROM hamburguesa h
                 WHERE h.nombre_hamburguesa != ?
-                LIMIT 5";  // Obtener 3 productos diferentes
+                LIMIT 2";  // Obtener 3 productos diferentes
 
         $stmt = $conexion->prepare($sql);
         $stmt->bind_param("s", $producto['nombre']);
