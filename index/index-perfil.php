@@ -29,7 +29,7 @@ $user_data = $result_user->fetch_assoc();
 $stmt_user->close();
 
 // Consulta para obtener direcciones del usuario actual
-$query_direcciones = "SELECT d.id_direccion, d.calle, d.numero, d.ciudad
+$query_direcciones = "SELECT d.id_direccion, d.calle, d.numero, d.ciudad, d.depto_oficina_piso
                       FROM direccion d
                       JOIN direccion_usuario du ON d.id_direccion = du.id_direccion
                       WHERE du.id_usuario = ?";
