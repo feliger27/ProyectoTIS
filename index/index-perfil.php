@@ -125,11 +125,10 @@ $stmt_metodos_pago->close();
                     type="button" role="tab">Gestionar Direcciones</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings"
-                    type="button" role="tab">Configuración</button>
+                <button class="nav-link" id="orders-tab" data-bs-toggle="pill" data-bs-target="#manage-orders"
+                    type="button" role="tab">Pedidos</button>
             </li>
         </ul>
-
         <!-- Contenido de las pestañas en tarjetas -->
         <div class="tab-content">
             <!-- Información Personal -->
@@ -263,15 +262,91 @@ $stmt_metodos_pago->close();
                 </div>
             </div>
 
-            <!-- Configuración -->
-            <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
-                <div class="card">
-                    <div class="card-body">
-                        <h4>Configuración</h4>
-                        <p>Opciones de configuración del perfil.</p>
+<!-- Pedidos -->
+<div class="tab-pane fade" id="manage-orders" role="tabpanel" aria-labelledby="orders-tab">
+    <div class="card">
+        <div class="card-body">
+            <h4>Mis Pedidos</h4>
+            <div class="list-group">
+                <?php
+                // Consulta para obtener pedidos del usuario actual
+                $query_pedidos = "SELECT p.id_pedido, p.fecha_pedido, p.estado_pedido, p.monto, d.calle, d.numero, d.ciudad
+                                  FROM pedido p
+                                  LEFT JOIN direccion d ON p.id_direccion = d.id_direccion
+                                  WHERE p.id_usuario = ?";
+                $stmt_pedidos = $conexion->prepare($query_pedidos);
+                $stmt_pedidos->bind_param("i", $user_id);
+                $stmt_pedidos->execute();
+                $result_pedidos = $stmt_pedidos->get_result();
+
+                if ($result_pedidos->num_rows > 0):
+                    while ($pedido = $result_pedidos->fetch_assoc()):
+                ?>
+                <div class="list-group-item">
+                    <h5 class="mb-1">Pedido #<?= htmlspecialchars($pedido['id_pedido']); ?></h5>
+                    <p class="mb-1"><strong>Fecha:</strong> <?= htmlspecialchars($pedido['fecha_pedido']); ?></p>
+                    <p class="mb-1"><strong>Estado:</strong> <?= htmlspecialchars($pedido['estado_pedido']); ?></p>
+                    <p class="mb-1"><strong>Dirección:</strong> <?= htmlspecialchars($pedido['calle']) . ' ' . htmlspecialchars($pedido['numero']) . ', ' . htmlspecialchars($pedido['ciudad']); ?></p>
+                    <p class="mb-1"><strong>Monto Total:</strong> $<?= number_format($pedido['monto'], 2); ?></p>
+                    <button class="btn btn-primary btn-sm mt-2" data-bs-toggle="collapse" data-bs-target="#pedido-<?= $pedido['id_pedido']; ?>">Ver Detalles</button>
+                    <div class="collapse mt-2" id="pedido-<?= $pedido['id_pedido']; ?>">
+                        <h6>Detalles:</h6>
+                        <ul class="list-unstyled">
+                            <?php
+                            // Consulta para obtener detalles de hamburguesas
+                            $query_hamburguesas = "SELECT h.nombre_hamburguesa, ph.cantidad, ph.precio 
+                                                   FROM pedido_hamburguesa ph
+                                                   JOIN hamburguesa h ON ph.id_hamburguesa = h.id_hamburguesa
+                                                   WHERE ph.id_pedido = ?";
+                            $stmt_hamburguesas = $conexion->prepare($query_hamburguesas);
+                            $stmt_hamburguesas->bind_param("i", $pedido['id_pedido']);
+                            $stmt_hamburguesas->execute();
+                            $result_hamburguesas = $stmt_hamburguesas->get_result();
+
+                            while ($hamburguesa = $result_hamburguesas->fetch_assoc()):
+                            ?>
+                            <li>
+                                <?= htmlspecialchars($hamburguesa['nombre_hamburguesa']); ?> 
+                                (x<?= htmlspecialchars($hamburguesa['cantidad']); ?>) 
+                                - $<?= number_format($hamburguesa['precio'], 2); ?>
+                            </li>
+                            <?php endwhile; ?>
+                            <?php $stmt_hamburguesas->close(); ?>
+
+                            <?php
+                            // Consulta para obtener detalles de acompañamientos
+                            $query_acompaniamientos = "SELECT a.nombre_acompaniamiento, pa.cantidad, pa.precio 
+                                                       FROM pedido_acompaniamiento pa
+                                                       JOIN acompaniamiento a ON pa.id_acompaniamiento = a.id_acompaniamiento
+                                                       WHERE pa.id_pedido = ?";
+                            $stmt_acompaniamientos = $conexion->prepare($query_acompaniamientos);
+                            $stmt_acompaniamientos->bind_param("i", $pedido['id_pedido']);
+                            $stmt_acompaniamientos->execute();
+                            $result_acompaniamientos = $stmt_acompaniamientos->get_result();
+
+                            while ($acompaniamiento = $result_acompaniamientos->fetch_assoc()):
+                            ?>
+                            <li>
+                                <?= htmlspecialchars($acompaniamiento['nombre_acompaniamiento']); ?> 
+                                (x<?= htmlspecialchars($acompaniamiento['cantidad']); ?>) 
+                                - $<?= number_format($acompaniamiento['precio'], 2); ?>
+                            </li>
+                            <?php endwhile; ?>
+                            <?php $stmt_acompaniamientos->close(); ?>
+                        </ul>
                     </div>
                 </div>
+                <?php endwhile; ?>
+                <?php else: ?>
+                <p>No tienes pedidos registrados.</p>
+                <?php endif; ?>
+                <?php $stmt_pedidos->close(); ?>
             </div>
+        </div>
+    </div>
+</div>
+
+
         </div>
     </div>
 
