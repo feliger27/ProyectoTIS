@@ -2,6 +2,17 @@
 
 function generarSugerencias($userId) {
     include '../conexion.php';  // Asegúrate de ajustar la ruta al archivo de conexión
+    // Comprobar si el usuario tiene pedidos
+    $sqlPedido = "SELECT 1 FROM pedido WHERE id_usuario = ?";
+    $stmtPedido = $conexion->prepare($sqlPedido);
+    $stmtPedido->bind_param("i", $userId);
+    $stmtPedido->execute();
+    $resultPedido = $stmtPedido->get_result();
+    $stmtPedido->close();
+
+    if ($resultPedido->num_rows === 0) {
+        return [];  // No hay pedidos, no mostrar sugerencias
+    }
 
     // Paso 1: Obtener los productos más comprados por el usuario
     $sql = "SELECT h.nombre_hamburguesa, h.imagen, COUNT(ph.id_hamburguesa) AS cantidad

@@ -83,7 +83,7 @@ if (isset($_SESSION['carrito'])) {
 
         /* Aumentar tamaño del logo sin que se distorsione */
         .logo-container img {
-            width: 50px; /* Ajuste el tamaño según lo desees */
+            width: 60px; /* Ajuste el tamaño según lo desees */
             height: auto;
         }
 
@@ -111,7 +111,7 @@ if (isset($_SESSION['carrito'])) {
         <!-- Logo sin fondo naranja -->
         <div class="logo-container me-3">
             <a href="../index/index-lobby.php">
-                <img src="../uploads/hamburgeeks_logo.jpeg" alt="Logo"> <!-- Logo sin fondo naranja -->
+                <img src="../uploads/HAMBUR_Mesa.png" alt="Logo"> <!-- Logo sin fondo naranja -->
             </a>
         </div>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
