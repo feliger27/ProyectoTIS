@@ -1,6 +1,50 @@
 <?php
 include '../../conexion.php';
 require_once('../../libs/fpdf.php');  // Asegúrate de cambiar la ruta según tu estructura de directorios
+require_once '../../funciones/notificar_usuario/enviar_notificacion_compra.php'; // Incluye el archivo correcto
+
+// Actualizar el estado del pedido si se envía el formulario
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pedido'], $_POST['estado_pedido'])) {
+    $id_pedido = $_POST['id_pedido'];
+    $nuevo_estado = $_POST['estado_pedido'];
+
+    // Obtener el estado actual del pedido y el correo del cliente
+    $sql_actual = "SELECT estado_pedido, u.correo_electronico 
+                   FROM pedido p
+                   JOIN usuario u ON p.id_usuario = u.id_usuario
+                   WHERE p.id_pedido = ?";
+    $stmt_actual = $conexion->prepare($sql_actual);
+    $stmt_actual->bind_param("i", $id_pedido);
+    $stmt_actual->execute();
+    $result_actual = $stmt_actual->get_result();
+    $pedido = $result_actual->fetch_assoc();
+
+    if (!$pedido) {
+        $mensaje_error = "Error: No se encontró el pedido con ID #$id_pedido.";
+    } else {
+        $estado_actual = $pedido['estado_pedido'];
+        $correo_usuario = $pedido['correo_electronico'];
+
+        // Actualizar solo si el estado cambia
+        if ($estado_actual !== $nuevo_estado) {
+            $sql_update = "UPDATE pedido SET estado_pedido = ? WHERE id_pedido = ?";
+            $stmt_update = $conexion->prepare($sql_update);
+            $stmt_update->bind_param("si", $nuevo_estado, $id_pedido);
+
+            if ($stmt_update->execute()) {
+                $mensaje_exito = "El estado del pedido #$id_pedido se actualizó correctamente a '$nuevo_estado'.";
+
+                // Enviar notificación al cliente usando enviarCorreoNotificacion
+                $notificacion_result = enviarCorreoNotificacion($id_pedido, $nuevo_estado, $correo_usuario);
+                if ($notificacion_result !== true) {
+                    $mensaje_error = "Estado actualizado, pero ocurrió un error al enviar la notificación: $notificacion_result";
+                }
+            } else {
+                $mensaje_error = "Error al actualizar el estado del pedido: " . $stmt_update->error;
+            }
+        }
+    }
+}
 
 // Configuración regional para español
 setlocale(LC_TIME, 'es_ES.UTF-8');
@@ -156,7 +200,16 @@ if (isset($_POST['download_pdf']) && $mes_filtro) {
                 <td><?php echo $row['nombre_usuario'] . ' ' . $row['apellido_usuario']; ?></td>
                 <td>$<?php echo number_format($row['monto_total'], 2); ?></td>
                 <td><?php echo date('d-m-Y H:i', strtotime($row['fecha_pedido'])); ?></td>
-                <td><?php echo ucfirst($row['estado_pedido']); ?></td>
+                <td>
+                            <form method="POST" action="" class="estado-form">
+                                <input type="hidden" name="id_pedido" value="<?php echo $row['id_pedido']; ?>">
+                                <select name="estado_pedido" id="estado_<?php echo $row['id_pedido']; ?>" class="form-select me-2 estado-select">
+                                    <option value="en_preparacion" <?php if ($row['estado_pedido'] == 'en_preparacion') echo 'selected'; ?>>En preparación</option>
+                                    <option value="en_reparto" <?php if ($row['estado_pedido'] == 'en_reparto') echo 'selected'; ?>>En reparto</option>
+                                    <option value="entregado" <?php if ($row['estado_pedido'] == 'entregado') echo 'selected'; ?>>Entregado</option>
+                                </select>
+                            </form>
+                        </td>
                 <td>
                     <a href="editar.php?id=<?php echo $row['id_pedido']; ?>" class="btn btn-primary btn-sm">Editar</a>
                     <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#eliminarModal"
@@ -199,6 +252,24 @@ if (isset($_POST['download_pdf']) && $mes_filtro) {
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    $(document).ready(function () {
+        $('.estado-select').change(function () {
+            $(this).closest('form').submit(); // Enviar el formulario automáticamente al cambiar de estado
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#eliminarModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // Botón que activó el modal
+            var idPedido = button.data('id'); // Extraer el ID del pedido del atributo data-id
+            var modal = $(this);
+            modal.find('#idPedidoEliminar').val(idPedido); // Configurar el valor en el input oculto
+        });
+    });
+</script>
     
 
 </body>

@@ -60,26 +60,28 @@ if (isset($_GET['id'])) {
             <button class="btn btn-secondary" onclick="window.location.href='listar.php'">Volver</button>
         </div>
         <form method="POST" class="mt-4">
-            <div class="mb-3">
-                <label for="id_promocion" class="form-label">Promoción</label>
-                <select class="form-select" id="id_promocion" name="id_promocion">
-                    <option value="" <?php if (empty($pedido['id_promocion'])) echo 'selected'; ?>>Sin Promoción</option>
-                    <?php while ($promocion = $promociones->fetch_assoc()): ?>
-                        <option value="<?php echo $promocion['id_promocion']; ?>" <?php if ($pedido['id_promocion'] == $promocion['id_promocion']) echo 'selected'; ?>>
-                            <?php echo $promocion['codigo_promocion']; ?>
-                        </option>
-                    <?php endwhile; ?>
-                </select>
-            </div>
+    <div class="mb-3">
+        <label for="id_promocion" class="form-label">Promoción</label>
+        <select class="form-select" id="id_promocion" name="id_promocion">
+            <option value="" <?php if (empty($pedido['id_promocion'])) echo 'selected'; ?>>Sin Promoción</option>
+            <?php while ($promocion = $promociones->fetch_assoc()): ?>
+                <option value="<?php echo htmlspecialchars($promocion['id_promocion']); ?>" <?php echo ($pedido['id_promocion'] == $promocion['id_promocion']) ? 'selected' : ''; ?>>
+    <?php echo htmlspecialchars($promocion['codigo_promocion']); ?>
+</option>
 
-            <div class="mb-3">
-                <label for="total" class="form-label">Total</label>
-                <input type="number" class="form-control" id="total" name="total" value="<?php echo $pedido['total']; ?>" required>
-            </div>
+            <?php endwhile; ?>
+        </select>
+    </div>
 
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-            <a href="listar.php" class="btn btn-secondary">Cancelar</a>
-        </form>
+    <div class="mb-3">
+        <label for="total" class="form-label">Total</label>
+        <input type="number" class="form-control" id="total" name="total" value="<?php echo $pedido['total']; ?>" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    <a href="listar.php" class="btn btn-secondary">Cancelar</a>
+</form>
+
 
         <?php if (isset($_GET['actualizado']) && $_GET['actualizado'] == 1): ?>
             <div class="alert alert-success mt-3" role="alert">Pedido actualizado exitosamente.</div>
