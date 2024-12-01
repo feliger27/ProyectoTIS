@@ -111,43 +111,14 @@ try {
     descontarStock($conexion, $idPedido, $carrito);
 
     // Paso 4: Gestionar los puntos de recompensa
-    include 'gestionar_puntos.php'; // Asegúrate de incluir la ruta correcta
+    // Llamada a la función gestionarPuntos
+    include 'gestionar_puntos.php';
 
-    // Verificar y restar los puntos usados, actualizando el total de la compra
-    if ($puntosUsados > 0) {
-        // Obtiene los puntos disponibles para el usuario
-        $queryUsuario = "SELECT puntos_recompensa FROM usuario WHERE id_usuario = ?";
-        $stmtUsuario = $conexion->prepare($queryUsuario);
-        $stmtUsuario->bind_param('i', $idUsuario);
-        $stmtUsuario->execute();
-        $resultadoUsuario = $stmtUsuario->get_result();
-        $usuario = $resultadoUsuario->fetch_assoc();
-
-        // Verifica si el usuario tiene suficientes puntos
-        $puntosDisponibles = $usuario['puntos_recompensa'] ?? 0;
-        if ($puntosUsados > $puntosDisponibles) {
-            throw new Exception("No tienes suficientes puntos de recompensa.");
-        }
-
-        // Restar puntos usados y actualizar el total
-        $nuevoTotalCompra = $totalCompra - $puntosUsados;
-        if ($nuevoTotalCompra < 0) {
-            $nuevoTotalCompra = 0;
-        }
-
-        // Actualizar los puntos de recompensa del usuario
-        $nuevoPuntos = $puntosDisponibles - $puntosUsados;
-        $queryActualizarPuntos = "UPDATE usuario SET puntos_recompensa = ? WHERE id_usuario = ?";
-        $stmtActualizarPuntos = $conexion->prepare($queryActualizarPuntos);
-        $stmtActualizarPuntos->bind_param('ii', $nuevoPuntos, $idUsuario);
-        $stmtActualizarPuntos->execute();
-
-        // Actualizar el monto total con el descuento de puntos
-        $totalCompra = $nuevoTotalCompra;
+    try {
+        gestionarPuntos($conexion, $idUsuario, $idPedido, $totalCompra, $puntosUsados);
+    } catch (Exception $e) {
+        throw new Exception("Error al gestionar puntos: " . $e->getMessage());
     }
-
-    // Llamada a la función para gestionar los puntos si es necesario
-    gestionarPuntos($conexion, $idUsuario, $totalCompra, $puntosUsados);
 
     // Confirmar la transacción
     $conexion->commit();
