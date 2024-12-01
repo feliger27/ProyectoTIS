@@ -25,6 +25,20 @@ $stmt->execute();
 $result = $stmt->get_result();
 $stmt->close();
 
+// Consulta para contar los pedidos por mes en el año actual
+$sql_count_pedidos = "SELECT MONTH(fecha_pedido) AS mes, COUNT(*) AS cantidad_pedidos
+                      FROM pedido
+                      WHERE YEAR(fecha_pedido) = YEAR(CURRENT_DATE())
+                      GROUP BY mes
+                      ORDER BY mes";
+$result_count_pedidos = $conexion->query($sql_count_pedidos);
+
+$pedidos_por_mes = array_fill(1, 12, 0); // Asegúrate de tener datos para todos los meses
+
+while ($fila = $result_count_pedidos->fetch_assoc()) {
+    $pedidos_por_mes[$fila['mes']] = $fila['cantidad_pedidos'];
+}
+
 // Consulta para obtener las ventas por mes
 $sql_ventas_mes = "SELECT MONTH(p.fecha_pedido) AS mes, SUM(p.total) AS ventas_totales
                    FROM pedido p
@@ -161,6 +175,31 @@ if (isset($_POST['download_pdf']) && $mes_filtro) {
     <?php endif; ?>
 </tbody>
         </table>
+        <h3>Pedidos por Mes</h3>
+        <canvas id="pedidosPorMes"></canvas>
+        <script>
+    var ctx = document.getElementById('pedidosPorMes').getContext('2d');
+    var pedidosPorMesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            datasets: [{
+                label: 'Número de Pedidos',
+                data: <?php echo json_encode(array_values($pedidos_por_mes)); ?>,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
