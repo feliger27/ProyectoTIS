@@ -116,6 +116,16 @@ $carrito = isset($_SESSION['carrito']) ? $_SESSION['carrito'] : [];
             background-color: #229954;
         }
 
+        .btn-pagar {
+            background-color: #ffc107;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-pagar:hover {
+            background-color: #e0a800;
+        }
+
         .icono-basura {
             color: #e74c3c;
             font-size: 1.5rem;
@@ -135,16 +145,13 @@ $carrito = isset($_SESSION['carrito']) ? $_SESSION['carrito'] : [];
         .precio-normal {
             font-size: 1rem;
             color: #7f8c8d;
-            /* Gris */
             text-decoration: line-through;
             margin-right: 5px;
         }
 
         .precio-promocional {
             font-size: 1.1rem;
-            /* Más grande */
             color: #27ae60;
-            /* Verde */
             font-weight: bold;
         }
     </style>
@@ -172,7 +179,6 @@ $carrito = isset($_SESSION['carrito']) ? $_SESSION['carrito'] : [];
                     $total = 0;
                     foreach ($carrito as $categoria => $productos):
                         foreach ($productos as $id => $producto):
-                            // Verificar si el producto tiene una promoción activa
                             $promocion = obtenerPromocion($id, $categoria, $promociones);
                             $precioUnitario = $promocion ? calcularPrecioPromocional($producto['precio'], $promocion['porcentaje_descuento']) : $producto['precio'];
                             $subtotal = $precioUnitario * $producto['cantidad'];
@@ -186,15 +192,12 @@ $carrito = isset($_SESSION['carrito']) ? $_SESSION['carrito'] : [];
                                 <td><?php echo $producto['nombre']; ?></td>
                                 <td>
                                     <?php if ($promocion): ?>
-                                        <span
-                                            class="precio-normal">$<?php echo number_format($producto['precio'], 0, ',', '.'); ?></span>
-                                        <span
-                                            class="precio-promocional">$<?php echo number_format($precioUnitario, 0, ',', '.'); ?></span>
+                                        <span class="precio-normal">$<?php echo number_format($producto['precio'], 0, ',', '.'); ?></span>
+                                        <span class="precio-promocional">$<?php echo number_format($precioUnitario, 0, ',', '.'); ?></span>
                                     <?php else: ?>
                                         $<?php echo number_format($producto['precio'], 0, ',', '.'); ?>
                                     <?php endif; ?>
                                 </td>
-
                                 <td>
                                     <input type="number" name="cantidad" value="<?php echo $producto['cantidad']; ?>" min="1"
                                         class="form-control text-center"
@@ -218,7 +221,10 @@ $carrito = isset($_SESSION['carrito']) ? $_SESSION['carrito'] : [];
             </table>
             <div class="d-flex justify-content-between">
                 <button class="btn btn-vaciar" onclick="vaciarCarrito()">Vaciar Carrito</button>
-                <a href="../index/index-menu.php" class="btn btn-seguir">Seguir Comprando</a>
+                <div>
+                    <a href="../index/index-menu.php" class="btn btn-seguir">Seguir Comprando</a>
+                    <a href="../index/index-pago.php" class="btn btn-pagar">Proceder al Pago</a>
+                </div>
             </div>
         <?php else: ?>
             <p class="text-center">Tu carrito está vacío. <a href="../index/index-menu.php">Explorar menú</a></p>
@@ -252,31 +258,19 @@ $carrito = isset($_SESSION['carrito']) ? $_SESSION['carrito'] : [];
                         console.error('Error del servidor:', data.error);
                         alert(data.error);
                     } else {
-                        // Actualizar los valores en la interfaz
                         const subtotalElem = document.getElementById(`subtotal-${idProducto}`);
                         const totalElem = document.getElementById('total');
 
-                        // Actualiza el subtotal del producto
                         if (subtotalElem) {
                             subtotalElem.innerText = data.subtotal;
-                        } else {
-                            console.error(`Elemento con ID subtotal-${idProducto} no encontrado.`);
                         }
-
-                        // Actualiza el total del carrito
                         if (totalElem) {
                             totalElem.innerText = data.total;
-                        } else {
-                            console.error('Elemento con ID total no encontrado.');
                         }
                     }
                 })
                 .catch(error => console.error('Error en la solicitud AJAX:', error));
         }
-
-
-
-
 
         function eliminarProducto(idProducto, categoria) {
             fetch('../funciones/gestionar_carrito/eliminar_carrito.php', {
