@@ -4,7 +4,7 @@ include '../../conexion.php';
 if (isset($_GET['id'])) {
     $id_pedido = $_GET['id'];
 
-    // Obtener el pedido actual
+    // Validar que el pedido existe
     $sql = "SELECT * FROM pedido WHERE id_pedido = ?";
     $stmt = $conexion->prepare($sql);
     $stmt->bind_param('i', $id_pedido);
@@ -12,28 +12,40 @@ if (isset($_GET['id'])) {
     $result = $stmt->get_result();
     $pedido = $result->fetch_assoc();
 
-    // Obtener usuarios y promociones para el formulario
-    $usuarios = $conexion->query("SELECT id_usuario, nombre FROM usuario");
-    $promociones = $conexion->query("SELECT id_promocion, codigo_promocion FROM promocion");
+    if (!$pedido) {
+        header("Location: listar.php?error=PedidoNoEncontrado");
+        exit();
+    }
+
+    // Obtener promociones disponibles
+    $promociones = $conexion->query("SELECT id_promocion, nombre_promocion FROM promocion");
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        // Recibir datos del formulario
-        $id_promocion = $_POST['id_promocion'] ?: null; // Permitir que el valor sea null si no se selecciona promoción
+        // Validar entrada
+        $id_promocion = isset($_POST['id_promocion']) && $_POST['id_promocion'] !== '' ? (int) $_POST['id_promocion'] : null;
         $total = $_POST['total'];
 
-        // Actualizar el pedido
-        $sql_update = "UPDATE pedido SET id_promocion = ?, total = ? WHERE id_pedido = ?";
-        $stmt_update = $conexion->prepare($sql_update);
-        $stmt_update->bind_param('sii', $id_promocion, $total, $id_pedido);
-
-        if ($stmt_update->execute()) {
-            header("Location: listar.php?actualizado=1");
-            exit();
-        } else {
+        // Validar total como número positivo
+        if (!is_numeric($total) || $total <= 0) {
             echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                    Error: " . $stmt_update->error . "
+                    Error: El total debe ser un valor numérico mayor a 0.
                     <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
                 </div>";
+        } else {
+            // Actualizar pedido
+            $sql_update = "UPDATE pedido SET id_promocion = ?, total = ? WHERE id_pedido = ?";
+            $stmt_update = $conexion->prepare($sql_update);
+            $stmt_update->bind_param('iii', $id_promocion, $total, $id_pedido);
+
+            if ($stmt_update->execute()) {
+                header("Location: listar.php?actualizado=1");
+                exit();
+            } else {
+                echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                        Error al actualizar el pedido: " . $stmt_update->error . "
+                        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                    </div>";
+            }
         }
     }
 } else {
@@ -53,7 +65,6 @@ if (isset($_GET['id'])) {
 </head>
 
 <body>
-
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center">
             <h1>Editar Pedido</h1>
@@ -66,7 +77,7 @@ if (isset($_GET['id'])) {
                     <option value="" <?php if (empty($pedido['id_promocion'])) echo 'selected'; ?>>Sin Promoción</option>
                     <?php while ($promocion = $promociones->fetch_assoc()): ?>
                         <option value="<?php echo $promocion['id_promocion']; ?>" <?php if ($pedido['id_promocion'] == $promocion['id_promocion']) echo 'selected'; ?>>
-                            <?php echo $promocion['codigo_promocion']; ?>
+                            <?php echo $promocion['nombre_promocion']; ?>
                         </option>
                     <?php endwhile; ?>
                 </select>
@@ -74,16 +85,12 @@ if (isset($_GET['id'])) {
 
             <div class="mb-3">
                 <label for="total" class="form-label">Total</label>
-                <input type="number" class="form-control" id="total" name="total" value="<?php echo $pedido['total']; ?>" required>
+                <input type="number" class="form-control" id="total" name="total" value="<?php echo htmlspecialchars($pedido['total']); ?>" required>
             </div>
 
             <button type="submit" class="btn btn-primary">Guardar Cambios</button>
             <a href="listar.php" class="btn btn-secondary">Cancelar</a>
         </form>
-
-        <?php if (isset($_GET['actualizado']) && $_GET['actualizado'] == 1): ?>
-            <div class="alert alert-success mt-3" role="alert">Pedido actualizado exitosamente.</div>
-        <?php endif; ?>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

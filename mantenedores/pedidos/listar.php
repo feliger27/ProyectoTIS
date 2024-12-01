@@ -75,7 +75,7 @@ $result = $conexion->query($sql);
     
     <div class="d-flex justify-content-between align-items-center">
         <h1>Listado de Pedidos</h1>
-        <button class="btn btn-secondary" onclick="window.location.href='../../index/index.php'">Volver</button>
+        <button class="btn btn-secondary" onclick="window.location.href='../../index/index-mantenedores.php'">Volver</button>
     </div>
     <table class="table table-striped">
         <thead>
@@ -95,14 +95,13 @@ $result = $conexion->query($sql);
                         <td><?php echo $row['nombre_usuario'] . ' ' . $row['apellido_usuario']; ?></td>
                         <td><?php echo '$' . number_format($row['total'], 2); ?></td>
                         <td>
-                            <form method="POST" class="d-flex">
+                            <form method="POST" action="" class="estado-form">
                                 <input type="hidden" name="id_pedido" value="<?php echo $row['id_pedido']; ?>">
-                                <select name="estado_pedido" id="estado_<?php echo $row['id_pedido']; ?>" class="form-select me-2">
+                                <select name="estado_pedido" id="estado_<?php echo $row['id_pedido']; ?>" class="form-select me-2 estado-select">
                                     <option value="en_preparacion" <?php if ($row['estado_pedido'] == 'en_preparacion') echo 'selected'; ?>>En preparación</option>
                                     <option value="en_reparto" <?php if ($row['estado_pedido'] == 'en_reparto') echo 'selected'; ?>>En reparto</option>
                                     <option value="entregado" <?php if ($row['estado_pedido'] == 'entregado') echo 'selected'; ?>>Entregado</option>
                                 </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Actualizar</button>
                             </form>
                         </td>
                         <td>
@@ -118,8 +117,51 @@ $result = $conexion->query($sql);
             <?php endif; ?>
         </tbody>
     </table>
+<!-- Modal para Confirmar Eliminación -->
+<div class="modal fade" id="eliminarModal" tabindex="-1" aria-labelledby="eliminarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formEliminar" method="POST" action="eliminar.php">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eliminarModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar este pedido?</p>
+                    <input type="hidden" name="id_pedido" id="idPedidoEliminar">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+    
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('.estado-select').change(function () {
+            $(this).closest('form').submit(); // Enviar el formulario automáticamente al cambiar de estado
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#eliminarModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // Botón que activó el modal
+            var idPedido = button.data('id'); // Extraer el ID del pedido del atributo data-id
+            var modal = $(this);
+            modal.find('#idPedidoEliminar').val(idPedido); // Configurar el valor en el input oculto
+        });
+    });
+</script>
+
 </body>
 </html>

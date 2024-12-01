@@ -72,7 +72,33 @@ function enviarCorreoNotificacion($id_pedido, $estado_pedido, $correo)
 
         // Configurar contenido del correo
         $mail->isHTML(true);
+        
         $mail->Subject = 'Resumen y Seguimiento de Pedido';
+        // Definir el HTML para los estados del pedido
+        $estados_html = "
+        <div style='display: flex; justify-content: space-between; align-items: center; margin: 20px 0;'>
+            <div style='flex: 1; text-align: center; padding: 10px; font-weight: " . ($estado_pedido === 'en_preparacion' ? "bold" : "normal") . "; 
+                        background-color: " . ($estado_pedido === 'en_preparacion' ? "#ffc107" : "#f9f9f9") . "; 
+                        color: " . ($estado_pedido === 'en_preparacion' ? "#fff" : "#555") . "; 
+                        border: 1px solid #ddd; border-radius: 5px; margin: 0 5px;'>
+                En Preparación
+            </div>
+            <div style='flex: 1; text-align: center; padding: 10px; font-weight: " . ($estado_pedido === 'en_reparto' ? "bold" : "normal") . "; 
+                        background-color: " . ($estado_pedido === 'en_reparto' ? "#007bff" : "#f9f9f9") . "; 
+                        color: " . ($estado_pedido === 'en_reparto' ? "#fff" : "#555") . "; 
+                        border: 1px solid #ddd; border-radius: 5px; margin: 0 5px;'>
+                En Reparto
+            </div>
+            <div style='flex: 1; text-align: center; padding: 10px; font-weight: " . ($estado_pedido === 'entregado' ? "bold" : "normal") . "; 
+                        background-color: " . ($estado_pedido === 'entregado' ? "#28a745" : "#f9f9f9") . "; 
+                        color: " . ($estado_pedido === 'entregado' ? "#fff" : "#555") . "; 
+                        border: 1px solid #ddd; border-radius: 5px; margin: 0 5px;'>
+                Entregado
+            </div>
+        </div>";
+        
+        
+
         $mail->Body = "
         <!DOCTYPE html>
         <html lang='es'>
@@ -105,10 +131,9 @@ function enviarCorreoNotificacion($id_pedido, $estado_pedido, $correo)
                 <tr>
                     <td style='padding: 20px; border-bottom: 1px solid #dddddd;'>
                         <h4 style='color: #007bff; margin: 0;'>Seguimiento del Pedido</h4>
-                        <p>Revisa aquí el estado de tu pedido:</p>
-                        <a href='https://hamburgeeks.com/seguimiento' style='color: #ffc107; text-decoration: none;'>https://hamburgeeks.com/seguimiento</a>
+                        <p>Estado de tu pedido:</p>
+                        {$estados_html}
                         <p><strong>Fecha del Pedido:</strong> {$fecha_pedido}</p>
-                        <p><strong>Estado Actual:</strong> {$estado_actual_legible}</p>
                     </td>
                 </tr>
                 <tr>
@@ -132,6 +157,10 @@ function enviarCorreoNotificacion($id_pedido, $estado_pedido, $correo)
             </table>
         </body>
         </html>";
+        
+        
+        
+        
 
         $mail->send();
         return "<div class='alert alert-success'>Notificación enviada exitosamente a $correo.</div>";
