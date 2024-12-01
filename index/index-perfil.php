@@ -63,44 +63,41 @@ $stmt_metodos_pago->close();
     <title>Mi Perfil - HamburGeeks</title>
     <style>
     .container .btn-primary, .container .btn-warning, .container .btn-danger, .container .btn-success {
-    background-color: #fd7e14; 
-    border-color: #fd7e14; 
+        background-color: #fd7e14; 
+        border-color: #fd7e14; 
     }
 
     .container .btn-primary:hover, .container .btn-warning:hover, .container .btn-danger:hover, .container .btn-success:hover {
-    background-color: #e69500; 
-    border-color: #e69500;
+        background-color: #e69500; 
+        border-color: #e69500;
     }
 
-
     .container h2, .container h4, .container .nav-link.active {
-    color: #fd7e14; /
+        color: #fd7e14; 
     }
 
     .container .nav-link.active {
-    background-color: #fd7e14;
-    color: white;
-    }
-    .nav-pills .nav-link {
-    color: black; 
+        background-color: #fd7e14;
+        color: white;
     }
 
-    /* Asegura que el contenido del cuerpo y html ocupe toda la altura */
+    .nav-pills .nav-link {
+        color: black; 
+    }
+
     html, body {
         height: 100%;
         display: flex;
         flex-direction: column;
     }
 
-    /* Permite que el contenido ocupe el espacio disponible */
     body {
         flex-grow: 1;
     }
 
-    /* Asegura que el footer siempre se quede en la parte inferior */
     footer {
-        margin-top: auto; /* Empuja el footer al final si el contenido es corto */
-        width: 100%; /* Asegura que ocupe todo el ancho de la pantalla */
+        margin-top: auto; 
+        width: 100%;
     }
     </style>
 </head>
@@ -114,7 +111,6 @@ $stmt_metodos_pago->close();
             </div>
         </div>
 
-        <!-- Barra de navegación en pestañas -->
         <ul class="nav nav-pills mb-4" id="perfil-tabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="personal-tab" data-bs-toggle="pill" data-bs-target="#personal-info"
@@ -129,253 +125,91 @@ $stmt_metodos_pago->close();
                     type="button" role="tab">Pedidos</button>
             </li>
         </ul>
-        <!-- Contenido de las pestañas en tarjetas -->
+
         <div class="tab-content">
-            <!-- Información Personal -->
             <div class="tab-pane fade show active" id="personal-info" role="tabpanel" aria-labelledby="personal-tab">
                 <div class="card">
                     <div class="card-body">
                         <h4>Información Personal</h4>
                         <p><strong>Nombre:</strong> <?= htmlspecialchars($user_data['nombre']); ?></p>
                         <p><strong>Apellido:</strong> <?= htmlspecialchars($user_data['apellido']); ?></p>
-                        <p><strong>Correo Electrónico:</strong>
-                            <?= htmlspecialchars($user_data['correo_electronico']); ?></p>
+                        <p><strong>Correo Electrónico:</strong> <?= htmlspecialchars($user_data['correo_electronico']); ?></p>
                         <p><strong>Teléfono:</strong> <?= htmlspecialchars($user_data['telefono']); ?></p>
-                        <button class="btn btn-primary mt-3" data-bs-toggle="modal"
-                            data-bs-target="#editPersonalInfoModal">Editar</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Modal para editar Información Personal -->
-            <div class="modal fade" id="editPersonalInfoModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Editar Información Personal</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form action="../mantenedores/usuarios/editar.php?id=<?= $user_id ?>&origin=perfil" method="POST">
-                                <div class="form-group mb-3">
-                                    <label for="nombre">Nombre</label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre" value="<?= htmlspecialchars($user_data['nombre']) ?>" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="apellido">Apellido</label>
-                                    <input type="text" class="form-control" id="apellido" name="apellido" value="<?= htmlspecialchars($user_data['apellido']) ?>" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="email">Correo Electrónico</label>
-                                    <input type="email" class="form-control" id="email" value="<?= htmlspecialchars($user_data['correo_electronico']) ?>" readonly>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="telefono">Teléfono</label>
-                                    <input type="tel" class="form-control" id="telefono" name="telefono" value="<?= htmlspecialchars($user_data['telefono']) ?>" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Gestión de Direcciones -->
-            <div class="tab-pane fade" id="manage-addresses" role="tabpanel" aria-labelledby="addresses-tab">
+            <div class="tab-pane fade" id="manage-orders" role="tabpanel" aria-labelledby="orders-tab">
                 <div class="card">
                     <div class="card-body">
-                        <h4>Gestionar Direcciones</h4>
-                        <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addAddressModal">Añadir Nueva Dirección</button>
-                        <ul class="list-group">
-                            <?php foreach ($direcciones as $direccion): ?>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>
-                                        <?= htmlspecialchars($direccion['calle']) . ' ' . htmlspecialchars($direccion['numero']) . ', ' . htmlspecialchars($direccion['ciudad']); ?>
-                                    </span>
-                                    <div>
-                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editAddressModal-<?= $direccion['id_direccion']; ?>">Editar</button>
-                                        <a href="../funciones/gestionar_direcciones/eliminar_direccion.php?id_direccion=<?= $direccion['id_direccion']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta dirección?')">Eliminar</a>
-                                    </div>
-                                </li>
+                        <h4>Mis Pedidos</h4>
+                        <div class="list-group">
+                            <?php
+                            $query_pedidos = "SELECT p.id_pedido, p.fecha_pedido, p.estado_pedido, p.monto, d.calle, d.numero, d.ciudad
+                                              FROM pedido p
+                                              LEFT JOIN direccion d ON p.id_direccion = d.id_direccion
+                                              WHERE p.id_usuario = ?";
+                            $stmt_pedidos = $conexion->prepare($query_pedidos);
+                            $stmt_pedidos->bind_param("i", $user_id);
+                            $stmt_pedidos->execute();
+                            $result_pedidos = $stmt_pedidos->get_result();
 
-                                <!-- Modal para Editar Dirección -->
-                                <div class="modal fade" id="editAddressModal-<?= $direccion['id_direccion']; ?>" tabindex="-1" aria-hidden="true">
+                            if ($result_pedidos->num_rows > 0):
+                                while ($pedido = $result_pedidos->fetch_assoc()):
+                            ?>
+                            <div class="list-group-item">
+                                <h5 class="mb-1">Pedido #<?= htmlspecialchars($pedido['id_pedido']); ?></h5>
+                                <p class="mb-1"><strong>Fecha:</strong> <?= htmlspecialchars($pedido['fecha_pedido']); ?></p>
+                                <p class="mb-1"><strong>Estado:</strong> <?= htmlspecialchars($pedido['estado_pedido']); ?></p>
+                                <button class="btn btn-warning btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#reviewModal-<?= $pedido['id_pedido']; ?>">Añadir Reseña</button>
+                                <div class="modal fade" id="reviewModal-<?= $pedido['id_pedido']; ?>" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Editar Dirección</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form action="../funciones/gestionar_direcciones/editar_direccion.php" method="POST">
-                                                    <input type="hidden" name="id_direccion" value="<?= $direccion['id_direccion']; ?>">
-                                                    <div class="form-group mb-3">
-                                                        <label for="calle">Calle</label>
-                                                        <input type="text" class="form-control" name="calle" value="<?= htmlspecialchars($direccion['calle']); ?>" required>
+                                        <form action="../funciones/valoraciones/insertar_valoracion.php" method="POST">
+
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Añadir Reseña para Pedido #<?= $pedido['id_pedido']; ?></h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="id_pedido" value="<?= $pedido['id_pedido']; ?>">
+                                                    <div class="mb-3">
+                                                        <label for="cantidad_estrellas" class="form-label">Calificación (1-5 estrellas)</label>
+                                                        <select name="cantidad_estrellas" class="form-select" required>
+                                                            <option value="" selected disabled>Selecciona una calificación</option>
+                                                            <option value="1">1 estrella</option>
+                                                            <option value="2">2 estrellas</option>
+                                                            <option value="3">3 estrellas</option>
+                                                            <option value="4">4 estrellas</option>
+                                                            <option value="5">5 estrellas</option>
+                                                        </select>
                                                     </div>
-                                                    <div class="form-group mb-3">
-                                                        <label for="numero">Número</label>
-                                                        <input type="text" class="form-control" name="numero" value="<?= htmlspecialchars($direccion['numero']); ?>" required>
+                                                    <div class="mb-3">
+                                                        <label for="comentario" class="form-label">Comentario</label>
+                                                        <textarea name="comentario" class="form-control" rows="3" required></textarea>
                                                     </div>
-                                                    <div class="form-group mb-3">
-                                                        <label for="ciudad">Ciudad</label>
-                                                        <input type="text" class="form-control" name="ciudad" value="<?= htmlspecialchars($direccion['ciudad']); ?>" required>
-                                                    </div>
-                                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                                                </form>
-                                            </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="submit" class="btn btn-success">Enviar Reseña</button>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal para Añadir Dirección -->
-            <div class="modal fade" id="addAddressModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Añadir Nueva Dirección</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form action="../funciones/gestionar_direcciones/insertar_direccion.php" method="POST">
-                                <div class="form-group mb-3">
-                                    <label for="calle">Calle</label>
-                                    <input type="text" class="form-control" name="calle" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="numero">Número</label>
-                                    <input type="text" class="form-control" name="numero" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="ciudad">Ciudad</label>
-                                    <input type="text" class="form-control" name="ciudad" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Guardar Dirección</button>
-                            </form>
+                            </div>
+                            <?php endwhile; ?>
+                            <?php else: ?>
+                            <p>No tienes pedidos registrados.</p>
+                            <?php endif; ?>
+                            <?php $stmt_pedidos->close(); ?>
                         </div>
                     </div>
                 </div>
             </div>
-
-<!-- Pedidos -->
-<div class="tab-pane fade" id="manage-orders" role="tabpanel" aria-labelledby="orders-tab">
-    <div class="card">
-        <div class="card-body">
-            <h4>Mis Pedidos</h4>
-            <div class="list-group">
-                <?php
-                // Consulta para obtener pedidos del usuario actual
-                $query_pedidos = "SELECT p.id_pedido, p.fecha_pedido, p.estado_pedido, p.monto, d.calle, d.numero, d.ciudad
-                                  FROM pedido p
-                                  LEFT JOIN direccion d ON p.id_direccion = d.id_direccion
-                                  WHERE p.id_usuario = ?";
-                $stmt_pedidos = $conexion->prepare($query_pedidos);
-                $stmt_pedidos->bind_param("i", $user_id);
-                $stmt_pedidos->execute();
-                $result_pedidos = $stmt_pedidos->get_result();
-
-                if ($result_pedidos->num_rows > 0):
-                    while ($pedido = $result_pedidos->fetch_assoc()):
-                ?>
-                <div class="list-group-item">
-                    <h5 class="mb-1">Pedido #<?= htmlspecialchars($pedido['id_pedido']); ?></h5>
-                    <p class="mb-1"><strong>Fecha:</strong> <?= htmlspecialchars($pedido['fecha_pedido']); ?></p>
-                    <p class="mb-1"><strong>Estado:</strong> <?= htmlspecialchars($pedido['estado_pedido']); ?></p>
-                    <p class="mb-1"><strong>Dirección:</strong> <?= htmlspecialchars($pedido['calle']) . ' ' . htmlspecialchars($pedido['numero']) . ', ' . htmlspecialchars($pedido['ciudad']); ?></p>
-                    <p class="mb-1"><strong>Monto Total:</strong> $<?= number_format($pedido['monto'], 2); ?></p>
-                    <button class="btn btn-primary btn-sm mt-2" data-bs-toggle="collapse" data-bs-target="#pedido-<?= $pedido['id_pedido']; ?>">Ver Detalles</button>
-                    <div class="collapse mt-2" id="pedido-<?= $pedido['id_pedido']; ?>">
-                        <h6>Detalles:</h6>
-                        <ul class="list-unstyled">
-                            <?php
-                            // Consulta para obtener detalles de hamburguesas
-                            $query_hamburguesas = "SELECT h.nombre_hamburguesa, ph.cantidad, ph.precio 
-                                                   FROM pedido_hamburguesa ph
-                                                   JOIN hamburguesa h ON ph.id_hamburguesa = h.id_hamburguesa
-                                                   WHERE ph.id_pedido = ?";
-                            $stmt_hamburguesas = $conexion->prepare($query_hamburguesas);
-                            $stmt_hamburguesas->bind_param("i", $pedido['id_pedido']);
-                            $stmt_hamburguesas->execute();
-                            $result_hamburguesas = $stmt_hamburguesas->get_result();
-
-                            while ($hamburguesa = $result_hamburguesas->fetch_assoc()):
-                            ?>
-                            <li>
-                                <?= htmlspecialchars($hamburguesa['nombre_hamburguesa']); ?> 
-                                (x<?= htmlspecialchars($hamburguesa['cantidad']); ?>) 
-                                - $<?= number_format($hamburguesa['precio'], 2); ?>
-                            </li>
-                            <?php endwhile; ?>
-                            <?php $stmt_hamburguesas->close(); ?>
-
-                            <?php
-                            // Consulta para obtener detalles de acompañamientos
-                            $query_acompaniamientos = "SELECT a.nombre_acompaniamiento, pa.cantidad, pa.precio 
-                                                       FROM pedido_acompaniamiento pa
-                                                       JOIN acompaniamiento a ON pa.id_acompaniamiento = a.id_acompaniamiento
-                                                       WHERE pa.id_pedido = ?";
-                            $stmt_acompaniamientos = $conexion->prepare($query_acompaniamientos);
-                            $stmt_acompaniamientos->bind_param("i", $pedido['id_pedido']);
-                            $stmt_acompaniamientos->execute();
-                            $result_acompaniamientos = $stmt_acompaniamientos->get_result();
-
-                            while ($acompaniamiento = $result_acompaniamientos->fetch_assoc()):
-                            ?>
-                            <li>
-                                <?= htmlspecialchars($acompaniamiento['nombre_acompaniamiento']); ?> 
-                                (x<?= htmlspecialchars($acompaniamiento['cantidad']); ?>) 
-                                - $<?= number_format($acompaniamiento['precio'], 2); ?>
-                            </li>
-                            <?php endwhile; ?>
-                            <?php $stmt_acompaniamientos->close(); ?>
-                        </ul>
-                    </div>
-                </div>
-                <?php endwhile; ?>
-                <?php else: ?>
-                <p>No tienes pedidos registrados.</p>
-                <?php endif; ?>
-                <?php $stmt_pedidos->close(); ?>
-            </div>
-        </div>
-    </div>
-</div>
-
-
         </div>
     </div>
 
-    <script>
-        setTimeout(function () {
-            var mensajeExito = document.getElementById('mensajeExito');
-            if (mensajeExito) {
-                mensajeExito.classList.remove('show');
-                mensajeExito.classList.add('fade');
-            }
-        }, 5000);
-    </script>
-    <script>
-        document.getElementById('fecha_expiracion').addEventListener('input', function (e) {
-            var input = e.target;
-            var value = input.value.replace(/\D/g, ''); // Remover caracteres no numéricos
-            var formattedValue = '';
-
-            // Si se ingresan los primeros dos dígitos (MM)
-            if (value.length > 0) {
-                formattedValue = value.substring(0, 2);
-                if (value.length >= 3) {
-                    formattedValue += '/' + value.substring(2, 4); // Agregar '/' y los siguientes dos dígitos (YY)
-                }
-            }
-
-            input.value = formattedValue; // Asignar el valor formateado al campo
-        });
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -119,7 +119,10 @@ if (isset($_SESSION['carrito'])) {
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
+            <li class="nav-item">
+                    <a class="nav-link" href="../index/index-menu.php">Menú</a>
+                </li>    
+            <li class="nav-item">
                     <a class="nav-link" href="../index/index-promociones.php">Promociones</a>
                 </li>
                 <li class="nav-item">
