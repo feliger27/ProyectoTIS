@@ -1,182 +1,173 @@
 <?php
-include '../conexion.php';
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../login/login.php");
-    exit();
+// Iniciar sesión si no está iniciada
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-include('../includes/header.php');
+// Incluir la conexión a la base de datos
+include('../conexion.php');
+include('../includes/header.php'); // Header con el contador del carrito
 
-$user_id = $_SESSION['user_id'];
-$monto_total = isset($_SESSION['total_carrito']) ? $_SESSION['total_carrito'] : 0;
+// Validar que el carrito no esté vacío
+if (empty($_SESSION['carrito'])) {
+    header('Location: index-carrito.php');
+    exit;
+}
 
-// Crear un nuevo pedido en la base de datos
-$stmt = $conexion->prepare("INSERT INTO pedido (id_usuario, total, fecha_pedido) VALUES (?, ?, NOW())");
-$stmt->bind_param("ii", $user_id, $monto_total);
-$stmt->execute();
-$id_pedido = $stmt->insert_id; // Recuperar el ID del pedido generado
-$stmt->close();
+// Cambiar de id_usuario a user_id
+$idUsuario = $_SESSION['user_id'] ?? null; // Adaptado a la clave user_id
+if (!$idUsuario) {
+    header('Location: index-lobby.php'); // Redirigir si no hay usuario logueado
+    exit;
+}
 
-// Guardar el ID del pedido en la sesión para utilizarlo en los siguientes pasos
-$_SESSION['id_pedido'] = $id_pedido;
+// Obtener direcciones del usuario
+$queryDirecciones = "
+    SELECT d.id_direccion, d.calle, d.numero, d.ciudad, d.depto_oficina_piso 
+    FROM direccion d
+    JOIN direccion_usuario du ON d.id_direccion = du.id_direccion
+    WHERE du.id_usuario = $idUsuario
+";
+$resultadoDirecciones = $conexion->query($queryDirecciones);
 
-// Obtener las direcciones guardadas del usuario
-$query_direcciones = "SELECT d.id_direccion, d.calle, d.numero, d.ciudad, d.codigo_postal 
-                      FROM direccion AS d
-                      INNER JOIN direccion_usuario AS du ON d.id_direccion = du.id_direccion
-                      WHERE du.id_usuario = $user_id";
-$direcciones = mysqli_query($conexion, $query_direcciones);
+// Obtener puntos de recompensa del usuario
+$queryPuntos = "SELECT puntos_recompensa FROM usuario WHERE id_usuario = $idUsuario";
+$resultadoPuntos = $conexion->query($queryPuntos);
+$puntosDisponibles = $resultadoPuntos->fetch_assoc()['puntos_recompensa'] ?? 0;
 
-// Obtener todas las tarjetas guardadas del usuario
-$query_tarjetas = "SELECT mp.id_pago, mp.nombre_titular, mp.numero_tarjeta, mp.fecha_expiracion, mp.tipo_tarjeta
-                   FROM metodo_pago AS mp
-                   INNER JOIN usuario_metodo_pago AS ump ON mp.id_pago = ump.id_pago
-                   WHERE ump.id_usuario = $user_id";
-$tarjetas_guardadas = mysqli_query($conexion, $query_tarjetas);
+// Obtener promociones activas
+$hoy = date('Y-m-d H:i:s');
+$queryPromociones = "SELECT * FROM promocion WHERE fecha_inicio <= '$hoy' AND fecha_fin >= '$hoy'";
+$resultadoPromociones = $conexion->query($queryPromociones);
+
+$promociones = [];
+if ($resultadoPromociones->num_rows > 0) {
+    while ($promo = $resultadoPromociones->fetch_assoc()) {
+        $promociones[] = $promo;
+    }
+}
+
+// Función para calcular el precio promocional
+function calcularPrecioPromocional($precio, $descuento) {
+    return $precio - ($precio * $descuento / 100);
+}
+
+// Función para buscar una promoción activa para un producto
+function obtenerPromocion($productoId, $categoria, $promociones) {
+    foreach ($promociones as $promo) {
+        if (($categoria === 'hamburguesa' && isset($promo['id_hamburguesa']) && $promo['id_hamburguesa'] == $productoId) ||
+            ($categoria === 'bebida' && isset($promo['id_bebida']) && $promo['id_bebida'] == $productoId) ||
+            ($categoria === 'acompaniamiento' && isset($promo['id_acompaniamiento']) && $promo['id_acompaniamiento'] == $productoId) ||
+            ($categoria === 'postre' && isset($promo['id_postre']) && $promo['id_postre'] == $productoId) ||
+            ($categoria === 'combo' && isset($promo['id_combo']) && $promo['id_combo'] == $productoId)) {
+            return $promo;
+        }
+    }
+    return null;
+}
+
+// Calcular el total del carrito
+$totalCarrito = 0;
+foreach ($_SESSION['carrito'] as $categoria => $productos) {
+    foreach ($productos as $productoId => $producto) {
+        // Obtener detalles del producto desde la base de datos
+        $queryProducto = "SELECT nombre_{$categoria} AS nombre, precio FROM {$categoria} WHERE id_{$categoria} = $productoId";
+        $resultadoProducto = $conexion->query($queryProducto);
+        $detallesProducto = $resultadoProducto->fetch_assoc();
+
+        // Calcular precio con promoción
+        $promocion = obtenerPromocion($productoId, $categoria, $promociones);
+        $precioUnitario = $promocion ? calcularPrecioPromocional($detallesProducto['precio'], $promocion['porcentaje_descuento']) : $detallesProducto['precio'];
+
+        // Sumar al total
+        $totalCarrito += $producto['cantidad'] * $precioUnitario;
+    }
+}
 ?>
 
-<div class="container my-5">
-    <h2 class="text-center mb-4">Proceder al Pago</h2>
-    
-    <div class="card mb-4">
-        <div class="card-body">
-            <h3 class="card-title">Seleccionar Dirección de Envío</h3>
-            <form action="../funciones/procesamiento/procesar-pago.php" method="POST">
-                <div class="mb-3">
-                    <?php while($direccion = mysqli_fetch_assoc($direcciones)): ?>
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" name="direccion_id" value="<?= $direccion['id_direccion'] ?>" required>
-                            <label class="form-check-label">
-                                <?= $direccion['calle'] ?>, <?= $direccion['numero'] ?>, <?= $direccion['ciudad'] ?>, <?= $direccion['codigo_postal'] ?>
-                            </label>
-                        </div>
-                    <?php endwhile; ?>
-                </div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagar - HamburGeeks</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        // Función para mostrar u ocultar el botón de pago según el método seleccionado
+        function togglePaymentButton() {
+            const metodoPago = document.getElementById('metodo_pago').value;
+            const btnConfirmar = document.getElementById('btn-confirmar-efectivo');
+            const btnTransbank = document.getElementById('btn-transbank');
 
-                <!-- Opción para agregar una nueva dirección -->
-                <div class="mb-3">
-                    <button type="button" class="btn btn-link" id="toggleNuevaDireccion">+ Agregar Nueva Dirección</button>
-                </div>
-                <div id="nuevaDireccionForm" style="display: none;">
-                    <h4>Agregar Nueva Dirección</h4>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="nueva_calle" placeholder="Calle" />
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="nueva_ciudad" placeholder="Ciudad" />
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="nuevo_codigo_postal" placeholder="Código Postal" />
-                        </div>
-                    </div>
-                    <div class="form-check mt-2">
-                        <input type="checkbox" class="form-check-input" name="recordar_direccion" value="1">
-                        <label class="form-check-label">Recordar esta dirección para futuros pedidos</label>
-                    </div>
-                </div>
+            if (metodoPago === 'efectivo') {
+                btnConfirmar.style.display = 'block';
+                btnTransbank.style.display = 'none';
+            } else if (metodoPago === 'transbank') {
+                btnConfirmar.style.display = 'none';
+                btnTransbank.style.display = 'block';
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Confirmar Pedido</h1>
 
-                <h4 class="mt-4">Seleccionar Método de Pago</h4>
-                <div class="mb-3">
-                    <div class="form-check">
-                        <input type="radio" class="form-check-input" name="metodo_pago" value="efectivo" required>
-                        <label class="form-check-label">Efectivo</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="radio" class="form-check-input" name="metodo_pago" value="debito">
-                        <label class="form-check-label">Tarjeta de Débito</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="radio" class="form-check-input" name="metodo_pago" value="credito">
-                        <label class="form-check-label">Tarjeta de Crédito</label>
-                    </div>
-                </div>
-
-                <!-- Selección de tarjeta guardada -->
-                <div id="tarjetas-guardadas" style="display: none;">
-                    <h4>Seleccione una Tarjeta Guardada</h4>
-                    <select id="tarjeta_guardada_select" class="form-select">
-                        <option value="">Seleccione una tarjeta</option>
-                        <?php while($tarjeta = mysqli_fetch_assoc($tarjetas_guardadas)): ?>
-                            <option value="<?= $tarjeta['id_pago'] ?>"
-                                    data-tipo="<?= $tarjeta['tipo_tarjeta'] ?>"
-                                    data-nombre="<?= $tarjeta['nombre_titular'] ?>"
-                                    data-numero="<?= $tarjeta['numero_tarjeta'] ?>"
-                                    data-fecha="<?= date('m/y', strtotime($tarjeta['fecha_expiracion'])) ?>">
-                                <?= $tarjeta['nombre_titular'] ?> - **** **** **** <?= substr($tarjeta['numero_tarjeta'], -4) ?> (<?= ucfirst($tarjeta['tipo_tarjeta']) ?>)
+        <!-- Selección de Dirección -->
+        <h3>Dirección de Entrega</h3>
+        <form id="form-pago" action="../funciones/compra/procesar_pago.php" method="POST">
+            <div class="mb-3">
+                <label for="direccion" class="form-label">Selecciona una dirección:</label>
+                <select class="form-select" id="direccion" name="id_direccion" required>
+                    <?php if ($resultadoDirecciones->num_rows > 0): ?>
+                        <?php while ($direccion = $resultadoDirecciones->fetch_assoc()): ?>
+                            <option value="<?= $direccion['id_direccion']; ?>">
+                                <?= $direccion['calle'] . ' #' . $direccion['numero'] . ', ' . $direccion['ciudad']; ?>
+                                <?php if ($direccion['depto_oficina_piso']): ?>
+                                    - <?= $direccion['depto_oficina_piso']; ?>
+                                <?php endif; ?>
                             </option>
                         <?php endwhile; ?>
-                    </select>
-                </div>
+                    <?php else: ?>
+                        <option value="" disabled>No tienes direcciones registradas.</option>
+                    <?php endif; ?>
+                </select>
+            </div>
 
-                <!-- Información adicional para tarjeta -->
-                <div id="tarjeta-info" style="display: none;">
-                    <h4>Detalles de Tarjeta</h4>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" id="nombre_titular" name="nombre_titular" placeholder="Nombre del titular" />
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" id="numero_tarjeta" name="numero_tarjeta" placeholder="Número de tarjeta" />
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" id="fecha_expiracion" name="fecha_expiracion" placeholder="Fecha de expiración (MM/AA)" />
-                        </div>
-                        <div class="col-md-4" id="cuotas" style="display: none;">
-                            <label for="num_cuotas">Cuotas:</label>
-                            <select name="num_cuotas" class="form-select">
-                                <?php for ($i = 1; $i <= 12; $i++): ?>
-                                    <option value="<?= $i ?>"><?= $i ?> cuota<?= $i > 1 ? 's' : '' ?></option>
-                                <?php endfor; ?>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-check mt-2">
-                        <input type="checkbox" class="form-check-input" name="recordar_metodo_pago" value="1">
-                        <label class="form-check-label">Recordar este método de pago</label>
-                    </div>
-                </div>
+            <!-- Puntos de recompensa -->
+            <h3>Puntos de Recompensa</h3>
+            <div class="mb-3">
+                <p>Tienes <strong><?= $puntosDisponibles; ?></strong> puntos disponibles.</p>
+                <label for="puntos_usados" class="form-label">Usar puntos (1 punto = $1):</label>
+                <input type="number" class="form-control" id="puntos_usados" name="puntos_usados" max="<?= $puntosDisponibles; ?>" value="0">
+            </div>
 
-                <!-- Botón para enviar el formulario -->
-                <input type="hidden" name="monto" value="<?= $monto_total ?>"> <!-- Usar el monto del carrito -->
-                <input type="hidden" name="pedido_id" value="<?= $id_pedido ?>"> <!-- Incluir el ID del pedido -->
-                <button type="submit" class="btn btn-primary w-100">Confirmar y Pagar</button>
-                <a href="../funciones/transbank/crear_transaccion.php?monto=<?= $monto_total ?>" class="btn btn-secondary w-100 mt-2" id="sistemaPruebaPago">Ir al Sistema Prueba de Pago</a>
-                </form>
-        </div>
+            <!-- Método de Pago -->
+            <h3>Método de Pago</h3>
+            <div class="mb-3">
+                <label for="metodo_pago" class="form-label">Selecciona el método de pago:</label>
+                <select class="form-select" id="metodo_pago" name="metodo_pago" onchange="togglePaymentButton()" required>
+                    <option value="efectivo">Efectivo</option>
+                    <option value="transbank">Transbank (próximamente)</option>
+                </select>
+            </div>
+
+            <!-- Resumen del Pedido -->
+            <h3>Resumen del Pedido</h3>
+            <p><strong>Total:</strong> $<?= number_format($totalCarrito, 0, ',', '.'); ?></p>
+
+            <!-- Campos ocultos -->
+            <input type="hidden" name="id_usuario" value="<?= htmlspecialchars($idUsuario, ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="hidden" name="total_compra" value="<?= htmlspecialchars($totalCarrito, ENT_QUOTES, 'UTF-8'); ?>">
+
+            <!-- Botón de Confirmar Pedido para efectivo -->
+            <button type="submit" id="btn-confirmar-efectivo" class="btn btn-primary btn-lg" style="display: block;">Confirmar Pedido</button>
+
+            <!-- Botón de Pago Transbank (deshabilitado por ahora) -->
+            <button type="button" id="btn-transbank" class="btn btn-secondary btn-lg" style="display: none;" disabled>Pagar con Transbank</button>
+        </form>
     </div>
-</div>
 
-<script>
-    // Mostrar/Ocultar el formulario de nueva dirección
-    document.getElementById('toggleNuevaDireccion').addEventListener('click', function() {
-        const nuevaDireccionForm = document.getElementById('nuevaDireccionForm');
-        nuevaDireccionForm.style.display = nuevaDireccionForm.style.display === 'none' ? 'block' : 'none';
-    });
-
-    // Cambiar formulario según método de pago y mostrar/ocultar elementos
-    document.querySelectorAll('input[name="metodo_pago"]').forEach((radio) => {
-        radio.addEventListener('change', function() {
-            const tarjetaInfo = document.getElementById('tarjeta-info');
-            const cuotas = document.getElementById('cuotas');
-            const tarjetasGuardadas = document.getElementById('tarjetas-guardadas');
-            const sistemaPruebaPago = document.getElementById('sistemaPruebaPago');
-
-            if (this.value === 'efectivo') {
-                sistemaPruebaPago.style.display = 'none';   // Oculta el botón de sistema de pruebas
-                tarjetaInfo.style.display = 'none';         // Oculta el formulario de tarjeta
-                tarjetasGuardadas.style.display = 'none';   // Oculta la selección de tarjetas guardadas
-            } else {
-                sistemaPruebaPago.style.display = 'block';  // Muestra el botón de sistema de pruebas
-                tarjetaInfo.style.display = 'block';        // Muestra el formulario de tarjeta
-                tarjetasGuardadas.style.display = 'block';  // Muestra la selección de tarjetas guardadas
-
-                // Mostrar u ocultar el campo de cuotas solo para crédito
-                cuotas.style.display = (this.value === 'credito') ? 'block' : 'none';
-            }
-        });
-    });
-</script>
-
-<?php include('../includes/footer.php'); ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
