@@ -86,6 +86,9 @@ foreach ($_SESSION['carrito'] as $categoria => $productos) {
         $totalCarrito += $producto['cantidad'] * $precioUnitario;
     }
 }
+
+// Calcular puntos generados por la compra al abrir la interfaz (5% del total)
+$puntosGeneradosIniciales = floor($totalCarrito * 0.05);
 ?>
 
 <!DOCTYPE html>
@@ -95,28 +98,31 @@ foreach ($_SESSION['carrito'] as $categoria => $productos) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pagar - HamburGeeks</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
+            margin-top: 90px;
             background-color: #f8f9fa;
         }
         .card-header {
-            background-color: #ff4500;
+            background-color: #d35400; /* Naranja */
             color: white;
         }
         .btn-primary {
-            background-color: #ff4500;
-            border-color: #ff4500;
+            background-color: #d35400; /* Naranja */
+            border-color: #d35400; /* Naranja */
         }
         .btn-primary:hover {
-            background-color: #e03e00;
-            border-color: #e03e00;
+            background-color: #b84400; /* Naranja más oscuro */
+            border-color: #b84400; /* Naranja más oscuro */
         }
         h1 {
-            color: #333;
+            color: #d35400;
+            font-size: 35px;
         }
         .total-amount {
             font-size: 1.5rem;
-            color: #ff4500;
+            color: #d35400; /* Naranja */
             font-weight: bold;
         }
         .card {
@@ -136,50 +142,89 @@ foreach ($_SESSION['carrito'] as $categoria => $productos) {
         .gestionar-direcciones-btn {
             transition: transform 0.3s ease;
         }
-
         .gestionar-direcciones-btn:hover {
             transform: scale(1.1);
         }
         .metodo-pago-opcion {
-        display: inline-block;
-        width: 45%; /* Asegura que ambas opciones ocupen la mitad del espacio */
-        text-align: center;
-        cursor: pointer;
-    }
-
-    .metodo-pago-contenedor {
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        padding: 10px;
-        background-color: #f8f9fa;
-        transition: all 0.3s ease;
-    }
-
-    .btn-check:checked + .metodo-pago-contenedor {
-        border-color: #ff4500;
-        background-color: #ffe6e1;
-    }
-
-    .icono-metodo {
-        max-width: 50px;
-        margin-bottom: 10px;
-    }
-
-    .metodo-pago-contenedor:hover {
-        border-color: #ff4500;
-        transform: scale(1.05);
-    }
-
-    .metodo-pago-contenedor p {
-        margin: 0;
-        font-weight: bold;
-    }
+            display: inline-block;
+            width: 45%;
+            text-align: center;
+            cursor: pointer;
+        }
+        .metodo-pago-contenedor {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        .btn-check:checked + .metodo-pago-contenedor {
+            border-color: #d35400; /* Naranja */
+            background-color: #fad6b5; /* Naranja claro */
+        }
+        .icono-metodo {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .metodo-pago-contenedor:hover {
+            border-color: #d35400; /* Naranja */
+            transform: scale(1.05);
+        }
+        .metodo-pago-contenedor p {
+            margin: 0;
+            font-weight: bold;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+        .text-muted {
+            font-size: 0.9rem;
+        }
+        .text-danger {
+            font-size: 0.9rem;
+        }
+        .list-unstyled li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            text-align: center;
+        }
+        .d-flex span {
+            display: inline-block;
+            width: auto;
+            white-space: nowrap;
+        }
+        .ms-4 {
+            margin-left: 1rem;
+        }
+        .list-unstyled .subtotal-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .text-muted.text-decoration-line-through {
+            margin-right: 5px;
+        }
+        .text-success.fw-bold {
+            display: inline-block;
+            text-align: center;
+        }
+        .puntos {
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
     <div class="container mt-5">
         <div class="main-container">
-            <h1 class="text-center mb-4">Confirmar Pedido</h1>
+            <h1 class="text-center mb-4 fw-bold">Gestión de Compra</h1>
 
             <!-- Diseño Responsive -->
             <div class="row row-cols-1 row-cols-lg-2 g-4">
@@ -190,28 +235,26 @@ foreach ($_SESSION['carrito'] as $categoria => $productos) {
                             <h3 class="h5 mb-0">Dirección de Entrega</h3>
                         </div>
                         <div class="card-body">
-                            <form id="form-pago" action="../funciones/compra/procesar_pago.php" method="POST" onsubmit="return validarFormulario();">
-                                <div class="mb-3">
-                                    <label for="direccion" class="form-label">Selecciona una dirección para recibir tu pedido:</label>
-                                    <select class="form-select" id="direccion" name="id_direccion" required>
-                                        <?php if ($resultadoDirecciones->num_rows > 0): ?>
-                                            <?php while ($direccion = $resultadoDirecciones->fetch_assoc()): ?>
-                                                <option value="<?= $direccion['id_direccion']; ?>">
-                                                    <?= $direccion['calle'] . ' #' . $direccion['numero'] . ', ' . $direccion['ciudad']; ?>
-                                                    <?php if ($direccion['depto_oficina_piso']): ?>
-                                                        - <?= $direccion['depto_oficina_piso']; ?>
-                                                    <?php endif; ?>
-                                                </option>
-                                            <?php endwhile; ?>
-                                        <?php else: ?>
-                                            <option value="" disabled>No tienes direcciones registradas.</option>
-                                        <?php endif; ?>
-                                    </select>
-                                </div>
-                                <div class="text-center">
-                                    <a href="index-perfil.php" class="btn btn-secondary gestionar-direcciones-btn">Gestionar Direcciones</a>
-                                </div>
-                            </form>
+                            <div class="mb-3">
+                                <label for="direccion" class="form-label">Selecciona una dirección para recibir tu pedido:</label>
+                                <select class="form-select" id="direccion" name="id_direccion" form="form-pago" required>
+                                    <?php if ($resultadoDirecciones->num_rows > 0): ?>
+                                        <?php while ($direccion = $resultadoDirecciones->fetch_assoc()): ?>
+                                            <option value="<?= $direccion['id_direccion']; ?>">
+                                                <?= $direccion['calle'] . ' #' . $direccion['numero'] . ', ' . $direccion['ciudad']; ?>
+                                                <?php if ($direccion['depto_oficina_piso']): ?>
+                                                    - <?= $direccion['depto_oficina_piso']; ?>
+                                                <?php endif; ?>
+                                            </option>
+                                        <?php endwhile; ?>
+                                    <?php else: ?>
+                                        <option value="" disabled>No tienes direcciones registradas.</option>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
+                            <div class="text-center">
+                                <a href="index-perfil.php" class="btn btn-secondary gestionar-direcciones-btn">Gestionar Direcciones</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -233,14 +276,14 @@ foreach ($_SESSION['carrito'] as $categoria => $productos) {
                                 class="form-control text-center" 
                                 id="puntos_usados" 
                                 name="puntos_usados" 
+                                form="form-pago"
                                 min="0" 
                                 max="<?= min($puntosDisponibles, $totalCarrito); ?>" 
                                 value="0" 
-                                oninput="actualizarTotal(); validarPuntos();">
+                                oninput="actualizarTotal()">
                         </div>
                     </div>
                 </div>
-
 
                 <!-- Método de Pago -->
                 <div class="col">
@@ -252,17 +295,17 @@ foreach ($_SESSION['carrito'] as $categoria => $productos) {
                             <div class="d-flex justify-content-around">
                                 <!-- Opción Efectivo -->
                                 <label class="metodo-pago-opcion" for="pago_efectivo">
-                                    <input type="radio" class="btn-check" name="metodo_pago" id="pago_efectivo" value="efectivo" required>
+                                    <input type="radio" class="btn-check" name="metodo_pago" id="pago_efectivo" form="form-pago" value="efectivo" required>
                                     <div class="metodo-pago-contenedor">
-                                        <img src="https://img.icons8.com/ios-filled/50/000000/cash.png" alt="Efectivo" class="icono-metodo">
+                                        <i class="bi bi-cash icono-metodo"></i>
                                         <p>Efectivo</p>
                                     </div>
                                 </label>
                                 <!-- Opción Transbank -->
                                 <label class="metodo-pago-opcion" for="pago_transbank">
-                                    <input type="radio" class="btn-check" name="metodo_pago" id="pago_transbank" value="transbank">
+                                    <input type="radio" class="btn-check" name="metodo_pago" id="pago_transbank" form="form-pago" value="transbank">
                                     <div class="metodo-pago-contenedor">
-                                        <img src="https://img.icons8.com/ios-filled/50/000000/bank-card-front-side.png" alt="Transbank" class="icono-metodo">
+                                        <i class="bi bi-credit-card icono-metodo"></i>
                                         <p>Transbank</p>
                                     </div>
                                 </label>
@@ -277,24 +320,73 @@ foreach ($_SESSION['carrito'] as $categoria => $productos) {
                         <div class="card-header">
                             <h3 class="h5 mb-0">Resumen del Pedido</h3>
                         </div>
-                        <div class="card-body text-center">
-                            <p>Total: <span class="total-amount">$<?= number_format($totalCarrito, 0, ',', '.'); ?></span></p>
-                            <input type="hidden" id="totalCompra" value="<?= htmlspecialchars($totalCarrito, ENT_QUOTES, 'UTF-8'); ?>">
-                            <input type="hidden" name="id_usuario" value="<?= htmlspecialchars($idUsuario, ENT_QUOTES, 'UTF-8'); ?>">
-                            <input type="hidden" name="total_compra" id="total_compra" value="<?= htmlspecialchars($totalCarrito, ENT_QUOTES, 'UTF-8'); ?>">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-auto">
+                                    <h6>Productos:</h6>
+                                    <ul class="list-unstyled">
+                                        <?php foreach ($_SESSION['carrito'] as $categoria => $productos): ?>
+                                            <?php foreach ($productos as $productoId => $producto): ?>
+                                                <?php
+                                                $queryProducto = "SELECT nombre_{$categoria} AS nombre, precio FROM {$categoria} WHERE id_{$categoria} = $productoId";
+                                                $resultadoProducto = $conexion->query($queryProducto);
+                                                $detallesProducto = $resultadoProducto->fetch_assoc();
+                                                ?>
+                                                <li>- <?= $detallesProducto['nombre']; ?> x<?= $producto['cantidad']; ?></li>
+                                            <?php endforeach; ?>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                                <div class="col-auto ms-4">
+                                    <h6 class="subtotal-title">Subtotal:</h6>
+                                    <ul class="list-unstyled">
+                                        <?php foreach ($_SESSION['carrito'] as $categoria => $productos): ?>
+                                            <?php foreach ($productos as $productoId => $producto): ?>
+                                                <?php
+                                                $queryProducto = "SELECT precio FROM {$categoria} WHERE id_{$categoria} = $productoId";
+                                                $resultadoProducto = $conexion->query($queryProducto);
+                                                $detallesProducto = $resultadoProducto->fetch_assoc();
+
+                                                $promocion = obtenerPromocion($productoId, $categoria, $promociones);
+                                                $precioNormal = $detallesProducto['precio'] * $producto['cantidad'];
+                                                $precioPromocional = $promocion ? calcularPrecioPromocional($detallesProducto['precio'], $promocion['porcentaje_descuento']) * $producto['cantidad'] : null;
+                                                ?>
+                                                <li>
+                                                    <?php if ($promocion): ?>
+                                                        <span class="text-muted text-decoration-line-through">$<?= number_format($precioNormal, 0, ',', '.'); ?></span>
+                                                        <span class="text-success fw-bold">$<?= number_format($precioPromocional, 0, ',', '.'); ?></span>
+                                                    <?php else: ?>
+                                                        <span><strong>$<?= number_format($precioNormal, 0, ',', '.'); ?></strong></span>
+                                                    <?php endif; ?>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="text-center mt-3">
+                                <p>Por esta compra ganarás: <span class="puntos text-success fw-bold" id="puntos_generados"><?= $puntosGeneradosIniciales; ?> puntos</span></p>
+                            </div>
+                            <div class="text-center mt-3">
+                                <p class="mb-0"><strong>Total:</strong> <span class="total-amount" id="total_compra">$<?= number_format($totalCarrito, 0, ',', '.'); ?></span></p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>                                
 
-            <!-- Botón de Confirmar Pedido -->
-            <div class="text-center mt-4">
-                <button type="submit" class="btn btn-primary btn-lg">Confirmar Pedido</button>
+            <div class="d-flex justify-content-between mt-4">
+                <a href="index-menu.php" class="btn btn-secondary btn-lg">Volver al Menú</a>
+                <form id="form-pago" action="../funciones/compra/procesar_pago.php" method="POST">
+                    <input type="hidden" name="id_usuario" value="<?= $idUsuario; ?>">
+                    <input type="hidden" name="total_compra" id="total_compra_hidden" value="<?= $totalCarrito; ?>">
+                    <input type="hidden" name="puntos_usados" id="puntos_usados_hidden" value="0">
+                    <button type="submit" class="btn btn-primary btn-lg">Confirmar Pedido</button>
+                </form>
             </div>
         </div>
     </div>
     <script>
-        // Validar que un método de pago esté seleccionado antes de enviar
         function validarFormulario() {
             const metodoPago = document.querySelector('input[name="metodo_pago"]:checked');
             if (!metodoPago) {
@@ -304,51 +396,32 @@ foreach ($_SESSION['carrito'] as $categoria => $productos) {
             return true;
         }
 
-        // Función para actualizar el precio total dinámicamente
-        function actualizarTotal() {
-            const totalCompra = parseFloat(document.getElementById('totalCompra').value); // Total original
-            const puntosUsados = parseInt(document.getElementById('puntos_usados').value) || 0; // Puntos ingresados
-            const maxPuntos = parseInt(document.getElementById('puntos_usados').max); // Máximo de puntos disponibles
+        document.addEventListener('DOMContentLoaded', function () {
+            actualizarTotal();
+        });
 
-            // Validar que los puntos no superen el máximo
+        function actualizarTotal() {
+            const totalCarrito = <?= $totalCarrito; ?>;
+            const puntosUsados = parseInt(document.getElementById('puntos_usados').value) || 0;
+            const maxPuntos = <?= min($puntosDisponibles, $totalCarrito); ?>;
+
             if (puntosUsados > maxPuntos) {
-                alert("No puedes usar más puntos de los disponibles.");
+                alert(`No puedes usar más de ${maxPuntos} puntos.`);
                 document.getElementById('puntos_usados').value = maxPuntos;
                 return;
             }
 
-            // Calcular el nuevo total
-            const nuevoTotal = totalCompra - puntosUsados;
+            const nuevoTotal = totalCarrito - puntosUsados;
+            const totalFinal = nuevoTotal > 0 ? nuevoTotal : 0;
 
-            // Mostrar el nuevo total (asegurándonos de que no sea negativo)
-            document.getElementById('totalConDescuento').textContent = 
-                nuevoTotal > 0 ? nuevoTotal.toLocaleString() : '0';
-            document.getElementById('total_compra').value = nuevoTotal > 0 ? nuevoTotal : 0; // Actualizar el input oculto
+            const puntosGenerados = Math.max(Math.floor(totalFinal * 0.05), 0);
 
-            function validarPuntos() {
-                const puntosUsados = parseInt(document.getElementById('puntos_usados').value) || 0; // Puntos ingresados
-                const maxPuntos = parseInt(document.getElementById('puntos_usados').max); // Máximo permitido
-                const minPuntos = parseInt(document.getElementById('puntos_usados').min); // Mínimo permitido
+            document.getElementById('total_compra').textContent = `$${totalFinal.toLocaleString('es-CL')}`;
+            document.getElementById('puntos_generados').textContent = `${puntosGenerados} puntos`;
 
-                // Verificar si los puntos están fuera del rango permitido
-                if (puntosUsados < minPuntos) {
-                    alert("No puedes usar un valor negativo.");
-                    document.getElementById('puntos_usados').value = minPuntos;
-                } else if (puntosUsados > maxPuntos) {
-                    alert(`No puedes usar más de ${maxPuntos} puntos.`);
-                    document.getElementById('puntos_usados').value = maxPuntos;
-                }
-            }
-            
-            function actualizarLimites() {
-                const totalCompra = parseFloat(document.getElementById('totalCompra').value); // Total del carrito
-                const maxPuntosDisponibles = parseInt(document.getElementById('puntos_usados').max); // Puntos disponibles
-
-                // Ajustar el máximo dinámicamente
-                const nuevoMaximo = Math.min(maxPuntosDisponibles, totalCompra);
-                document.getElementById('puntos_usados').max = nuevoMaximo;
-            }
         }
+
+
     </script>                    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
