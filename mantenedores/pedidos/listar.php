@@ -1,7 +1,7 @@
 <?php
 include '../../conexion.php';
 require_once('../../libs/fpdf.php');  // Asegúrate de cambiar la ruta según tu estructura de directorios
-require_once '../../funciones/notificar_usuario/enviar_notificacion_compra.php'; // Incluye el archivo correcto
+require_once '../../funciones/notificar usuario/enviar_notificacion_compra.php'; // Incluye el archivo correcto
 
 // Actualizar el estado del pedido si se envía el formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pedido'], $_POST['estado_pedido'])) {
@@ -252,6 +252,7 @@ if (isset($_POST['download_pdf']) && $mes_filtro) {
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
     $(document).ready(function () {
         $('.estado-select').change(function () {

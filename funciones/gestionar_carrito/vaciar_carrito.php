@@ -1,9 +1,11 @@
 <?php
 session_start();
 
-// Vaciar el carrito
-unset($_SESSION['carrito']);
-
-// Responder con éxito
-echo json_encode(['success' => 'Carrito vaciado correctamente.']);
+if (isset($_SESSION['carrito'])) {
+    unset($_SESSION['carrito']);
+    echo json_encode(['status' => 'success', 'message' => 'Carrito vaciado correctamente.']);
+} else {
+    echo json_encode(['status' => 'error', 'message' => 'El carrito ya está vacío.']);
+}
+exit;
 ?>

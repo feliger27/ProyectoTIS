@@ -153,40 +153,41 @@ $carrito = isset($_SESSION['carrito']) ? $_SESSION['carrito'] : [];
     <script>
         // Eliminar producto del carrito
         document.querySelectorAll('.eliminar-producto').forEach(button => {
-            button.addEventListener('click', function () {
-                const idProducto = this.dataset.id;
-                const categoria = this.dataset.categoria;
+    button.addEventListener('click', function () {
+        const idProducto = this.dataset.id;
+        const categoria = this.dataset.categoria;
 
-                fetch('../funciones/gestionar_carrito/eliminar_carrito.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({ id_producto: idProducto, categoria: categoria })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        location.reload(); // Recargar la página
-                    } else {
-                        alert('Error al eliminar el producto.');
-                    }
-                });
-            });
+        fetch('../funciones/gestionar_carrito/eliminar_carrito.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ id_producto: idProducto, categoria: categoria })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+                location.reload(); // Recargar la página
+            } else {
+                alert(data.message); // Mostrar el mensaje de error
+            }
         });
+    });
+});
 
-        // Vaciar carrito
-        document.querySelector('.vaciar-carrito').addEventListener('click', function () {
-            fetch('../funciones/gestionar_carrito/vaciar_carrito.php', {
-                method: 'POST'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    location.reload();
-                } else {
-                    alert('Error al vaciar el carrito.');
-                }
-            });
-        });
+document.querySelector('.vaciar-carrito').addEventListener('click', function () {
+    fetch('../funciones/gestionar_carrito/vaciar_carrito.php', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    });
+});
 
         // Actualizar cantidad del producto
         document.querySelectorAll('.cantidad-producto').forEach(input => {

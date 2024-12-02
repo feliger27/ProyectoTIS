@@ -23,7 +23,7 @@ function enviarCorreoNotificacion($id_pedido, $estado_pedido, $correo)
 
 
     // Obtener datos del pedido
-    $sql_pedido = "SELECT p.id_pedido, p.fecha_pedido, p.monto, u.nombre, u.apellido
+    $sql_pedido = "SELECT p.id_pedido, p.fecha_pedido, p.monto_total, u.nombre, u.apellido
                    FROM pedido p
                    JOIN usuario u ON p.id_usuario = u.id_usuario
                    WHERE p.id_pedido = $id_pedido";
@@ -33,7 +33,7 @@ function enviarCorreoNotificacion($id_pedido, $estado_pedido, $correo)
         $pedido = $result_pedido->fetch_assoc();
         $nombre_cliente = $pedido['nombre'] . " " . $pedido['apellido'];
         $fecha_pedido = date("d-m-Y - H:i A", strtotime($pedido['fecha_pedido']));
-        $total = number_format($pedido['monto'], 0, ',', '.');
+        $total = number_format($pedido['monto_total'], 0, ',', '.');
     } else {
         return "No se encontró el pedido.";
     }
