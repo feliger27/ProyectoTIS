@@ -1,15 +1,14 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// if (session_status() === PHP_SESSION_NONE) {
+//     session_start();
+// }
 
-// Verificar si el usuario ha iniciado sesión
-if (!isset($_SESSION['username'])) {
-    // Si no está logueado, redirigir al login
-    header("Location: ../login/login.php");
-    exit();
-}
-
+// // Verificar si el usuario ha iniciado sesión
+// if (!isset($_SESSION['username'])) {
+//     // Si no está logueado, redirigir al login
+//     header("Location: ../login/login.php");
+//     exit();
+// }
 // Conectar a la base de datos para obtener hamburguesas destacadas y acompañamientos más vendidos
 include '../conexion.php';
 include '../includes/header.php';
@@ -259,25 +258,28 @@ $sugerencias = generarSugerencias($userId);
     <!-- Sección de Productos Destacados -->
     <section class="products-section">
         <h2>Nuestros Productos Destacados</h2>
+
+        <?php if (!empty($sugerencias)): ?>
         <h3>Sugerencias</h3>
-        <!-- Mostrar las sugerencias generadas -->
         <div class="row justify-content-center">
-             <?php if (count($sugerencias) > 0): ?>
-                <?php foreach ($sugerencias as $sugerencia): ?>
-    <div class="col-md-4 mb-4 d-flex justify-content-center">
-        <<a href="index-menu.php?hamburguesa=<?php echo urlencode($sugerencia['nombre']); ?>" class="card-link">
-            <div class="card">
-                <img src="<?php echo '../uploads/hamburguesas/' . $sugerencia['imagen']; ?>"
-                     alt="Imagen de <?php echo $sugerencia['nombre']; ?>" class="card-img-top">
-                <div class="card-body text-center">
-                    <h5 class="card-title"><?php echo $sugerencia['nombre']; ?></h5>
+            <!-- Mostrar las sugerencias generadas -->
+            <?php foreach ($sugerencias as $sugerencia): ?>
+                <div class="col-md-4 mb-4 d-flex justify-content-center">
+                    <a href="index-menu.php?hamburguesa=<?php echo urlencode($sugerencia['nombre']); ?>" class="card-link">
+                        <div class="card">
+                            <img src="<?php echo '../uploads/hamburguesas/' . $sugerencia['imagen']; ?>"
+                                 alt="Imagen de <?php echo htmlspecialchars($sugerencia['nombre']); ?>" class="card-img-top">
+                            <div class="card-body text-center">
+                                <h5 class="card-title"><?php echo htmlspecialchars($sugerencia['nombre']); ?></h5>
+                            </div>
+                        </div>
+                    </a>
                 </div>
-            </div>
-        </a>
-    </div>
-    <?php endforeach; ?>
+            <?php endforeach; ?>
+        </div>
     <?php else: ?>
     <?php endif; ?>
+</div>
 </div>
         <h3>Hamburguesas</h3>
         <div class="row justify-content-center">

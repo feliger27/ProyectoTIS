@@ -90,9 +90,7 @@ foreach ($_SESSION['carrito'] as $tipo => $productos) {
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
-        <a class="navbar-brand" href="../index/index-lobby.php">
-            <img src="../uploads/HAMBUR_Mesa.png" alt="Logo HamburGeeks" style="height: 60px;">
-        </a>
+            <a class="navbar-brand" href="../index/index-lobby.php">HamburGeeks</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>

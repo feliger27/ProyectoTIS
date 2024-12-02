@@ -412,63 +412,94 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function agregarAlCarrito(idProducto, categoria, nombre, precio, imagen) {
-            // Enviar una solicitud AJAX para agregar el producto al carrito
-            fetch('../funciones/gestionar_carrito/agregar_carrito.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    idProducto: idProducto,
-                    categoria: categoria,
-                    nombre: nombre,
-                    precio: precio,
-                    imagen: imagen // Incluir el campo imagen
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Actualizar el contador del carrito
-                const cartCountElement = document.querySelector('.cart-count');
-                if (cartCountElement) {
-                    cartCountElement.textContent = data.totalProductos;
-                } else {
-                    const newCartCount = document.createElement('span');
-                    newCartCount.classList.add('cart-count');
-                    newCartCount.textContent = data.totalProductos;
-                    document.querySelector('.cart-icon').appendChild(newCartCount);
-                }
-                // Mostrar la notificación
-                mostrarNotificacion(`${nombre} ha sido agregado al carrito exitosamente`);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+       function agregarAlCarrito(idProducto, categoria, nombre, precio, imagen) {
+    // Enviar una solicitud AJAX para agregar el producto al carrito
+    fetch('../funciones/gestionar_carrito/agregar_carrito.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            idProducto: idProducto,
+            categoria: categoria,
+            nombre: nombre,
+            precio: precio,
+            imagen: imagen
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.totalProductos !== undefined) {
+            // Actualizar el contador del carrito
+            actualizarContadorCarrito(data.totalProductos);
+
+            // Mostrar la notificación
+            mostrarNotificacion(`${nombre} ha sido agregado al carrito exitosamente`);
+        } else {
+            // Manejar posibles errores que podrían venir en data.error
+            console.error('Error al agregar al carrito:', data.error);
         }
+    })
+    .catch(error => {
+        console.error('Error al procesar la respuesta:', error);
+    });
+}
 
 
-        function mostrarNotificacion(mensaje) {
-            const container = document.getElementById('notification-container');
+function actualizarContadorCarrito(totalProductos) {
+    // Encontrar el elemento del contador del carrito en la página
+    const cartCountElement = document.querySelector('.cart-count');
 
-            // Crear el elemento de notificación
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.innerHTML = `
-                <span>${mensaje}</span>
-                <button class="close-btn" onclick="this.parentElement.remove()">×</button>
-            `;
+    if (cartCountElement) {
+        // Si el contador ya existe, simplemente actualizamos su contenido
+        cartCountElement.textContent = totalProductos > 0 ? totalProductos : '';
+    } else if (totalProductos > 0) {
+        // Si el contador no existe y hay productos, creamos el contador
+        const newCartCount = document.createElement('span');
+        newCartCount.classList.add('cart-count');
+        newCartCount.textContent = totalProductos;
 
-            // Agregar la notificación al contenedor
-            container.appendChild(notification);
-
-            // Remover automáticamente después de 5 segundos
-            setTimeout(() => {
-                if (notification.parentElement) {
-                    notification.remove();
-                }
-            }, 5000);
+        // Necesitas asegurarte de que el selector '.cart-icon' apunte al elemento correcto que debe contener el contador
+        const cartIcon = document.querySelector('.cart-icon');
+        if (cartIcon) {
+            cartIcon.appendChild(newCartCount);
+        } else {
+            console.error('El icono del carrito no se encontró en el DOM.');
         }
+    }
+    // Si el total de productos es 0 y el contador existe, podría considerarse eliminar el span o dejarlo vacío
+    if (totalProductos === 0 && cartCountElement) {
+        cartCountElement.remove(); // Opcional, remover el contador si no hay productos
+    }
+}
+
+
+function mostrarNotificacion(mensaje) {
+    const container = document.getElementById('notification-container');
+    if (!container) {
+        console.error('Container for notifications is missing!');
+        return;
+    }
+
+    // Crear el elemento de notificación
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.innerHTML = `
+        <span>${mensaje}</span>
+        <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+    `;
+
+    // Agregar la notificación al contenedor
+    container.appendChild(notification);
+
+    // Remover automáticamente después de 5 segundos
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
         </script>
         
     <div id="notification-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;"></div>

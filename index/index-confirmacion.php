@@ -1,173 +1,172 @@
 <?php
-session_start();
-if (!isset($_GET['pedido_id'])) {
-    die("Error: No se ha especificado un pedido.");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
 include('../conexion.php');
-include('../includes/header.php');
 
-$pedido_id = $_GET['pedido_id'];
-
-// Obtener detalles del pedido
-$query_pedido = "SELECT p.fecha_pedido, d.calle, d.ciudad, d.codigo_postal, mp.tipo_tarjeta AS metodo_pago 
-                 FROM pedido AS p
-                 JOIN direccion AS d ON p.id_direccion = d.id_direccion
-                 LEFT JOIN metodo_pago AS mp ON p.id_metodo_pago = mp.id_pago
-                 WHERE p.id_pedido = ?";
-$stmt = $conexion->prepare($query_pedido);
-$stmt->bind_param("i", $pedido_id);
-$stmt->execute();
-$result_pedido = $stmt->get_result();
-$pedido = $result_pedido->fetch_assoc();
-$stmt->close();
-
-$query_puntos = "SELECT puntos_recompensa FROM usuario WHERE id_usuario = ?";
-$stmt_puntos = $conexion->prepare($query_puntos);
-$stmt_puntos->bind_param("i", $user_id);
-$stmt_puntos->execute();
-$result_puntos = $stmt_puntos->get_result();
-$puntos_usuario = $result_puntos->fetch_assoc();
-$stmt_puntos->close();
-
-$puntos_recompensa = $puntos_usuario['puntos_recompensa'] ?? '0'; // Asume 0 si no está definido
-
-if (!$pedido) {
-    die("Error: Pedido no encontrado.");
+// Verificar que se recibe el ID del pedido
+if (!isset($_GET['id_pedido']) || !is_numeric($_GET['id_pedido'])) {
+    die("Error: No se proporcionó un ID de pedido válido. ID recibido: " . ($_GET['id_pedido'] ?? 'No definido'));
 }
 
+$idPedido = (int)$_GET['id_pedido'];
+
+// Recuperar los detalles del pedido
+$queryPedido = "
+    SELECT p.id_pedido, p.fecha_pedido, p.monto_total, p.estado_pedido, d.calle, d.numero, d.ciudad, d.depto_oficina_piso
+    FROM pedido p
+    JOIN direccion d ON p.id_direccion = d.id_direccion
+    WHERE p.id_pedido = ?
+";
+$stmtPedido = $conexion->prepare($queryPedido);
+$stmtPedido->bind_param('i', $idPedido);
+$stmtPedido->execute();
+$resultadoPedido = $stmtPedido->get_result();
+
+if ($resultadoPedido->num_rows === 0) {
+    die("Error: No se encontraron detalles para el pedido especificado.");
+}
+
+$pedido = $resultadoPedido->fetch_assoc();
+$stmtPedido->close();
+
+// Recuperar los artículos del pedido
+$articulos = [];
+
+// Combos
+$queryCombos = "
+    SELECT c.nombre_combo AS nombre, pc.cantidad, pc.precio
+    FROM pedido_combo pc
+    JOIN combo c ON pc.id_combo = c.id_combo
+    WHERE pc.id_pedido = $idPedido
+";
+$resultadoCombos = $conexion->query($queryCombos);
+while ($combo = $resultadoCombos->fetch_assoc()) {
+    $articulos[] = [
+        'categoria' => 'Combo',
+        'nombre' => $combo['nombre'],
+        'cantidad' => $combo['cantidad'],
+        'precio' => $combo['precio']
+    ];
+}
+
+// Hamburguesas
+$queryHamburguesas = "
+    SELECT h.nombre_hamburguesa AS nombre, ph.cantidad, ph.precio
+    FROM pedido_hamburguesa ph
+    JOIN hamburguesa h ON ph.id_hamburguesa = h.id_hamburguesa
+    WHERE ph.id_pedido = $idPedido
+";
+$resultadoHamburguesas = $conexion->query($queryHamburguesas);
+while ($hamburguesa = $resultadoHamburguesas->fetch_assoc()) {
+    $articulos[] = [
+        'categoria' => 'Hamburguesa',
+        'nombre' => $hamburguesa['nombre'],
+        'cantidad' => $hamburguesa['cantidad'],
+        'precio' => $hamburguesa['precio']
+    ];
+}
+
+// Bebidas
+$queryBebidas = "
+    SELECT b.nombre_bebida AS nombre, pb.cantidad, pb.precio
+    FROM pedido_bebida pb
+    JOIN bebida b ON pb.id_bebida = b.id_bebida
+    WHERE pb.id_pedido = $idPedido
+";
+$resultadoBebidas = $conexion->query($queryBebidas);
+while ($bebida = $resultadoBebidas->fetch_assoc()) {
+    $articulos[] = [
+        'categoria' => 'Bebida',
+        'nombre' => $bebida['nombre'],
+        'cantidad' => $bebida['cantidad'],
+        'precio' => $bebida['precio']
+    ];
+}
+
+// Acompañamientos
+$queryAcompanamientos = "
+    SELECT a.nombre_acompaniamiento AS nombre, pa.cantidad, pa.precio
+    FROM pedido_acompaniamiento pa
+    JOIN acompaniamiento a ON pa.id_acompaniamiento = a.id_acompaniamiento
+    WHERE pa.id_pedido = $idPedido
+";
+$resultadoAcompanamientos = $conexion->query($queryAcompanamientos);
+while ($acompanamiento = $resultadoAcompanamientos->fetch_assoc()) {
+    $articulos[] = [
+        'categoria' => 'Acompañamiento',
+        'nombre' => $acompanamiento['nombre'],
+        'cantidad' => $acompanamiento['cantidad'],
+        'precio' => $acompanamiento['precio']
+    ];
+}
+
+// Postres
+$queryPostres = "
+    SELECT p.nombre_postre AS nombre, pp.cantidad, pp.precio
+    FROM pedido_postre pp
+    JOIN postre p ON pp.id_postre = p.id_postre
+    WHERE pp.id_pedido = $idPedido
+";
+$resultadoPostres = $conexion->query($queryPostres);
+while ($postre = $resultadoPostres->fetch_assoc()) {
+    $articulos[] = [
+        'categoria' => 'Postre',
+        'nombre' => $postre['nombre'],
+        'cantidad' => $postre['cantidad'],
+        'precio' => $postre['precio']
+    ];
+}
 ?>
 
-<div class="container my-5">
-    <h2 class="text-center">¡Pedido Confirmado!</h2>
-    <p class="text-center">Tu pedido ha sido procesado exitosamente. Aquí tienes los detalles:</p>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Pedido</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Confirmación de Pedido</h1>
 
-    <div class="card mt-4">
-        <div class="card-header">
-            <h4>Detalles del Pedido #<?= htmlspecialchars($pedido_id) ?></h4>
-        </div>
-        <div class="card-body">
-            <p><strong>Fecha del Pedido:</strong> <?= htmlspecialchars($pedido['fecha_pedido']) ?></p>
-            <p><strong>Dirección de Envío:</strong> <?= htmlspecialchars($pedido['calle']) ?>, <?= htmlspecialchars($pedido['ciudad']) ?>, <?= htmlspecialchars($pedido['codigo_postal']) ?></p>
-            <p><strong>Método de Pago:</strong> <?= htmlspecialchars($pedido['metodo_pago'] ?? 'Efectivo') ?></p>
-            <p><strong>Puntos de Recompensa Actuales:</strong> <?= htmlspecialchars($puntos_recompensa) ?></p>
-        </div>
-    </div>
+        <!-- Detalles del pedido -->
+        <h3>Detalles del Pedido</h3>
+        <p><strong>ID del Pedido:</strong> <?= $pedido['id_pedido']; ?></p>
+        <p><strong>Fecha:</strong> <?= $pedido['fecha_pedido']; ?></p>
+        <p><strong>Estado:</strong> <?= ucfirst($pedido['estado_pedido']); ?></p>
+        <p><strong>Dirección:</strong> <?= $pedido['calle'] . ' #' . $pedido['numero'] . ', ' . $pedido['ciudad']; ?></p>
+        <?php if ($pedido['depto_oficina_piso']): ?>
+            <p><strong>Depto/Oficina/Piso:</strong> <?= $pedido['depto_oficina_piso']; ?></p>
+        <?php endif; ?>
+        <p><strong>Monto Total:</strong> $<?= number_format($pedido['monto_total'], 0, ',', '.'); ?></p>
 
-    <h4 class="mt-4">Resumen de Productos en el Pedido</h4>
-    <table class="table table-bordered mt-3">
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Tipo</th>
-                <th>Cantidad</th>
-                <th>Precio Unitario</th>
-                <th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            $total = 0;
-            $total_sin_descuento = 0;
-            $tipos = ['hamburguesa', 'acompaniamiento', 'bebida', 'postre'];
-
-            // Mostrar productos individuales
-            foreach ($tipos as $tipo) {
-                $query_detalles = "SELECT p.nombre_$tipo AS nombre, pp.cantidad, pp.precio 
-                                   FROM pedido_$tipo AS pp
-                                   JOIN $tipo AS p ON pp.id_$tipo = p.id_$tipo
-                                   WHERE pp.id_pedido = ?";
-                $stmt = $conexion->prepare($query_detalles);
-                $stmt->bind_param("i", $pedido_id);
-                $stmt->execute();
-                $result_detalles = $stmt->get_result();
-
-                while ($detalle = $result_detalles->fetch_assoc()) {
-                    $subtotal = $detalle['cantidad'] * $detalle['precio'];
-                    $total += $subtotal;
-                    $total_sin_descuento += $subtotal;
-                    ?>
+        <!-- Artículos del pedido -->
+        <h3>Artículos del Pedido</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Categoría</th>
+                    <th>Nombre</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($articulos as $articulo): ?>
                     <tr>
-                        <td><?= htmlspecialchars($detalle['nombre']) ?></td>
-                        <td><?= ucfirst($tipo) ?></td>
-                        <td><?= htmlspecialchars($detalle['cantidad']) ?></td>
-                        <td>$<?= number_format($detalle['precio'], 0, ',', '.') ?></td>
-                        <td>$<?= number_format($subtotal, 0, ',', '.') ?></td>
+                        <td><?= $articulo['categoria']; ?></td>
+                        <td><?= $articulo['nombre']; ?></td>
+                        <td><?= $articulo['cantidad']; ?></td>
+                        <td>$<?= number_format($articulo['precio'], 0, ',', '.'); ?></td>
                     </tr>
-                    <?php
-                }
-                $stmt->close();
-            }
+                <?php endforeach; ?>
+            </tbody>
+        </table>
 
-            // Mostrar combos y sus productos
-            $query_combos = "SELECT c.nombre_combo AS nombre, c.precio AS precio_combo, pc.id_combo 
-                             FROM pedido_combo AS pc
-                             JOIN combo AS c ON pc.id_combo = c.id_combo
-                             WHERE pc.id_pedido = ?";
-            $stmt_combo = $conexion->prepare($query_combos);
-            $stmt_combo->bind_param("i", $pedido_id);
-            $stmt_combo->execute();
-            $result_combo = $stmt_combo->get_result();
-
-            while ($combo = $result_combo->fetch_assoc()) {
-                $subtotal_combo = $combo['precio_combo'];
-                $total += $subtotal_combo;
-
-                echo "<tr>
-                        <td colspan='5' class='table-active'><strong>Combo: " . htmlspecialchars($combo['nombre']) . "</strong> - Precio Combo: $" . number_format($subtotal_combo, 0, ',', '.') . "</td>
-                      </tr>";
-
-                // Detalle de productos dentro del combo
-                foreach ($tipos as $tipo) {
-                    $query_productos_combo = "SELECT p.nombre_$tipo AS nombre, cc.cantidad, p.precio 
-                                              FROM combo_$tipo AS cc
-                                              JOIN $tipo AS p ON cc.id_$tipo = p.id_$tipo
-                                              WHERE cc.id_combo = ?";
-                    $stmt_productos_combo = $conexion->prepare($query_productos_combo);
-                    $stmt_productos_combo->bind_param("i", $combo['id_combo']);
-                    $stmt_productos_combo->execute();
-                    $result_productos_combo = $stmt_productos_combo->get_result();
-
-                    while ($producto_combo = $result_productos_combo->fetch_assoc()) {
-                        $subtotal_producto = $producto_combo['cantidad'] * $producto_combo['precio'];
-                        $total_sin_descuento += $subtotal_producto;
-
-                        echo "<tr>
-                                <td>&nbsp;&nbsp;&nbsp;" . htmlspecialchars($producto_combo['nombre']) . "</td>
-                                <td>" . ucfirst($tipo) . "</td>
-                                <td>" . htmlspecialchars($producto_combo['cantidad']) . "</td>
-                                <td>$" . number_format($producto_combo['precio'], 0, ',', '.') . "</td>
-                                <td>$" . number_format($subtotal_producto, 0, ',', '.') . "</td>
-                              </tr>";
-                    }
-                    $stmt_productos_combo->close();
-                }
-            }
-            $stmt_combo->close();
-            ?>
-        </tbody>
-        <tfoot>
-            <?php
-            $ahorro = $total_sin_descuento - $total;
-            ?>
-            <tr>
-                <th colspan="4" class="text-end">Total sin descuento</th>
-                <th>$<?= number_format($total_sin_descuento, 0, ',', '.') ?></th>
-            </tr>
-            <tr>
-                <th colspan="4" class="text-end">Ahorro por Combo</th>
-                <th>$<?= number_format($ahorro, 0, ',', '.') ?></th>
-            </tr>
-            <tr>
-                <th colspan="4" class="text-end">Total con descuento</th>
-                <th>$<?= number_format($total, 0, ',', '.') ?></th>
-            </tr>
-        </tfoot>
-    </table>
-
-    <div class="text-center mt-4">
-        <a href="index-menu.php" class="btn btn-primary">Volver al Menú</a>
+        <a href="../index/index-lobby.php" class="btn btn-primary">Volver al Inicio</a>
     </div>
-</div>
-
-<?php include('../includes/footer.php'); ?>
+</body>
+</html>

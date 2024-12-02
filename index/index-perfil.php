@@ -29,7 +29,7 @@ $user_data = $result_user->fetch_assoc();
 $stmt_user->close();
 
 // Consulta para obtener direcciones del usuario actual
-$query_direcciones = "SELECT d.id_direccion, d.calle, d.numero, d.ciudad
+$query_direcciones = "SELECT d.id_direccion, d.calle, d.numero, d.ciudad, d.depto_oficina_piso
                       FROM direccion d
                       JOIN direccion_usuario du ON d.id_direccion = du.id_direccion
                       WHERE du.id_usuario = ?";
@@ -40,17 +40,7 @@ $result_direcciones = $stmt_direcciones->get_result();
 $direcciones = $result_direcciones->fetch_all(MYSQLI_ASSOC);
 $stmt_direcciones->close();
 
-// Consulta para obtener métodos de pago del usuario actual
-$query_metodos_pago = "SELECT mp.id_pago, mp.tipo_tarjeta, mp.numero_tarjeta, mp.fecha_expiracion, mp.nombre_titular 
-                       FROM metodo_pago mp
-                       JOIN usuario_metodo_pago ump ON mp.id_pago = ump.id_pago
-                       WHERE ump.id_usuario = ?";
-$stmt_metodos_pago = $conexion->prepare($query_metodos_pago);
-$stmt_metodos_pago->bind_param("i", $user_id);
-$stmt_metodos_pago->execute();
-$result_metodos_pago = $stmt_metodos_pago->get_result();
-$metodos_pago = $result_metodos_pago->fetch_all(MYSQLI_ASSOC);
-$stmt_metodos_pago->close();
+
 ?>
 
 <!DOCTYPE html>
@@ -106,7 +96,7 @@ $stmt_metodos_pago->close();
 </head>
 
 <body>
-    <div class="container pt-4 my-5">
+    <div class="container pt-5 my-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="text-center">Mi Perfil</h2>
             <div>
@@ -191,7 +181,7 @@ $stmt_metodos_pago->close();
                             <?php foreach ($direcciones as $direccion): ?>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <span>
-                                        <?= htmlspecialchars($direccion['calle']) . ' ' . htmlspecialchars($direccion['numero']) . ', ' . htmlspecialchars($direccion['ciudad']); ?>
+                                        <?= htmlspecialchars($direccion['calle']) . ' ' . htmlspecialchars($direccion['numero']) . ', ' . htmlspecialchars($direccion['ciudad']). ' ' . htmlspecialchars($direccion['depto_oficina_piso']); ?>
                                     </span>
                                     <div>
                                         <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editAddressModal-<?= $direccion['id_direccion']; ?>">Editar</button>
@@ -221,6 +211,10 @@ $stmt_metodos_pago->close();
                                                     <div class="form-group mb-3">
                                                         <label for="ciudad">Ciudad</label>
                                                         <input type="text" class="form-control" name="ciudad" value="<?= htmlspecialchars($direccion['ciudad']); ?>" required>
+                                                    </div>
+                                                    <div class="form-group mb-3">
+                                                        <label for="depto_oficina_piso">Depto, Oficina, Piso</label>
+                                                        <input type="text" class="form-control" name="depto_oficina_piso" value="<?= htmlspecialchars($direccion['depto_oficina_piso']); ?>" required>
                                                     </div>
                                                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                                                 </form>
@@ -255,6 +249,10 @@ $stmt_metodos_pago->close();
                                 <div class="form-group mb-3">
                                     <label for="ciudad">Ciudad</label>
                                     <input type="text" class="form-control" name="ciudad" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="depto_oficina_piso">Depto, Oficina, Piso</label>
+                                    <input type="text" class="form-control" name="depto_oficina_piso" required>
                                 </div>
                                 <button type="submit" class="btn btn-primary">Guardar Dirección</button>
                             </form>
