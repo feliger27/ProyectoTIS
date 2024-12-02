@@ -125,40 +125,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <h1><?php echo $tiene_permiso_editar_usuario ? "Editar Usuario" : "Mi Perfil"; ?></h1>
     <form method="POST" action="">
-        <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($usuario['nombre']); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="apellido" class="form-label">Apellido</label>
-            <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($usuario['apellido']); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="correo_electronico" class="form-label">Correo Electrónico</label>
-            <input type="email" class="form-control" id="correo_electronico" name="correo_electronico" value="<?php echo htmlspecialchars($usuario['correo_electronico']); ?>" <?php echo $tiene_permiso_editar_usuario ? '' : 'readonly'; ?>>
-        </div>
-        <div class="mb-3">
-            <label for="telefono" class="form-label">Teléfono</label>
-            <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($usuario['telefono']); ?>" required>
-        </div>
+    <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($usuario['nombre']); ?>" readonly>
+    </div>
+    <div class="mb-3">
+        <label for="apellido" class="form-label">Apellido</label>
+        <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($usuario['apellido']); ?>" readonly>
+    </div>
+    <div class="mb-3">
+        <label for="correo_electronico" class="form-label">Correo Electrónico</label>
+        <input type="email" class="form-control" id="correo_electronico" name="correo_electronico" value="<?php echo htmlspecialchars($usuario['correo_electronico']); ?>" readonly>
+    </div>
+    <div class="mb-3">
+        <label for="telefono" class="form-label">Teléfono</label>
+        <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($usuario['telefono']); ?>" readonly>
+    </div>
 
-        <!-- Mostrar selección de rol solo si el usuario actual tiene permiso de administrador -->
-        <?php if ($tiene_permiso_editar_usuario): ?>
-            <div class="mb-3">
-                <label for="id_rol" class="form-label">Rol</label>
-                <select class="form-select" id="id_rol" name="id_rol" required>
-                    <?php foreach ($roles as $rol): ?>
-                        <option value="<?php echo $rol['id_rol']; ?>" <?php echo $rol['id_rol'] == $usuario['id_rol'] ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($rol['nombre_rol']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-        <?php endif; ?>
+    <!-- Mostrar selección de rol solo si el usuario actual tiene permiso de administrador -->
+    <?php if ($tiene_permiso_editar_usuario): ?>
+        <div class="mb-3">
+            <label for="id_rol" class="form-label">Rol</label>
+            <select class="form-select" id="id_rol" name="id_rol" required>
+                <?php foreach ($roles as $rol): ?>
+                    <option value="<?php echo $rol['id_rol']; ?>" <?php echo $rol['id_rol'] == $usuario['id_rol'] ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($rol['nombre_rol']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+    <?php else: ?>
+        <div class="mb-3">
+            <label for="rol_actual" class="form-label">Rol</label>
+            <input type="text" class="form-control" value="<?php foreach ($roles as $rol) { if ($rol['id_rol'] == $usuario['id_rol']) { echo htmlspecialchars($rol['nombre_rol']); break; } } ?>" readonly>
+        </div>
+    <?php endif; ?>
 
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        <a href="<?php echo $origin === 'perfil' ? '../index-perfil.php' : 'listar.php'; ?>" class="btn btn-secondary">Volver</a>
-    </form>
+    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    <a href="<?php echo $origin === 'perfil' ? '../index-perfil.php' : 'listar.php'; ?>" class="btn btn-secondary">Volver</a>
+</form>
+
 </div>
 
 </body>

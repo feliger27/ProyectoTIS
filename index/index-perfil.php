@@ -40,7 +40,6 @@ $result_direcciones = $stmt_direcciones->get_result();
 $direcciones = $result_direcciones->fetch_all(MYSQLI_ASSOC);
 $stmt_direcciones->close();
 
-
 ?>
 
 <!DOCTYPE html>
@@ -52,19 +51,23 @@ $stmt_direcciones->close();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Mi Perfil - HamburGeeks</title>
     <style>
+    
     .container .btn-primary, .container .btn-warning, .container .btn-danger, .container .btn-success {
     background-color: #fd7e14; 
     border-color: #fd7e14; 
+    margin-top: 55%;
+
     }
 
     .container .btn-primary:hover, .container .btn-warning:hover, .container .btn-danger:hover, .container .btn-success:hover {
     background-color: #e69500; 
     border-color: #e69500;
+
     }
 
 
     .container h2, .container h4, .container .nav-link.active {
-    color: #fd7e14; /
+    color: #fd7e14; / /* Corregí un error de comentario */
     }
 
     .container .nav-link.active {
@@ -92,11 +95,22 @@ $stmt_direcciones->close();
         margin-top: auto; /* Empuja el footer al final si el contenido es corto */
         width: 100%; /* Asegura que ocupe todo el ancho de la pantalla */
     }
+
+    .align-top-right {
+    text-align: right; /* Alinea horizontalmente a la derecha */
+    vertical-align: top; /* Alinea verticalmente a la parte superior */
+    white-space: nowrap; /* Evita que los botones se distribuyan en líneas diferentes */
+}
+
+/* Ajustes adicionales para la tabla */
+.table td {
+    vertical-align: top; /* Por si otras celdas también necesitan este ajuste */
+}
     </style>
 </head>
 
 <body>
-    <div class="container pt-5 my-5">
+    <div class="container pt-4 my-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="text-center">Mi Perfil</h2>
             <div>
@@ -116,7 +130,7 @@ $stmt_direcciones->close();
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings"
-                    type="button" role="tab">Configuración</button>
+                    type="button" role="tab">Mis Pedidos</button>
             </li>
         </ul>
 
@@ -171,105 +185,242 @@ $stmt_direcciones->close();
                 </div>
             </div>
 
-            <!-- Gestión de Direcciones -->
-            <div class="tab-pane fade" id="manage-addresses" role="tabpanel" aria-labelledby="addresses-tab">
-                <div class="card">
-                    <div class="card-body">
-                        <h4>Gestionar Direcciones</h4>
-                        <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addAddressModal">Añadir Nueva Dirección</button>
-                        <ul class="list-group">
-                            <?php foreach ($direcciones as $direccion): ?>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>
-                                        <?= htmlspecialchars($direccion['calle']) . ' ' . htmlspecialchars($direccion['numero']) . ', ' . htmlspecialchars($direccion['ciudad']). ' ' . htmlspecialchars($direccion['depto_oficina_piso']); ?>
-                                    </span>
-                                    <div>
-                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editAddressModal-<?= $direccion['id_direccion']; ?>">Editar</button>
-                                        <a href="../funciones/gestionar_direcciones/eliminar_direccion.php?id_direccion=<?= $direccion['id_direccion']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta dirección?')">Eliminar</a>
-                                    </div>
-                                </li>
-
-                                <!-- Modal para Editar Dirección -->
-                                <div class="modal fade" id="editAddressModal-<?= $direccion['id_direccion']; ?>" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Editar Dirección</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form action="../funciones/gestionar_direcciones/editar_direccion.php" method="POST">
-                                                    <input type="hidden" name="id_direccion" value="<?= $direccion['id_direccion']; ?>">
-                                                    <div class="form-group mb-3">
-                                                        <label for="calle">Calle</label>
-                                                        <input type="text" class="form-control" name="calle" value="<?= htmlspecialchars($direccion['calle']); ?>" required>
-                                                    </div>
-                                                    <div class="form-group mb-3">
-                                                        <label for="numero">Número</label>
-                                                        <input type="text" class="form-control" name="numero" value="<?= htmlspecialchars($direccion['numero']); ?>" required>
-                                                    </div>
-                                                    <div class="form-group mb-3">
-                                                        <label for="ciudad">Ciudad</label>
-                                                        <input type="text" class="form-control" name="ciudad" value="<?= htmlspecialchars($direccion['ciudad']); ?>" required>
-                                                    </div>
-                                                    <div class="form-group mb-3">
-                                                        <label for="depto_oficina_piso">Depto, Oficina, Piso</label>
-                                                        <input type="text" class="form-control" name="depto_oficina_piso" value="<?= htmlspecialchars($direccion['depto_oficina_piso']); ?>" required>
-                                                    </div>
-                                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal para Añadir Dirección -->
-            <div class="modal fade" id="addAddressModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Añadir Nueva Dirección</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form action="../funciones/gestionar_direcciones/insertar_direccion.php" method="POST">
-                                <div class="form-group mb-3">
-                                    <label for="calle">Calle</label>
-                                    <input type="text" class="form-control" name="calle" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="numero">Número</label>
-                                    <input type="text" class="form-control" name="numero" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="ciudad">Ciudad</label>
-                                    <input type="text" class="form-control" name="ciudad" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="depto_oficina_piso">Depto, Oficina, Piso</label>
-                                    <input type="text" class="form-control" name="depto_oficina_piso" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Guardar Dirección</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Configuración -->
             <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
                 <div class="card">
                     <div class="card-body">
-                        <h4>Configuración</h4>
-                        <p>Opciones de configuración del perfil.</p>
+                        <h4>Mis Pedidos</h4>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID Pedido</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                    <th>Monto Total</th>
+                                    <th>Valoración</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $query_pedidos = "
+                                    SELECT id_pedido, estado_pedido, fecha_pedido, monto_total 
+                                    FROM pedido 
+                                    WHERE id_usuario = ? AND estado_pedido = 'entregado'";
+                                $stmt_pedidos = $conexion->prepare($query_pedidos);
+                                $stmt_pedidos->bind_param("i", $user_id);
+                                $stmt_pedidos->execute();
+                                $result_pedidos = $stmt_pedidos->get_result();
+
+                                while ($pedido = $result_pedidos->fetch_assoc()) {
+                                    echo "<tr>";
+                                    echo "<td>" . htmlspecialchars($pedido['id_pedido']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($pedido['estado_pedido']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($pedido['fecha_pedido']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($pedido['monto_total']) . "</td>";
+                                    echo "<td class='d-flex justify-content-end align-items-start'>
+                                    <button class='btn btn-primary btn-sm me-1' data-bs-toggle='modal' data-bs-target='#valorarPedidoModal-{$pedido['id_pedido']}'>Valorar</button>
+                                    <button class='btn btn-success btn-sm' data-bs-toggle='modal' data-bs-target='#detallePedidoModal-{$pedido['id_pedido']}'>Ver Detalles</button>
+                                  </td>";
+                            
+                                    echo "</tr>";
+                                }
+                                $stmt_pedidos->close();
+                                
+                                ?>
+                            </tbody>
+                        </table>
+                        
                     </div>
                 </div>
             </div>
+
+            <?php
+            $stmt_pedidos = $conexion->prepare("
+                SELECT id_pedido 
+                FROM pedido 
+                WHERE id_usuario = ? AND estado_pedido = 'entregado'");
+            $stmt_pedidos->bind_param("i", $user_id);
+            $stmt_pedidos->execute();
+            $result_pedidos = $stmt_pedidos->get_result();
+
+            while ($pedido = $result_pedidos->fetch_assoc()) {
+            ?>
+            <div class="modal fade" id="valorarPedidoModal-<?= $pedido['id_pedido'] ?>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Valorar Pedido #<?= htmlspecialchars($pedido['id_pedido']); ?></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                        <form action="../funciones/gestionar_valoraciones/agregar_valoracion.php" method="POST">
+                            <input type="hidden" name="id_pedido" value="<?= htmlspecialchars($pedido['id_pedido']); ?>">
+                            <input type="hidden" name="user_id" value="<?= htmlspecialchars($user_id); ?>">
+
+                            <div class="form-group mb-3">
+                                <label for="cantidad_estrellas">Calificación (1 a 5 estrellas)</label>
+                                <select class="form-control" name="cantidad_estrellas" required>
+                                    <option value="">Seleccione</option>
+                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                        <option value="<?= $i; ?>"><?= $i; ?> estrella<?= $i > 1 ? 's' : ''; ?></option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="comentario">Comentario</label>
+                                <textarea class="form-control" name="comentario" rows="3" placeholder="Escribe un comentario (general)"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Enviar Valoración</button>
+                        </form>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
+
+             ?>
+            <div class="modal fade" id="detallePedidoModal-<?= $pedido['id_pedido'] ?>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Detalles del Pedido #<?= htmlspecialchars($pedido['id_pedido']); ?></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <?php
+                            // Consulta para obtener detalles del pedido
+                            $query_detalles = "
+                                SELECT 'Hamburguesa' AS tipo, h.nombre_hamburguesa AS producto, ph.cantidad, ph.precio
+                                FROM pedido_hamburguesa ph
+                                JOIN hamburguesa h ON ph.id_hamburguesa = h.id_hamburguesa
+                                WHERE ph.id_pedido = ?
+                                UNION
+                                SELECT 'Bebida', b.nombre_bebida, pb.cantidad, pb.precio
+                                FROM pedido_bebida pb
+                                JOIN bebida b ON pb.id_bebida = b.id_bebida
+                                WHERE pb.id_pedido = ?
+                                UNION
+                                SELECT 'Acompañamiento', a.nombre_acompaniamiento, pa.cantidad, pa.precio
+                                FROM pedido_acompaniamiento pa
+                                JOIN acompaniamiento a ON pa.id_acompaniamiento = a.id_acompaniamiento
+                                WHERE pa.id_pedido = ?
+                                UNION
+                                SELECT 'Postre', p.nombre_postre, pp.cantidad, pp.precio
+                                FROM pedido_postre pp
+                                JOIN postre p ON pp.id_postre = p.id_postre
+                                WHERE pp.id_pedido = ?";
+                            $stmt_detalles = $conexion->prepare($query_detalles);
+                            $stmt_detalles->bind_param("iiii", $pedido['id_pedido'], $pedido['id_pedido'], $pedido['id_pedido'], $pedido['id_pedido']);
+                            $stmt_detalles->execute();
+                            $result_detalles = $stmt_detalles->get_result();
+
+                            echo "<table class='table'>
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Producto</th>
+                                            <th>Cantidad</th>
+                                            <th>Precio</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>";
+                            while ($detalle = $result_detalles->fetch_assoc()) {
+                                echo "<tr>";
+                                echo "<td>" . htmlspecialchars($detalle['tipo']) . "</td>";
+                                echo "<td>" . htmlspecialchars($detalle['producto']) . "</td>";
+                                echo "<td>" . htmlspecialchars($detalle['cantidad']) . "</td>";
+                                echo "<td>$" . htmlspecialchars($detalle['precio']) . "</td>";
+                                echo "</tr>";
+                            }
+                            echo "</tbody>
+                                </table>";
+
+                            $stmt_detalles->close();
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
+            }
+            $stmt_pedidos = $conexion->prepare("
+            SELECT id_pedido 
+            FROM pedido 
+            WHERE id_usuario = ?");
+        $stmt_pedidos->bind_param("i", $user_id);
+        $stmt_pedidos->execute();
+        $result_pedidos = $stmt_pedidos->get_result();
+            while ($pedido = $result_pedidos->fetch_assoc()) {
+                ?>
+                <div class="modal fade" id="detallePedidoModal-<?= $pedido['id_pedido'] ?>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Detalles del Pedido #<?= htmlspecialchars($pedido['id_pedido']); ?></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <?php
+                                // Consulta para obtener detalles del pedido
+                                $query_detalles = "
+                                    SELECT 'Hamburguesa' AS tipo, h.nombre_hamburguesa AS producto, ph.cantidad, ph.precio
+                                    FROM pedido_hamburguesa ph
+                                    JOIN hamburguesa h ON ph.id_hamburguesa = h.id_hamburguesa
+                                    WHERE ph.id_pedido = ?
+                                    UNION
+                                    SELECT 'Bebida', b.nombre_bebida, pb.cantidad, pb.precio
+                                    FROM pedido_bebida pb
+                                    JOIN bebida b ON pb.id_bebida = b.id_bebida
+                                    WHERE pb.id_pedido = ?
+                                    UNION
+                                    SELECT 'Acompañamiento', a.nombre_acompaniamiento, pa.cantidad, pa.precio
+                                    FROM pedido_acompaniamiento pa
+                                    JOIN acompaniamiento a ON pa.id_acompaniamiento = a.id_acompaniamiento
+                                    WHERE pa.id_pedido = ?
+                                    UNION
+                                    SELECT 'Postre', p.nombre_postre, pp.cantidad, pp.precio
+                                    FROM pedido_postre pp
+                                    JOIN postre p ON pp.id_postre = p.id_postre
+                                    WHERE pp.id_pedido = ?";
+                                $stmt_detalles = $conexion->prepare($query_detalles);
+                                $stmt_detalles->bind_param("iiii", $pedido['id_pedido'], $pedido['id_pedido'], $pedido['id_pedido'], $pedido['id_pedido']);
+                                $stmt_detalles->execute();
+                                $result_detalles = $stmt_detalles->get_result();
+    
+                                echo "<table class='table'>
+                                        <thead>
+                                            <tr>
+                                                <th>Tipo</th>
+                                                <th>Producto</th>
+                                                <th>Cantidad</th>
+                                                <th>Precio</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>";
+                                while ($detalle = $result_detalles->fetch_assoc()) {
+                                    echo "<tr>";
+                                    echo "<td>" . htmlspecialchars($detalle['tipo']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($detalle['producto']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($detalle['cantidad']) . "</td>";
+                                    echo "<td>$" . htmlspecialchars($detalle['precio']) . "</td>";
+                                    echo "</tr>";
+                                }
+                                echo "</tbody>
+                                    </table>";
+    
+                                $stmt_detalles->close();
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php
+                }
+            $stmt_pedidos->close();
+            ?>
         </div>
     </div>
 
@@ -282,24 +433,8 @@ $stmt_direcciones->close();
             }
         }, 5000);
     </script>
-    <script>
-        document.getElementById('fecha_expiracion').addEventListener('input', function (e) {
-            var input = e.target;
-            var value = input.value.replace(/\D/g, ''); // Remover caracteres no numéricos
-            var formattedValue = '';
-
-            // Si se ingresan los primeros dos dígitos (MM)
-            if (value.length > 0) {
-                formattedValue = value.substring(0, 2);
-                if (value.length >= 3) {
-                    formattedValue += '/' + value.substring(2, 4); // Agregar '/' y los siguientes dos dígitos (YY)
-                }
-            }
-
-            input.value = formattedValue; // Asignar el valor formateado al campo
-        });
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 <?php include '../includes/footer.php'; ?>
+

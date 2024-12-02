@@ -18,8 +18,8 @@ function configurarCorreo()
         $mail->isSMTP();
         $mail->Host = 'sandbox.smtp.mailtrap.io';
         $mail->SMTPAuth = true;
-        $mail->Username = '02508a3a3a9bf5'; // Usuario de Mailtrap
-        $mail->Password = '99c3b27d1457ed'; // Contraseña de Mailtrap
+        $mail->Username = '80f0a7e4d54b79'; // Usuario de Mailtrap
+        $mail->Password = '1961d2c4a89957'; // Contraseña de Mailtrap
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 25;
         $mail->CharSet = 'UTF-8';

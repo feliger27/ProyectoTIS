@@ -1,6 +1,7 @@
 <?php
 include '../conexion.php'; // Conexión a la base de datos
-
+$error_message = ''; // Inicializar variable para mensajes de error
+$success_message = '';
 // Obtener el token ya sea del GET (cuando se carga la página) o del POST (cuando se envía el formulario)
 $token = $_GET['token'] ?? $_POST['token'] ?? null;
 
@@ -13,7 +14,7 @@ if ($token) {
     $result = $stmt->get_result();
 
     if ($result->num_rows === 0) {
-        echo "<div class='alert alert-danger text-center'>El enlace de restablecimiento de contraseña no es válido o ha caducado.</div>";
+        $error_message = "<div class='alert alert-danger text-center'>El enlace de restablecimiento de contraseña no es válido o ha caducado.</div>";
     } else {
         // Si el token es válido, mostramos el formulario y manejamos la lógica del POST
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -44,24 +45,31 @@ if ($token) {
                         $stmt_update->bind_param("ss", $hashed_password, $email);
                         $stmt_update->execute();
 
+                        
                         // Eliminar el token
                         $query_delete = "DELETE FROM password_resets WHERE token = ?";
                         $stmt_delete = $conexion->prepare($query_delete);
                         $stmt_delete->bind_param("s", $token);
                         $stmt_delete->execute();
 
+                        // Mensaje de éxito
+                        $success_message = "Contraseña restablecida con éxito. Redirigiendo a inicio de sesión...";
                         header("Location: login.php?message=success");
                         exit;
                     } else {
-                        echo "<div class='alert alert-danger text-center'>La nueva contraseña debe tener entre 8 y 16 caracteres e incluir al menos una letra mayúscula, un número y un carácter especial.</div>";
+                        $error_message = "La nueva contraseña debe tener entre 8 y 16 caracteres e incluir al menos una letra mayúscula, un número y un carácter especial.";
                     }
                 } else {
-                    echo "<div class='alert alert-danger text-center'>Las contraseñas no coinciden. Intenta nuevamente.</div>";
+                    $error_message = "Las contraseñas no coinciden. Intenta nuevamente.";
                 }
             } else {
-                echo "<div class='alert alert-danger text-center'>Enlace no válido o caducado.</div>";
+                $error_message = "Enlace no válido o caducado.";
             }
         }
+    }
+} else {
+    $error_message = "Falta el token de restablecimiento de contraseña.";
+}
 ?>
 
 <!DOCTYPE html>
@@ -79,6 +87,12 @@ if ($token) {
     <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
         <div class="col-md-6">
             <h2 class="text-center mb-4">Restablecer Contraseña</h2>
+            <!-- Mostrar mensaje de éxito o error si existen -->
+            <?php if (!empty($error_message)): ?>
+                <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
+            <?php elseif (!empty($success_message)): ?>
+                <div class="alert alert-success text-center"><?php echo $success_message; ?></div>
+            <?php endif; ?>
 
             <!-- Formulario de restablecimiento de contraseña -->
             <form action="restablecer.php" method="POST">
@@ -111,8 +125,6 @@ if ($token) {
 </html>
 
 <?php
-    }
-} else {
-    echo "<div class='alert alert-danger text-center'>Falta el token de restablecimiento de contraseña.</div>";
-}
+    
+
 ?>

@@ -1,7 +1,8 @@
 <?php
 include '../conexion.php'; // Conexión a la base de datos
-include '../funciones/notificar_usuario/notificar_usuario.php';
-
+include '../funciones/notificar usuario/notificar_usuario.php';
+$error_message = ''; // Inicializar variable para mensajes de error
+$success_message = ''; // Inicializar variable para mensajes de éxito
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
 
@@ -23,14 +24,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("sss", $email, $token, $expiry);
         $stmt->execute();
 
+        
         // Llamar a la función para enviar el correo
         if (enviarCorreoRestablecimiento($email, $token)) {
-            echo "<div class='alert alert-success'>Revisa tu correo electrónico para restablecer tu contraseña.</div>";
+            $success_message = "Revisa tu correo electrónico para restablecer tu contraseña.";
         } else {
-            echo "<div class='alert alert-danger'>Error al enviar el correo de restablecimiento.</div>";
+            $error_message = "Error al enviar el correo de restablecimiento.";
         }
     } else {
-        echo "<div class='alert alert-danger'>Correo no registrado.</div>";
+        $error_message = "Correo no registrado.";
     }
 }
 ?>
@@ -51,6 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="col-md-6">
             <h2 class="text-center mb-4">Restablecer Contraseña</h2>
 
+            
             <!-- Mostrar mensaje de éxito o error si existen -->
             <?php if (!empty($success_message)): ?>
                 <div class="alert alert-success mb-3"><?php echo $success_message; ?></div>

@@ -21,6 +21,7 @@ foreach ($_SESSION['carrito'] as $tipo => $productos) {
         }
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -49,6 +50,7 @@ foreach ($_SESSION['carrito'] as $tipo => $productos) {
             display: flex;
             align-items: center;
             justify-content: center;
+            
         }
 
         .navbar-nav .nav-link:hover {

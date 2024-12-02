@@ -182,48 +182,43 @@ if (isset($_POST['download_pdf']) && $mes_filtro) {
         </form>
 
         <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Cliente</th>
-                    <th>Total</th>
-                    <th>Fecha y Hora del Pedido</th>
-                    <th>Estado del Pedido</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-    <?php if ($result->num_rows > 0): ?>
-        <?php while ($row = $result->fetch_assoc()): ?>
-            <tr>
-                <td><?php echo $row['id_pedido']; ?></td>
-                <td><?php echo $row['nombre_usuario'] . ' ' . $row['apellido_usuario']; ?></td>
-                <td>$<?php echo number_format($row['monto_total'], 2); ?></td>
-                <td><?php echo date('d-m-Y H:i', strtotime($row['fecha_pedido'])); ?></td>
-                <td>
-                            <form method="POST" action="" class="estado-form">
-                                <input type="hidden" name="id_pedido" value="<?php echo $row['id_pedido']; ?>">
-                                <select name="estado_pedido" id="estado_<?php echo $row['id_pedido']; ?>" class="form-select me-2 estado-select">
-                                    <option value="en_preparacion" <?php if ($row['estado_pedido'] == 'en_preparacion') echo 'selected'; ?>>En preparación</option>
-                                    <option value="en_reparto" <?php if ($row['estado_pedido'] == 'en_reparto') echo 'selected'; ?>>En reparto</option>
-                                    <option value="entregado" <?php if ($row['estado_pedido'] == 'entregado') echo 'selected'; ?>>Entregado</option>
-                                </select>
-                            </form>
-                        </td>
-                <td>
-                    <a href="editar.php?id=<?php echo $row['id_pedido']; ?>" class="btn btn-primary btn-sm">Editar</a>
-                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#eliminarModal"
-                        data-id="<?php echo $row['id_pedido']; ?>">Eliminar</button>
-                </td>
-            </tr>
-        <?php endwhile; ?>
-    <?php else: ?>
+    <thead>
         <tr>
-            <td colspan="6" class="text-center">No se encontraron pedidos.</td>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Total</th>
+            <th>Fecha y Hora del Pedido</th>
+            <th>Estado del Pedido</th>
         </tr>
-    <?php endif; ?>
-</tbody>
-        </table>
+    </thead>
+    <tbody>
+        <?php if ($result->num_rows > 0): ?>
+            <?php while ($row = $result->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo $row['id_pedido']; ?></td>
+                    <td><?php echo $row['nombre_usuario'] . ' ' . $row['apellido_usuario']; ?></td>
+                    <td>$<?php echo number_format($row['monto_total'], 2); ?></td>
+                    <td><?php echo date('d-m-Y H:i', strtotime($row['fecha_pedido'])); ?></td>
+                    <td>
+                        <form method="POST" action="" class="estado-form">
+                            <input type="hidden" name="id_pedido" value="<?php echo $row['id_pedido']; ?>">
+                            <select name="estado_pedido" id="estado_<?php echo $row['id_pedido']; ?>" class="form-select me-2 estado-select">
+                                <option value="en_preparacion" <?php if ($row['estado_pedido'] == 'en_preparacion') echo 'selected'; ?>>En preparación</option>
+                                <option value="en_reparto" <?php if ($row['estado_pedido'] == 'en_reparto') echo 'selected'; ?>>En reparto</option>
+                                <option value="entregado" <?php if ($row['estado_pedido'] == 'entregado') echo 'selected'; ?>>Entregado</option>
+                            </select>
+                        </form>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="5" class="text-center">No se encontraron pedidos.</td>
+            </tr>
+        <?php endif; ?>
+    </tbody>
+</table>
+
         <h3>Pedidos por Mes</h3>
         <canvas id="pedidosPorMes"></canvas>
         <script>

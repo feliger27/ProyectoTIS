@@ -20,6 +20,7 @@ $roles = $conexion->query($query_roles);
     <meta charset="UTF-8">
     <title>Gestión de Roles</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
 <div class="container mt-4">
@@ -50,7 +51,7 @@ $roles = $conexion->query($query_roles);
                         <button class="btn btn-info" onclick="showPermissions(<?php echo $row['id_rol']; ?>)">Ver</button>
                     </td>
                     <td>
-                        <a href="editar_rol.php?id_rol=<?php echo $row['id_rol']; ?>" class="btn btn-warning">Editar</a>
+                        <a href="editar_rol.php?id_rol=<?php echo $row['id_rol']; ?>" class="btn btn-warning"><i class="bi bi-pencil-square"></i></a>
                         <a href="eliminar_rol.php?id_rol=<?php echo $row['id_rol']; ?>" class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar este rol?')">Eliminar</a>
                     </td>
                 </tr>

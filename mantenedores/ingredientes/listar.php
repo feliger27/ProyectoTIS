@@ -11,6 +11,7 @@ $result = $conexion->query($sql);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listado de Ingredientes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
 
@@ -44,8 +45,8 @@ $result = $conexion->query($sql);
                         <td><?php echo $row['nombre_ingrediente']; ?></td>
                         <td><?php echo $row['cantidad']; ?></td>
                         <td>
-                            <a href="editar.php?id=<?php echo $row['id_ingrediente']; ?>" class="btn btn-primary btn-sm">Editar</a>
-                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#eliminarModal" data-id="<?php echo $row['id_ingrediente']; ?>">Eliminar</button>
+                            <a href="editar.php?id=<?php echo $row['id_ingrediente']; ?>" class="btn btn-primary btn-sm"><i class="bi bi-pencil-square"></i></a>
+                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#eliminarModal" data-id="<?php echo $row['id_ingrediente']; ?>"><i class="bi bi-trash"></i></button>
                         </td>
                     </tr>
                 <?php endwhile; ?>

@@ -11,6 +11,7 @@ $permisos = $conexion->query($query);
     <meta charset="UTF-8">
     <title>Listado de Permisos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
 <div class="container mt-4">
@@ -36,8 +37,8 @@ $permisos = $conexion->query($query);
                     <td><?php echo $row['nombre_permiso']; ?></td>
                     <td><?php echo $row['descripcion']; ?></td>
                     <td>
-                        <a href="editar_permiso.php?id=<?php echo $row['id_permiso']; ?>" class="btn btn-warning">Editar</a>
-                        <a href="eliminar_permiso.php?id=<?php echo $row['id_permiso']; ?>" class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar este permiso?')">Eliminar</a>
+                        <a href="editar_permiso.php?id=<?php echo $row['id_permiso']; ?>" class="btn btn-warning"><i class="bi bi-pencil-square"></i></a>
+                        <a href="eliminar_permiso.php?id=<?php echo $row['id_permiso']; ?>" class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar este permiso?')"><i class="bi bi-trash"></i></a>
                     </td>
                 </tr>
             <?php endwhile; ?>
