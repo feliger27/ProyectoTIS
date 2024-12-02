@@ -261,15 +261,98 @@ $stmt_direcciones->close();
                 </div>
             </div>
 
-            <!-- Configuración -->
             <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
                 <div class="card">
                     <div class="card-body">
-                        <h4>Configuración</h4>
-                        <p>Opciones de configuración del perfil.</p>
+                        <h4>Mis Pedidos</h4>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID Pedido</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                    <th>Monto Total</th>
+                                    <th>Valoración</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $query_pedidos = "
+                                    SELECT id_pedido, estado_pedido, fecha_pedido, monto_total 
+                                    FROM pedido 
+                                    WHERE id_usuario = ? AND estado_pedido = 'entregado'";
+                                $stmt_pedidos = $conexion->prepare($query_pedidos);
+                                $stmt_pedidos->bind_param("i", $user_id);
+                                $stmt_pedidos->execute();
+                                $result_pedidos = $stmt_pedidos->get_result();
+
+                                while ($pedido = $result_pedidos->fetch_assoc()) {
+                                    echo "<tr>";
+                                    echo "<td>" . htmlspecialchars($pedido['id_pedido']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($pedido['estado_pedido']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($pedido['fecha_pedido']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($pedido['monto_total']) . "</td>";
+                                    echo "<td><button class='btn btn-primary btn-sm' data-bs-toggle='modal' data-bs-target='#valorarPedidoModal-{$pedido['id_pedido']}'>Valorar</button></td>";
+                                    echo "</tr>";
+                                }
+                                $stmt_pedidos->close();
+                                ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+
+            <?php
+            $stmt_pedidos = $conexion->prepare("
+                SELECT id_pedido 
+                FROM pedido 
+                WHERE id_usuario = ? AND estado_pedido = 'entregado'");
+            $stmt_pedidos->bind_param("i", $user_id);
+            $stmt_pedidos->execute();
+            $result_pedidos = $stmt_pedidos->get_result();
+
+            while ($pedido = $result_pedidos->fetch_assoc()) {
+            ?>
+            <div class="modal fade" id="valorarPedidoModal-<?= $pedido['id_pedido'] ?>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Valorar Pedido #<?= htmlspecialchars($pedido['id_pedido']); ?></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                        <form action="../funciones/gestionar_valoraciones/agregar_valoracion.php" method="POST">
+                            <input type="hidden" name="id_pedido" value="<?= htmlspecialchars($pedido['id_pedido']); ?>">
+                            <input type="hidden" name="user_id" value="<?= htmlspecialchars($user_id); ?>">
+
+                            <div class="form-group mb-3">
+                                <label for="cantidad_estrellas">Calificación (1 a 5 estrellas)</label>
+                                <select class="form-control" name="cantidad_estrellas" required>
+                                    <option value="">Seleccione</option>
+                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                        <option value="<?= $i; ?>"><?= $i; ?> estrella<?= $i > 1 ? 's' : ''; ?></option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="comentario">Comentario</label>
+                                <textarea class="form-control" name="comentario" rows="3" placeholder="Escribe un comentario (general)"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Enviar Valoración</button>
+                        </form>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
+            }
+            $stmt_pedidos->close();
+            ?>
         </div>
     </div>
 
