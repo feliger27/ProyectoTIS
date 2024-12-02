@@ -29,7 +29,7 @@ $user_data = $result_user->fetch_assoc();
 $stmt_user->close();
 
 // Consulta para obtener direcciones del usuario actual
-$query_direcciones = "SELECT d.id_direccion, d.calle, d.numero, d.ciudad
+$query_direcciones = "SELECT d.id_direccion, d.calle, d.numero, d.ciudad, d.depto_oficina_piso
                       FROM direccion d
                       JOIN direccion_usuario du ON d.id_direccion = du.id_direccion
                       WHERE du.id_usuario = ?";
@@ -40,17 +40,6 @@ $result_direcciones = $stmt_direcciones->get_result();
 $direcciones = $result_direcciones->fetch_all(MYSQLI_ASSOC);
 $stmt_direcciones->close();
 
-// Consulta para obtener métodos de pago del usuario actual
-$query_metodos_pago = "SELECT mp.id_pago, mp.tipo_tarjeta, mp.numero_tarjeta, mp.fecha_expiracion, mp.nombre_titular 
-                       FROM metodo_pago mp
-                       JOIN usuario_metodo_pago ump ON mp.id_pago = ump.id_pago
-                       WHERE ump.id_usuario = ?";
-$stmt_metodos_pago = $conexion->prepare($query_metodos_pago);
-$stmt_metodos_pago->bind_param("i", $user_id);
-$stmt_metodos_pago->execute();
-$result_metodos_pago = $stmt_metodos_pago->get_result();
-$metodos_pago = $result_metodos_pago->fetch_all(MYSQLI_ASSOC);
-$stmt_metodos_pago->close();
 ?>
 
 <!DOCTYPE html>
@@ -63,41 +52,44 @@ $stmt_metodos_pago->close();
     <title>Mi Perfil - HamburGeeks</title>
     <style>
     .container .btn-primary, .container .btn-warning, .container .btn-danger, .container .btn-success {
-        background-color: #fd7e14; 
-        border-color: #fd7e14; 
+    background-color: #fd7e14; 
+    border-color: #fd7e14; 
     }
 
     .container .btn-primary:hover, .container .btn-warning:hover, .container .btn-danger:hover, .container .btn-success:hover {
-        background-color: #e69500; 
-        border-color: #e69500;
+    background-color: #e69500; 
+    border-color: #e69500;
     }
 
+
     .container h2, .container h4, .container .nav-link.active {
-        color: #fd7e14; 
+    color: #fd7e14; / /* Corregí un error de comentario */
     }
 
     .container .nav-link.active {
-        background-color: #fd7e14;
-        color: white;
+    background-color: #fd7e14;
+    color: white;
     }
-
     .nav-pills .nav-link {
-        color: black; 
+    color: black; 
     }
 
+    /* Asegura que el contenido del cuerpo y html ocupe toda la altura */
     html, body {
         height: 100%;
         display: flex;
         flex-direction: column;
     }
 
+    /* Permite que el contenido ocupe el espacio disponible */
     body {
         flex-grow: 1;
     }
 
+    /* Asegura que el footer siempre se quede en la parte inferior */
     footer {
-        margin-top: auto; 
-        width: 100%;
+        margin-top: auto; /* Empuja el footer al final si el contenido es corto */
+        width: 100%; /* Asegura que ocupe todo el ancho de la pantalla */
     }
     </style>
 </head>
@@ -111,6 +103,7 @@ $stmt_metodos_pago->close();
             </div>
         </div>
 
+        <!-- Barra de navegación en pestañas -->
         <ul class="nav nav-pills mb-4" id="perfil-tabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="personal-tab" data-bs-toggle="pill" data-bs-target="#personal-info"
@@ -121,95 +114,166 @@ $stmt_metodos_pago->close();
                     type="button" role="tab">Gestionar Direcciones</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="orders-tab" data-bs-toggle="pill" data-bs-target="#manage-orders"
-                    type="button" role="tab">Pedidos</button>
+                <button class="nav-link" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings"
+                    type="button" role="tab">Mis Pedidos</button>
             </li>
         </ul>
 
+        <!-- Contenido de las pestañas en tarjetas -->
         <div class="tab-content">
+            <!-- Información Personal -->
             <div class="tab-pane fade show active" id="personal-info" role="tabpanel" aria-labelledby="personal-tab">
                 <div class="card">
                     <div class="card-body">
                         <h4>Información Personal</h4>
                         <p><strong>Nombre:</strong> <?= htmlspecialchars($user_data['nombre']); ?></p>
                         <p><strong>Apellido:</strong> <?= htmlspecialchars($user_data['apellido']); ?></p>
-                        <p><strong>Correo Electrónico:</strong> <?= htmlspecialchars($user_data['correo_electronico']); ?></p>
+                        <p><strong>Correo Electrónico:</strong>
+                            <?= htmlspecialchars($user_data['correo_electronico']); ?></p>
                         <p><strong>Teléfono:</strong> <?= htmlspecialchars($user_data['telefono']); ?></p>
+                        <button class="btn btn-primary mt-3" data-bs-toggle="modal"
+                            data-bs-target="#editPersonalInfoModal">Editar</button>
                     </div>
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="manage-orders" role="tabpanel" aria-labelledby="orders-tab">
-                <div class="card">
-                    <div class="card-body">
-                        <h4>Mis Pedidos</h4>
-                        <div class="list-group">
-                            <?php
-                            $query_pedidos = "SELECT p.id_pedido, p.fecha_pedido, p.estado_pedido, p.monto, d.calle, d.numero, d.ciudad
-                                              FROM pedido p
-                                              LEFT JOIN direccion d ON p.id_direccion = d.id_direccion
-                                              WHERE p.id_usuario = ?";
-                            $stmt_pedidos = $conexion->prepare($query_pedidos);
-                            $stmt_pedidos->bind_param("i", $user_id);
-                            $stmt_pedidos->execute();
-                            $result_pedidos = $stmt_pedidos->get_result();
-
-                            if ($result_pedidos->num_rows > 0):
-                                while ($pedido = $result_pedidos->fetch_assoc()):
-                            ?>
-                            <div class="list-group-item">
-                                <h5 class="mb-1">Pedido #<?= htmlspecialchars($pedido['id_pedido']); ?></h5>
-                                <p class="mb-1"><strong>Fecha:</strong> <?= htmlspecialchars($pedido['fecha_pedido']); ?></p>
-                                <p class="mb-1"><strong>Estado:</strong> <?= htmlspecialchars($pedido['estado_pedido']); ?></p>
-                                <button class="btn btn-warning btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#reviewModal-<?= $pedido['id_pedido']; ?>">Añadir Reseña</button>
-                                <div class="modal fade" id="reviewModal-<?= $pedido['id_pedido']; ?>" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                        <form action="../funciones/valoraciones/insertar_valoracion.php" method="POST">
-
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Añadir Reseña para Pedido #<?= $pedido['id_pedido']; ?></h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <input type="hidden" name="id_pedido" value="<?= $pedido['id_pedido']; ?>">
-                                                    <div class="mb-3">
-                                                        <label for="cantidad_estrellas" class="form-label">Calificación (1-5 estrellas)</label>
-                                                        <select name="cantidad_estrellas" class="form-select" required>
-                                                            <option value="" selected disabled>Selecciona una calificación</option>
-                                                            <option value="1">1 estrella</option>
-                                                            <option value="2">2 estrellas</option>
-                                                            <option value="3">3 estrellas</option>
-                                                            <option value="4">4 estrellas</option>
-                                                            <option value="5">5 estrellas</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="comentario" class="form-label">Comentario</label>
-                                                        <textarea name="comentario" class="form-control" rows="3" required></textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="submit" class="btn btn-success">Enviar Reseña</button>
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
+            <!-- Modal para editar Información Personal -->
+            <div class="modal fade" id="editPersonalInfoModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Editar Información Personal</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="../mantenedores/usuarios/editar.php?id=<?= $user_id ?>&origin=perfil" method="POST">
+                                <div class="form-group mb-3">
+                                    <label for="nombre">Nombre</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" value="<?= htmlspecialchars($user_data['nombre']) ?>" required>
                                 </div>
-                            </div>
-                            <?php endwhile; ?>
-                            <?php else: ?>
-                            <p>No tienes pedidos registrados.</p>
-                            <?php endif; ?>
-                            <?php $stmt_pedidos->close(); ?>
+                                <div class="form-group mb-3">
+                                    <label for="apellido">Apellido</label>
+                                    <input type="text" class="form-control" id="apellido" name="apellido" value="<?= htmlspecialchars($user_data['apellido']) ?>" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="email">Correo Electrónico</label>
+                                    <input type="email" class="form-control" id="email" value="<?= htmlspecialchars($user_data['correo_electronico']) ?>" readonly>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="telefono">Teléfono</label>
+                                    <input type="tel" class="form-control" id="telefono" name="telefono" value="<?= htmlspecialchars($user_data['telefono']) ?>" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Mis Pedidos</h4>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID Pedido</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                    <th>Monto Total</th>
+                                    <th>Valoración</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $query_pedidos = "
+                                    SELECT id_pedido, estado_pedido, fecha_pedido, monto_total 
+                                    FROM pedido 
+                                    WHERE id_usuario = ? AND estado_pedido = 'entregado'";
+                                $stmt_pedidos = $conexion->prepare($query_pedidos);
+                                $stmt_pedidos->bind_param("i", $user_id);
+                                $stmt_pedidos->execute();
+                                $result_pedidos = $stmt_pedidos->get_result();
+
+                                while ($pedido = $result_pedidos->fetch_assoc()) {
+                                    echo "<tr>";
+                                    echo "<td>" . htmlspecialchars($pedido['id_pedido']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($pedido['estado_pedido']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($pedido['fecha_pedido']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($pedido['monto_total']) . "</td>";
+                                    echo "<td><button class='btn btn-primary btn-sm' data-bs-toggle='modal' data-bs-target='#valorarPedidoModal-{$pedido['id_pedido']}'>Valorar</button></td>";
+                                    echo "</tr>";
+                                }
+                                $stmt_pedidos->close();
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <?php
+            $stmt_pedidos = $conexion->prepare("
+                SELECT id_pedido 
+                FROM pedido 
+                WHERE id_usuario = ? AND estado_pedido = 'entregado'");
+            $stmt_pedidos->bind_param("i", $user_id);
+            $stmt_pedidos->execute();
+            $result_pedidos = $stmt_pedidos->get_result();
+
+            while ($pedido = $result_pedidos->fetch_assoc()) {
+            ?>
+            <div class="modal fade" id="valorarPedidoModal-<?= $pedido['id_pedido'] ?>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Valorar Pedido #<?= htmlspecialchars($pedido['id_pedido']); ?></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                        <form action="../funciones/gestionar_valoraciones/agregar_valoracion.php" method="POST">
+                            <input type="hidden" name="id_pedido" value="<?= htmlspecialchars($pedido['id_pedido']); ?>">
+                            <input type="hidden" name="user_id" value="<?= htmlspecialchars($user_id); ?>">
+
+                            <div class="form-group mb-3">
+                                <label for="cantidad_estrellas">Calificación (1 a 5 estrellas)</label>
+                                <select class="form-control" name="cantidad_estrellas" required>
+                                    <option value="">Seleccione</option>
+                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                        <option value="<?= $i; ?>"><?= $i; ?> estrella<?= $i > 1 ? 's' : ''; ?></option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="comentario">Comentario</label>
+                                <textarea class="form-control" name="comentario" rows="3" placeholder="Escribe tu comentario"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Enviar Valoración</button>
+                        </form>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
+            }
+            $stmt_pedidos->close();
+            ?>
         </div>
     </div>
 
+    <script>
+        setTimeout(function () {
+            var mensajeExito = document.getElementById('mensajeExito');
+            if (mensajeExito) {
+                mensajeExito.classList.remove('show');
+                mensajeExito.classList.add('fade');
+            }
+        }, 5000);
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

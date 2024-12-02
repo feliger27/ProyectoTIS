@@ -2,45 +2,72 @@
 include '../../conexion.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $id_pedido = isset($_POST['id_pedido']) ? (int)$_POST['id_pedido'] : 0;
+    $id_pedido = $_POST['id_pedido'];
 
-    // Verificar si el ID del pedido es válido
-    if ($id_pedido > 0) {
-        // Eliminar dependencias en las tablas relacionadas
-        $tablas_dependientes = [
-            'pedido_bebida',
-            'pedido_hamburguesa',
-            'pedido_combo',
-            'pedido_acompaniamiento',
-            'pedido_postre',
-            'recompensa',
-            'boleta',
-            'valoracion'
-        ];
+    // Verificar si el ID del pedido está presente
+    if (!empty($id_pedido)) {
+        // Eliminar dependencias en la tabla pedido_bebida
+        $sql_dependencias = "DELETE FROM pedido_bebida WHERE id_pedido = ?";
+        $stmt_dependencias = $conexion->prepare($sql_dependencias);
+        $stmt_dependencias->bind_param("i", $id_pedido);
+        $stmt_dependencias->execute();
 
-        foreach ($tablas_dependientes as $tabla) {
-            $sql_dependencia = "DELETE FROM $tabla WHERE id_pedido = ?";
-            $stmt_dependencia = $conexion->prepare($sql_dependencia);
-            $stmt_dependencia->bind_param("i", $id_pedido);
-            $stmt_dependencia->execute();
-        }
+        // Eliminar dependencias en la tabla pedido_hamburguesa
+        $sql_dependencias = "DELETE FROM pedido_hamburguesa WHERE id_pedido = ?";
+        $stmt_dependencias = $conexion->prepare($sql_dependencias);
+        $stmt_dependencias->bind_param("i", $id_pedido);
+        $stmt_dependencias->execute();
 
-        // Eliminar el pedido de la tabla principal
-        $sql_pedido = "DELETE FROM pedido WHERE id_pedido = ?";
-        $stmt_pedido = $conexion->prepare($sql_pedido);
-        $stmt_pedido->bind_param("i", $id_pedido);
+        // Eliminar dependencias en la tabla pedido_combo
+        $sql_dependencias = "DELETE FROM pedido_combo WHERE id_pedido = ?";
+        $stmt_dependencias = $conexion->prepare($sql_dependencias);
+        $stmt_dependencias->bind_param("i", $id_pedido);
+        $stmt_dependencias->execute();
 
-        if ($stmt_pedido->execute()) {
-            // Redirigir con mensaje de éxito
+        // Eliminar dependencias en la tabla pedido_acompaniamiento
+        $sql_dependencias = "DELETE FROM pedido_acompaniamiento WHERE id_pedido = ?";
+        $stmt_dependencias = $conexion->prepare($sql_dependencias);
+        $stmt_dependencias->bind_param("i", $id_pedido);
+        $stmt_dependencias->execute();
+
+        // Eliminar dependencias en la tabla pedido_postre
+        $sql_dependencias = "DELETE FROM pedido_postre WHERE id_pedido = ?";
+        $stmt_dependencias = $conexion->prepare($sql_dependencias);
+        $stmt_dependencias->bind_param("i", $id_pedido);
+        $stmt_dependencias->execute();
+
+        // Eliminar dependencias en la tabla recompensa
+        $sql_dependencias = "DELETE FROM recompensa WHERE id_pedido = ?";
+        $stmt_dependencias = $conexion->prepare($sql_dependencias);
+        $stmt_dependencias->bind_param("i", $id_pedido);
+        $stmt_dependencias->execute();
+
+        // Eliminar dependencias en la tabla boleta
+        $sql_dependencias = "DELETE FROM boleta WHERE id_pedido = ?";
+        $stmt_dependencias = $conexion->prepare($sql_dependencias);
+        $stmt_dependencias->bind_param("i", $id_pedido);
+        $stmt_dependencias->execute();
+
+        // Eliminar dependencias en la tabla valoracion
+        $sql_dependencias = "DELETE FROM valoracion WHERE id_pedido = ?";
+        $stmt_dependencias = $conexion->prepare($sql_dependencias);
+        $stmt_dependencias->bind_param("i", $id_pedido);
+        $stmt_dependencias->execute();
+
+        // Ahora eliminar el pedido
+        $sql = "DELETE FROM pedido WHERE id_pedido = ?";
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param("i", $id_pedido);
+
+        if ($stmt->execute()) {
+            // Redirigir a la lista de pedidos con un mensaje de éxito
             header("Location: listar.php?eliminado=true&id=$id_pedido");
             exit();
         } else {
             echo "Error al eliminar el pedido: " . $conexion->error;
         }
-    } else {
-        echo "Error: ID del pedido no válido.";
     }
-} else {
-    echo "Método de solicitud no permitido.";
 }
 ?>
+
+

@@ -1,18 +1,19 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// if (session_status() === PHP_SESSION_NONE) {
+//     session_start();
+// }
 
-// Verificar si el usuario ha iniciado sesión
-if (!isset($_SESSION['username'])) {
-    // Si no está logueado, redirigir al login
-    header("Location: ../login/login.php");
-    exit();
-}
-
+// // Verificar si el usuario ha iniciado sesión
+// if (!isset($_SESSION['username'])) {
+//     // Si no está logueado, redirigir al login
+//     header("Location: ../login/login.php");
+//     exit();
+// }
 // Conectar a la base de datos para obtener hamburguesas destacadas y acompañamientos más vendidos
 include '../conexion.php';
 include '../includes/header.php';
+include '../funciones/generar_sugerencias/generar_sugerencias.php';
+
 // Consulta para obtener las tres hamburguesas destacadas
 $query_hamburguesas_destacadas = "
     SELECT h.nombre_hamburguesa, h.descripcion, h.imagen, AVG(v.cantidad_estrellas) AS rating
@@ -58,6 +59,18 @@ if (count($acompanamientos) < 3) {
         $acompanamientos[] = $row;
     }
 }
+
+$sugerencias = [];
+if (isset($_SESSION['user_id'])) {  // Verifica si el usuario ha iniciado sesión
+    $userId = $_SESSION['user_id'];
+    $sugerencias = generarSugerencias($userId);
+}
+$sugerencias = generarSugerencias($userId);
+
+?>
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -245,6 +258,29 @@ if (count($acompanamientos) < 3) {
     <!-- Sección de Productos Destacados -->
     <section class="products-section">
         <h2>Nuestros Productos Destacados</h2>
+
+        <?php if (!empty($sugerencias)): ?>
+        <h3>Sugerencias</h3>
+        <div class="row justify-content-center">
+            <!-- Mostrar las sugerencias generadas -->
+            <?php foreach ($sugerencias as $sugerencia): ?>
+                <div class="col-md-4 mb-4 d-flex justify-content-center">
+                    <a href="index-menu.php?hamburguesa=<?php echo urlencode($sugerencia['nombre']); ?>" class="card-link">
+                        <div class="card">
+                            <img src="<?php echo '../uploads/hamburguesas/' . $sugerencia['imagen']; ?>"
+                                 alt="Imagen de <?php echo htmlspecialchars($sugerencia['nombre']); ?>" class="card-img-top">
+                            <div class="card-body text-center">
+                                <h5 class="card-title"><?php echo htmlspecialchars($sugerencia['nombre']); ?></h5>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
+    <?php endif; ?>
+</div>
+</div>
         <h3>Hamburguesas</h3>
         <div class="row justify-content-center">
             <?php while ($hamburguesa = mysqli_fetch_assoc($hamburguesas_destacadas)): ?>

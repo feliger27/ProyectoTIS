@@ -73,6 +73,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
         <div class="col-md-6">
+        <div class="text-center mb-4">
+            <img src="../uploads/HAMBUR_Mesa2.png" alt="Logo de HamburGeeks" style="max-width: 200px;">
+        </div>
             <h2 class="text-center mb-4">Inicia Sesión</h2>
 
             <!-- Mostrar mensaje de error si existe -->
