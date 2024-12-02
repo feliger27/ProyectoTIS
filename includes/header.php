@@ -21,7 +21,6 @@ foreach ($_SESSION['carrito'] as $tipo => $productos) {
         }
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -50,7 +49,6 @@ foreach ($_SESSION['carrito'] as $tipo => $productos) {
             display: flex;
             align-items: center;
             justify-content: center;
-            
         }
 
         .navbar-nav .nav-link:hover {
@@ -95,9 +93,6 @@ foreach ($_SESSION['carrito'] as $tipo => $productos) {
         <a class="navbar-brand" href="../index/index-lobby.php">
             <img src="../uploads/HAMBUR_Mesa.png" alt="Logo HamburGeeks" style="height: 60px;">
         </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">

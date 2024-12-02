@@ -44,7 +44,6 @@ $totalCarrito = 0;
 
 // Obtener los productos del carrito desde la sesión
 $carrito = isset($_SESSION['carrito']) ? $_SESSION['carrito'] : [];
-
 ?>
 
 <!DOCTYPE html>
@@ -52,54 +51,109 @@ $carrito = isset($_SESSION['carrito']) ? $_SESSION['carrito'] : [];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrito de Compras - HamburGeeks</title>
+    <title>Mi Carrito - HamburGeeks</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        body {
+            background-color: #f8f9fa;
+            margin-top: 90px;
+        }
         .carrito-container {
-            margin-top: 100px;
+            margin: 50px auto;
+            max-width: 900px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         }
         .table img {
-            width: 80px;
-            height: 80px;
+            width: 120px;
+            height: 120px;
             object-fit: cover;
             border-radius: 8px;
         }
-        .total-container {
-            text-align: right;
+        .btn-vaciar, .btn-pagar {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s ease, background-color 0.2s ease;
         }
-        .notification {
-            background-color: #343a40;
-            color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            animation: fadeIn 0.5s ease-in-out;
+        .btn-vaciar {
+            font-size: 18px;
+            background-color: #dc3545;
+            color: white;
         }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .btn-vaciar:hover {
+            background-color: #c82333;
+            transform: scale(1.1);
+        }
+        .btn-pagar {
+            font-size: 18px;
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-pagar:hover {
+            background-color: #218838;
+            transform: scale(1.1);
+        }
+        .table thead th {
+            background-color: #d35400;
+            color: white;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .table td {
+            vertical-align: middle;
+        }
+        .price-normal {
+            color: #7f8c8d;
+            text-decoration: line-through;
+            margin-right: 5px;
+        }
+        .price-promo {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .subtotal {
+            font-weight: bold !important;
+        }
+        .header-title {
+            font-size: 35px;
+            font-weight: bold;
+            color: #d35400;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .icon-trash {
+            font-size: 20px;
+            color: #e74c3c;
+            cursor: pointer;
+        }
+        .icon-trash:hover {
+            color: #c0392b;
+        }
+
+        .total {
+            font-size: 25px;
         }
     </style>
 </head>
 <body>
     <div class="container carrito-container">
-        <h1 class="mb-4">Carrito de Compras</h1>
+        <h2 class="header-title text-center mb-4">Mi Carrito</h2>
 
         <?php if (!empty($carrito)): ?>
             <table class="table table-bordered text-center">
                 <thead>
                     <tr>
-                        <th>Producto</th>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
                         <th>Cantidad</th>
-                        <th>Precio Unitario</th>
                         <th>Subtotal</th>
-                        <th>Acciones</th>
+                        <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -111,85 +165,52 @@ $carrito = isset($_SESSION['carrito']) ? $_SESSION['carrito'] : [];
                             $resultadoProducto = $conexion->query($queryProducto);
                             $detallesProducto = $resultadoProducto->fetch_assoc();
 
+                            // Calcular precio y subtotal
                             $promocion = obtenerPromocion($productoId, $categoria, $promociones);
                             $precioUnitario = $promocion ? calcularPrecioPromocional($detallesProducto['precio'], $promocion['porcentaje_descuento']) : $detallesProducto['precio'];
-
                             $subtotal = $precioUnitario * $producto['cantidad'];
                             $totalCarrito += $subtotal;
                             ?>
                             <tr>
-                                <td>
-                                    <img src="<?= file_exists($detallesProducto['imagen']) ? $detallesProducto['imagen'] : '../uploads/default.jpg'; ?>" alt="<?= $detallesProducto['nombre']; ?>">
-                                    <p><?= $detallesProducto['nombre']; ?></p>
+                                <td><img src="<?= file_exists($detallesProducto['imagen']) ? $detallesProducto['imagen'] : '../uploads/default.jpg'; ?>" alt="<?= $detallesProducto['nombre']; ?>"></td>
+                                <td><?= $detallesProducto['nombre']; ?></td>
+                                <td class="precio-unitario" data-precio="<?= $precioUnitario; ?>">
+                                    <?php if ($promocion): ?>
+                                        <span class="price-normal">$<?= number_format($detallesProducto['precio'], 0, ',', '.'); ?></span>
+                                        <span class="price-promo">$<?= number_format($precioUnitario, 0, ',', '.'); ?></span>
+                                    <?php else: ?>
+                                        <strong>$<?= number_format($precioUnitario, 0, ',', '.'); ?></strong>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <input type="number" class="form-control cantidad-producto" data-id="<?= $productoId; ?>" data-categoria="<?= $categoria; ?>" value="<?= $producto['cantidad']; ?>" min="1">
                                 </td>
-                                <td class="precio-unitario" data-precio="<?= $precioUnitario; ?>">$<?= number_format($precioUnitario, 0, ',', '.'); ?></td>
                                 <td class="subtotal">$<?= number_format($subtotal, 0, ',', '.'); ?></td>
                                 <td>
-                                    <button class="btn btn-danger btn-sm eliminar-producto" data-id="<?= $productoId; ?>" data-categoria="<?= $categoria; ?>">Eliminar</button>
+                                    <span class="icon-trash eliminar-producto" data-id="<?= $productoId; ?>" data-categoria="<?= $categoria; ?>">🗑</span>
                                 </td>
                             </tr>
-
                         <?php endforeach; ?>
                     <?php endforeach; ?>
                 </tbody>
+                <tfoot>
+                    <tr class="total">
+                        <td colspan="4" class="text-end"><strong>Total:</strong></td>
+                        <td colspan="2" class="total-carrito fw-bold">$<?= number_format($totalCarrito, 0, ',', '.'); ?></td>
+                    </tr>
+                </tfoot>
             </table>
 
-            <div class="total-container">
-                <h3>Total: <span class="total-carrito">$<?php echo number_format($totalCarrito, 0, ',', '.'); ?></span></h3>
-                <button class="btn btn-warning vaciar-carrito">Vaciar Carrito</button>
-                <?php if (!empty($carrito)): ?>
-                    <a href="../index/index-pago.php" class="btn btn-success">Ir a Pagar</a>
-                <?php endif; ?>
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-danger btn-vaciar">Vaciar Carrito</button>
+                <a href="../index/index-pago.php" class="btn btn-success btn-pagar">Ir a Pagar</a>
             </div>
-
         <?php else: ?>
             <p class="text-center">Tu carrito está vacío.</p>
         <?php endif; ?>
     </div>
 
     <script>
-        // Eliminar producto del carrito
-        document.querySelectorAll('.eliminar-producto').forEach(button => {
-    button.addEventListener('click', function () {
-        const idProducto = this.dataset.id;
-        const categoria = this.dataset.categoria;
-
-        fetch('../funciones/gestionar_carrito/eliminar_carrito.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ id_producto: idProducto, categoria: categoria })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert(data.message);
-                location.reload(); // Recargar la página
-            } else {
-                alert(data.message); // Mostrar el mensaje de error
-            }
-        });
-    });
-});
-
-document.querySelector('.vaciar-carrito').addEventListener('click', function () {
-    fetch('../funciones/gestionar_carrito/vaciar_carrito.php', {
-        method: 'POST'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            alert(data.message);
-            location.reload();
-        } else {
-            alert(data.message);
-        }
-    });
-});
-
-        // Actualizar cantidad del producto
         document.querySelectorAll('.cantidad-producto').forEach(input => {
             input.addEventListener('change', function () {
                 const idProducto = this.dataset.id;
@@ -208,37 +229,70 @@ document.querySelector('.vaciar-carrito').addEventListener('click', function () 
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        // Actualizar subtotal dinámicamente
                         const precioUnitario = parseFloat(this.closest('tr').querySelector('.precio-unitario').dataset.precio);
                         const subtotal = precioUnitario * cantidad;
+                        this.closest('tr').querySelector('.subtotal').textContent = `$${subtotal.toLocaleString('es-CL')}`;
 
-                        // Actualizar el subtotal en la fila
-                        this.closest('tr').querySelector('.subtotal').textContent = `$${subtotal.toLocaleString('es-CL', { minimumFractionDigits: 0 })}`;
-
-                        // Recalcular el total general del carrito
-                        let totalCarrito = 0;
-                        document.querySelectorAll('.subtotal').forEach(subtotalElement => {
-                            const valorSubtotal = parseFloat(subtotalElement.textContent.replace('$', '').replace(/\./g, ''));
-                            totalCarrito += valorSubtotal;
+                        let total = 0;
+                        document.querySelectorAll('.subtotal').forEach(el => {
+                            total += parseFloat(el.textContent.replace('$', '').replace(/\./g, ''));
                         });
 
-                        // Actualizar el total general dinámicamente
-                        document.querySelector('.total-carrito').textContent = `$${totalCarrito.toLocaleString('es-CL', { minimumFractionDigits: 0 })}`;
+                        document.querySelector('.total-carrito').textContent = `$${total.toLocaleString('es-CL')}`;
 
                         // Actualizar el contador del carrito en el header
                         const cartCountElement = document.getElementById('cart-count');
                         if (cartCountElement) {
-                            cartCountElement.textContent = data.cartCount > 0 ? data.cartCount : '';
+                            cartCountElement.textContent = data.cartCount;
+                        } else if (data.cartCount > 0) {
+                            // Si no existe, agregar el contador al ícono del carrito
+                            const cartIcon = document.querySelector('.bi-cart-fill');
+                            const countSpan = document.createElement('span');
+                            countSpan.id = 'cart-count';
+                            countSpan.className = 'cart-count';
+                            countSpan.textContent = data.cartCount;
+                            cartIcon.parentElement.appendChild(countSpan);
                         }
                     } else {
-                        alert(data.message);
+                        alert('Error al actualizar la cantidad.');
                     }
+                });
+            });
+        });
+
+
+        document.querySelectorAll('.eliminar-producto').forEach(button => {
+            button.addEventListener('click', function () {
+                const idProducto = this.dataset.id;
+                const categoria = this.dataset.categoria;
+
+                fetch('../funciones/gestionar_carrito/eliminar_carrito.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ id_producto: idProducto, categoria: categoria })
                 })
-                .catch(error => console.error('Error:', error));
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar el producto.');
+                    }
+                });
+            });
+        });
+
+        document.querySelector('.btn-vaciar').addEventListener('click', function () {
+            fetch('../funciones/gestionar_carrito/vaciar_carrito.php', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert('Error al vaciar el carrito.');
+                }
             });
         });
     </script>
-
-
 </body>
 </html>

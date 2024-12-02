@@ -4,9 +4,13 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 include '../../conexion.php';
+require_once '../../vendor/autoload.php';
+
+use Transbank\Webpay\WebpayPlus\Transaction;
+use Transbank\Webpay\Options;
 
 // Validar los datos necesarios
-if (!isset($_POST['id_usuario'], $_POST['id_direccion'], $_POST['total_compra'], $_POST['puntos_usados'], $_SESSION['carrito'])) {
+if (!isset($_POST['id_usuario'], $_POST['id_direccion'], $_POST['total_compra'], $_POST['puntos_usados'], $_POST['metodo_pago'], $_SESSION['carrito'])) {
     http_response_code(400);
     echo json_encode([
         'status' => 'error',
@@ -19,9 +23,53 @@ $idUsuario = (int)$_POST['id_usuario'];
 $idDireccion = (int)$_POST['id_direccion'];
 $totalCompra = (float)$_POST['total_compra'];
 $puntosUsados = (int)$_POST['puntos_usados'];
+$metodoPago = $_POST['metodo_pago']; // Campo para identificar el método de pago
 $carrito = $_SESSION['carrito'];
 
+// Verificar el método de pago
+if ($metodoPago === 'transbank') {
+    // Crear instancia de Transbank
+    $transaction = new Transaction();
+
+    $buyOrder = uniqid(); // Generar un identificador único para la orden
+    $sessionId = session_id(); // ID de sesión actual
+    $returnUrl = 'http://localhost/xampp/ProyectoTIS/funciones/compra/confirmar_pago_transbank.php'; // URL de retorno
+
+    try {
+        // Crear la transacción
+        $response = $transaction->create($buyOrder, $sessionId, $totalCompra, $returnUrl);
+
+        // Obtener el token y la URL de redirección
+        $token = $response->getToken();
+        $url = $response->getUrl();
+
+        // Guardar temporalmente datos relevantes en la sesión
+        $_SESSION['transbank'] = [
+            'id_usuario' => $idUsuario,
+            'id_direccion' => $idDireccion,
+            'total_compra' => $totalCompra,
+            'puntos_usados' => $puntosUsados,
+            'carrito' => $carrito,
+            'buyOrder' => $buyOrder
+        ];
+
+        // Redirigir a Transbank
+        header("Location: {$url}?token_ws={$token}");
+        exit;
+    } catch (Exception $e) {
+        error_log("Error al iniciar la transacción con Transbank: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Error al iniciar la transacción con Transbank.',
+            'details' => $e->getMessage()
+        ]);
+        exit;
+    }
+}
+
 try {
+    // **Flujo actual para pagos en efectivo**
     $conexion->begin_transaction();
 
     // Paso 1: Registrar el pedido
@@ -111,23 +159,14 @@ try {
     descontarStock($conexion, $idPedido, $carrito);
 
     // Paso 4: Gestionar los puntos de recompensa
-    // Llamada a la función gestionarPuntos
     include 'gestionar_puntos.php';
-
-    try {
-        gestionarPuntos($conexion, $idUsuario, $idPedido, $totalCompra, $puntosUsados);
-    } catch (Exception $e) {
-        throw new Exception("Error al gestionar puntos: " . $e->getMessage());
-    }
+    gestionarPuntos($conexion, $idUsuario, $idPedido, $totalCompra, $puntosUsados);
 
     // Confirmar la transacción
     $conexion->commit();
 
     // Vaciar el carrito de compras
     unset($_SESSION['carrito']);
-
-    // Depuración final
-    error_log("Transacción completada. Pedido y productos registrados correctamente.");
 
     // Redirigir a la página de confirmación
     header("Location: ../../index/index-confirmacion.php?id_pedido=$idPedido");
@@ -139,7 +178,9 @@ try {
     http_response_code(500);
     echo json_encode([
         'status' => 'error',
-        'message' => 'Error al procesar el pago: ' . $e->getMessage()
+        'message' => 'Error al procesar el pago.',
+        'details' => $e->getMessage()
     ]);
+    exit;
 }
 ?>
