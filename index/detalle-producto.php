@@ -191,15 +191,18 @@ if ($tipo_producto == 'combo') {
             margin-left: 30px;
             /* Para asegurar que el texto no esté pegado a la imagen */
         }
-        .custom-btn {
-            background-color: #4CAF50; /* Cambia esto por el código de color que prefieras */
-            border-color: #4CAF50; /* Asegúrate de que el color del borde coincida o complemente el de fondo */
-        }
+        .custom-orange-btn {
+    background-color: #FF7F00; /* Naranja */
+    border-color: #FF7F00; /* Borde naranja */
+    color: white; /* Asegurarte de que el texto sea blanco para un buen contraste */
+    }
 
-        .custom-btn:hover {
-            background-color: #45a049; /* Un tono ligeramente más oscuro para el hover */
-            border-color: #45a049;
-        }
+    .custom-orange-btn:hover {
+    background-color: #FF8C1A; /* Un tono ligeramente más oscuro para el hover */
+    border-color: #FF8C1A;
+}
+
+
     </style>
 </head>
 
@@ -214,9 +217,10 @@ if ($tipo_producto == 'combo') {
                 <p class="description"><?php echo $descripcion; ?></p>
                 <div class="button-group mt-3 d-flex justify-content-start">
         <!-- Botón para abrir el modal de reseñas -->
-        <button type="button" class="btn btn-info back-btn me-2" data-bs-toggle="modal" data-bs-target="#resenasModal" id="btnResenas">
-            Ver Reseñas
+        <button type="button" class="btn custom-orange-btn back-btn me-2" data-bs-toggle="modal" data-bs-target="#resenasModal" id="btnResenas">
+        Ver Reseñas
         </button>
+
 
         <!-- Botón para volver al menú -->
         <a href="index-menu.php" class="btn btn-primary back-btn">Volver al Menú</a>
