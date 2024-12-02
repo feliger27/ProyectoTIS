@@ -79,6 +79,9 @@ foreach ($_SESSION['carrito'] as $categoria => $productos) {
         $promocion = obtenerPromocion($productoId, $categoria, $promociones);
         $precioUnitario = $promocion ? calcularPrecioPromocional($detallesProducto['precio'], $promocion['porcentaje_descuento']) : $detallesProducto['precio'];
 
+        // Asegúrate de que el índice 'precio' esté definido en el carrito
+        $_SESSION['carrito'][$categoria][$productoId]['precio'] = $precioUnitario;
+
         // Sumar al total
         $totalCarrito += $producto['cantidad'] * $precioUnitario;
     }
@@ -92,82 +95,261 @@ foreach ($_SESSION['carrito'] as $categoria => $productos) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pagar - HamburGeeks</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script>
-        // Función para mostrar u ocultar el botón de pago según el método seleccionado
-        function togglePaymentButton() {
-            const metodoPago = document.getElementById('metodo_pago').value;
-            const btnConfirmar = document.getElementById('btn-confirmar-efectivo');
-            const btnTransbank = document.getElementById('btn-transbank');
-
-            if (metodoPago === 'efectivo') {
-                btnConfirmar.style.display = 'block';
-                btnTransbank.style.display = 'none';
-            } else if (metodoPago === 'transbank') {
-                btnConfirmar.style.display = 'none';
-                btnTransbank.style.display = 'block';
-            }
+    <style>
+        body {
+            background-color: #f8f9fa;
         }
-    </script>
+        .card-header {
+            background-color: #ff4500;
+            color: white;
+        }
+        .btn-primary {
+            background-color: #ff4500;
+            border-color: #ff4500;
+        }
+        .btn-primary:hover {
+            background-color: #e03e00;
+            border-color: #e03e00;
+        }
+        h1 {
+            color: #333;
+        }
+        .total-amount {
+            font-size: 1.5rem;
+            color: #ff4500;
+            font-weight: bold;
+        }
+        .card {
+            height: 100%;
+        }
+        .row > [class*="col"] {
+            display: flex;
+            flex-direction: column;
+        }
+        .main-container {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .gestionar-direcciones-btn {
+            transition: transform 0.3s ease;
+        }
+
+        .gestionar-direcciones-btn:hover {
+            transform: scale(1.1);
+        }
+        .metodo-pago-opcion {
+        display: inline-block;
+        width: 45%; /* Asegura que ambas opciones ocupen la mitad del espacio */
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .metodo-pago-contenedor {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .btn-check:checked + .metodo-pago-contenedor {
+        border-color: #ff4500;
+        background-color: #ffe6e1;
+    }
+
+    .icono-metodo {
+        max-width: 50px;
+        margin-bottom: 10px;
+    }
+
+    .metodo-pago-contenedor:hover {
+        border-color: #ff4500;
+        transform: scale(1.05);
+    }
+
+    .metodo-pago-contenedor p {
+        margin: 0;
+        font-weight: bold;
+    }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4">Confirmar Pedido</h1>
+        <div class="main-container">
+            <h1 class="text-center mb-4">Confirmar Pedido</h1>
 
-        <!-- Selección de Dirección -->
-        <h3>Dirección de Entrega</h3>
-        <form id="form-pago" action="../funciones/compra/procesar_pago.php" method="POST">
-            <div class="mb-3">
-                <label for="direccion" class="form-label">Selecciona una dirección:</label>
-                <select class="form-select" id="direccion" name="id_direccion" required>
-                    <?php if ($resultadoDirecciones->num_rows > 0): ?>
-                        <?php while ($direccion = $resultadoDirecciones->fetch_assoc()): ?>
-                            <option value="<?= $direccion['id_direccion']; ?>">
-                                <?= $direccion['calle'] . ' #' . $direccion['numero'] . ', ' . $direccion['ciudad']; ?>
-                                <?php if ($direccion['depto_oficina_piso']): ?>
-                                    - <?= $direccion['depto_oficina_piso']; ?>
-                                <?php endif; ?>
-                            </option>
-                        <?php endwhile; ?>
-                    <?php else: ?>
-                        <option value="" disabled>No tienes direcciones registradas.</option>
-                    <?php endif; ?>
-                </select>
+            <!-- Diseño Responsive -->
+            <div class="row row-cols-1 row-cols-lg-2 g-4">
+                <!-- Dirección -->
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="h5 mb-0">Dirección de Entrega</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="form-pago" action="../funciones/compra/procesar_pago.php" method="POST" onsubmit="return validarFormulario();">
+                                <div class="mb-3">
+                                    <label for="direccion" class="form-label">Selecciona una dirección para recibir tu pedido:</label>
+                                    <select class="form-select" id="direccion" name="id_direccion" required>
+                                        <?php if ($resultadoDirecciones->num_rows > 0): ?>
+                                            <?php while ($direccion = $resultadoDirecciones->fetch_assoc()): ?>
+                                                <option value="<?= $direccion['id_direccion']; ?>">
+                                                    <?= $direccion['calle'] . ' #' . $direccion['numero'] . ', ' . $direccion['ciudad']; ?>
+                                                    <?php if ($direccion['depto_oficina_piso']): ?>
+                                                        - <?= $direccion['depto_oficina_piso']; ?>
+                                                    <?php endif; ?>
+                                                </option>
+                                            <?php endwhile; ?>
+                                        <?php else: ?>
+                                            <option value="" disabled>No tienes direcciones registradas.</option>
+                                        <?php endif; ?>
+                                    </select>
+                                </div>
+                                <div class="text-center">
+                                    <a href="index-perfil.php" class="btn btn-secondary gestionar-direcciones-btn">Gestionar Direcciones</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Puntos de Recompensa -->
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="h5 mb-0">Puntos de Recompensa</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <p class="mb-0"><strong>Puntos Disponibles: <?= $puntosDisponibles; ?></strong></p>
+                                <p class="text-muted mb-0" style="font-size: 0.9rem;">(1pto = $1)</p>
+                            </div>
+                            <label for="puntos_usados" class="form-label">Cantidad de puntos a utilizar:</label>
+                            <input 
+                                type="number" 
+                                class="form-control text-center" 
+                                id="puntos_usados" 
+                                name="puntos_usados" 
+                                min="0" 
+                                max="<?= min($puntosDisponibles, $totalCarrito); ?>" 
+                                value="0" 
+                                oninput="actualizarTotal(); validarPuntos();">
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Método de Pago -->
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="h5 mb-0">Método de Pago</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-around">
+                                <!-- Opción Efectivo -->
+                                <label class="metodo-pago-opcion" for="pago_efectivo">
+                                    <input type="radio" class="btn-check" name="metodo_pago" id="pago_efectivo" value="efectivo" required>
+                                    <div class="metodo-pago-contenedor">
+                                        <img src="https://img.icons8.com/ios-filled/50/000000/cash.png" alt="Efectivo" class="icono-metodo">
+                                        <p>Efectivo</p>
+                                    </div>
+                                </label>
+                                <!-- Opción Transbank -->
+                                <label class="metodo-pago-opcion" for="pago_transbank">
+                                    <input type="radio" class="btn-check" name="metodo_pago" id="pago_transbank" value="transbank">
+                                    <div class="metodo-pago-contenedor">
+                                        <img src="https://img.icons8.com/ios-filled/50/000000/bank-card-front-side.png" alt="Transbank" class="icono-metodo">
+                                        <p>Transbank</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen del Pedido -->
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="h5 mb-0">Resumen del Pedido</h3>
+                        </div>
+                        <div class="card-body text-center">
+                            <p>Total: <span class="total-amount">$<?= number_format($totalCarrito, 0, ',', '.'); ?></span></p>
+                            <input type="hidden" id="totalCompra" value="<?= htmlspecialchars($totalCarrito, ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="id_usuario" value="<?= htmlspecialchars($idUsuario, ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="total_compra" id="total_compra" value="<?= htmlspecialchars($totalCarrito, ENT_QUOTES, 'UTF-8'); ?>">
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Puntos de recompensa -->
-            <h3>Puntos de Recompensa</h3>
-            <div class="mb-3">
-                <p>Tienes <strong><?= $puntosDisponibles; ?></strong> puntos disponibles.</p>
-                <label for="puntos_usados" class="form-label">Usar puntos (1 punto = $1):</label>
-                <input type="number" class="form-control" id="puntos_usados" name="puntos_usados" max="<?= $puntosDisponibles; ?>" value="0">
+            <!-- Botón de Confirmar Pedido -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">Confirmar Pedido</button>
             </div>
-
-            <!-- Método de Pago -->
-            <h3>Método de Pago</h3>
-            <div class="mb-3">
-                <label for="metodo_pago" class="form-label">Selecciona el método de pago:</label>
-                <select class="form-select" id="metodo_pago" name="metodo_pago" onchange="togglePaymentButton()" required>
-                    <option value="efectivo">Efectivo</option>
-                    <option value="transbank">Transbank (próximamente)</option>
-                </select>
-            </div>
-
-            <!-- Resumen del Pedido -->
-            <h3>Resumen del Pedido</h3>
-            <p><strong>Total:</strong> $<?= number_format($totalCarrito, 0, ',', '.'); ?></p>
-
-            <!-- Campos ocultos -->
-            <input type="hidden" name="id_usuario" value="<?= htmlspecialchars($idUsuario, ENT_QUOTES, 'UTF-8'); ?>">
-            <input type="hidden" name="total_compra" value="<?= htmlspecialchars($totalCarrito, ENT_QUOTES, 'UTF-8'); ?>">
-
-            <!-- Botón de Confirmar Pedido para efectivo -->
-            <button type="submit" id="btn-confirmar-efectivo" class="btn btn-primary btn-lg" style="display: block;">Confirmar Pedido</button>
-
-            <!-- Botón de Pago Transbank (deshabilitado por ahora) -->
-            <button type="button" id="btn-transbank" class="btn btn-secondary btn-lg" style="display: none;" disabled>Pagar con Transbank</button>
-        </form>
+        </div>
     </div>
+    <script>
+        // Validar que un método de pago esté seleccionado antes de enviar
+        function validarFormulario() {
+            const metodoPago = document.querySelector('input[name="metodo_pago"]:checked');
+            if (!metodoPago) {
+                alert("Por favor, selecciona un método de pago.");
+                return false;
+            }
+            return true;
+        }
 
+        // Función para actualizar el precio total dinámicamente
+        function actualizarTotal() {
+            const totalCompra = parseFloat(document.getElementById('totalCompra').value); // Total original
+            const puntosUsados = parseInt(document.getElementById('puntos_usados').value) || 0; // Puntos ingresados
+            const maxPuntos = parseInt(document.getElementById('puntos_usados').max); // Máximo de puntos disponibles
+
+            // Validar que los puntos no superen el máximo
+            if (puntosUsados > maxPuntos) {
+                alert("No puedes usar más puntos de los disponibles.");
+                document.getElementById('puntos_usados').value = maxPuntos;
+                return;
+            }
+
+            // Calcular el nuevo total
+            const nuevoTotal = totalCompra - puntosUsados;
+
+            // Mostrar el nuevo total (asegurándonos de que no sea negativo)
+            document.getElementById('totalConDescuento').textContent = 
+                nuevoTotal > 0 ? nuevoTotal.toLocaleString() : '0';
+            document.getElementById('total_compra').value = nuevoTotal > 0 ? nuevoTotal : 0; // Actualizar el input oculto
+
+            function validarPuntos() {
+                const puntosUsados = parseInt(document.getElementById('puntos_usados').value) || 0; // Puntos ingresados
+                const maxPuntos = parseInt(document.getElementById('puntos_usados').max); // Máximo permitido
+                const minPuntos = parseInt(document.getElementById('puntos_usados').min); // Mínimo permitido
+
+                // Verificar si los puntos están fuera del rango permitido
+                if (puntosUsados < minPuntos) {
+                    alert("No puedes usar un valor negativo.");
+                    document.getElementById('puntos_usados').value = minPuntos;
+                } else if (puntosUsados > maxPuntos) {
+                    alert(`No puedes usar más de ${maxPuntos} puntos.`);
+                    document.getElementById('puntos_usados').value = maxPuntos;
+                }
+            }
+            
+            function actualizarLimites() {
+                const totalCompra = parseFloat(document.getElementById('totalCompra').value); // Total del carrito
+                const maxPuntosDisponibles = parseInt(document.getElementById('puntos_usados').max); // Puntos disponibles
+
+                // Ajustar el máximo dinámicamente
+                const nuevoMaximo = Math.min(maxPuntosDisponibles, totalCompra);
+                document.getElementById('puntos_usados').max = nuevoMaximo;
+            }
+        }
+    </script>                    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

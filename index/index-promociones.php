@@ -227,6 +227,50 @@ $resultado = $conexion->query($query);
             background-color: #e67e22;
             transform: scale(1.1);
         }
+
+        .notification {
+            background-color: #343a40;
+            color: #fff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+            font-family: 'Arial', sans-serif;
+            max-width: 300px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .notification span {
+            flex-grow: 1;
+        }
+
+        .notification .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .notification .close-btn:hover {
+            color: #e67e22;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -337,7 +381,7 @@ $resultado = $conexion->query($query);
             }, 5000);
         }
     </script>
-
     <div id="notification-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;"></div>
+    <?php include '../includes/footer.php'; ?>
 </body>
 </html>
