@@ -189,7 +189,6 @@ $stmt_direcciones->close();
     <div class="card">
         <div class="card-body py-4"> 
             <h4>Gestionar Direcciones</h4>
-            <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addAddressModal">Añadir Nueva Dirección</button>
             <ul class="list-group">
                 <?php foreach ($direcciones as $direccion): ?>
                     <li class="list-group-item d-flex justify-content-between align-items-center mb-3">
@@ -203,7 +202,7 @@ $stmt_direcciones->close();
                             <a href="../funciones/gestionar_direcciones/eliminar_direccion.php?id_direccion=<?= $direccion['id_direccion']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta dirección?')">Eliminar</a>
                         </div>
                     </li>
-
+                    
                     <!-- Modal para Editar Dirección -->
                     <div class="modal fade" id="editAddressModal-<?= $direccion['id_direccion']; ?>" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog">
@@ -231,7 +230,7 @@ $stmt_direcciones->close();
                                             <label for="depto_oficina_piso">Depto, Oficina, Piso</label>
                                             <input type="text" class="form-control" name="depto_oficina_piso" value="<?= htmlspecialchars($direccion['depto_oficina_piso']); ?>" required>
                                         </div>
-                                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                        <button type="submit" class="btn btn-primary mt-2">Guardar Cambios</button>
                                     </form>
                                 </div>
                             </div>
@@ -239,6 +238,7 @@ $stmt_direcciones->close();
                     </div>
                 <?php endforeach; ?>
             </ul>
+            <button class="btn btn-success mb-3 mt-2" data-bs-toggle="modal" data-bs-target="#addAddressModal">Añadir Nueva Dirección</button>
         </div>
     </div>
 </div>
@@ -269,7 +269,7 @@ $stmt_direcciones->close();
                         <label for="depto_oficina_piso">Depto, Oficina, Piso</label>
                         <input type="text" class="form-control" name="depto_oficina_piso" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Guardar Dirección</button>
+                    <button type="submit" class="btn btn-primary mt-2">Guardar Dirección</button>
                 </form>
             </div>
         </div>
