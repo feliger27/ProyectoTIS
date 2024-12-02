@@ -412,7 +412,17 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-       function agregarAlCarrito(idProducto, categoria, nombre, precio, imagen) {
+       // Comprobar si el usuario ha iniciado sesión
+const usuarioIniciado = <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>;
+
+function agregarAlCarrito(idProducto, categoria, nombre, precio, imagen) {
+    if (!usuarioIniciado) {
+        // Si no hay sesión de usuario, mostrar un mensaje o redirigir
+        alert('Debes iniciar sesión para agregar productos al carrito.');
+        window.location.href = '../login/login.php'; // Cambia la URL según tu estructura de directorios
+        return;
+    }
+
     // Enviar una solicitud AJAX para agregar el producto al carrito
     fetch('../funciones/gestionar_carrito/agregar_carrito.php', {
         method: 'POST',
