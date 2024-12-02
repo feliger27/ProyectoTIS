@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 include('../conexion.php');
+include('../includes/header.php'); // Header con el contador del carrito
 
 // Verificar que se recibe el ID del pedido
 if (!isset($_GET['id_pedido']) || !is_numeric($_GET['id_pedido'])) {
@@ -65,10 +66,11 @@ foreach ($categorias as $categoria) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
+            margin-top: 90px;
             background-color: #f4f4f9;
         }
         .card-header {
-            background-color: #2d3436;
+            background-color: #d35400;
             color: white;
             font-weight: bold;
         }
@@ -87,7 +89,7 @@ foreach ($categorias as $categoria) {
             font-weight: bold;
         }
         .btn-primary {
-            background-color: #0984e3;
+            background-color: #d35400;
             border: none;
         }
         .btn-primary:hover {
@@ -102,7 +104,7 @@ foreach ($categorias as $categoria) {
     <div class="container mt-5">
         <div class="card shadow-lg">
             <div class="card-header text-center">
-                <h2>Confirmación de Pedido</h2>
+                <h2>Confirmación del Pedido</h2>
             </div>
             <div class="card-body">
                 <!-- Detalles del pedido -->
@@ -115,12 +117,11 @@ foreach ($categorias as $categoria) {
                     <?php if ($pedido['depto_oficina_piso']): ?>
                         <p><strong>Depto/Oficina/Piso:</strong> <?= $pedido['depto_oficina_piso']; ?></p>
                     <?php endif; ?>
-                    <p><strong>Monto Total Original:</strong> <span class="total-amount">$<?= number_format($pedido['monto_total'], 0, ',', '.'); ?></span></p>
+                    <p><strong>Monto Total:</strong> <span class="total-amount">$<?= number_format($pedido['monto_total'], 0, ',', '.'); ?></span></p>
                     <?php if ($pedido['puntos_utilizados'] > 0): ?>
                         <p><strong>Puntos Utilizados:</strong> <?= $pedido['puntos_utilizados']; ?> puntos</p>
                         <p class="discount-amount"><strong>Descuento por Puntos:</strong> -$<?= number_format($pedido['puntos_utilizados'], 0, ',', '.'); ?></p>
                     <?php endif; ?>
-                    <p><strong>Monto Total con Descuento:</strong> <span class="total-amount">$<?= number_format($montoConDescuento, 0, ',', '.'); ?></span></p>
                 </div>
 
                 <!-- Artículos del pedido -->
