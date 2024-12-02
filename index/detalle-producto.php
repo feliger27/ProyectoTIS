@@ -189,45 +189,83 @@ if ($tipo_producto == 'combo') {
 </head>
 
 <body>
-
     <div class="container product-detail">
         <div class="row mt-4">
-            <!-- Imagen del producto -->
             <div class="col-md-6 mt-4">
-                <img src="<?php echo $imagenPath . $imagen; ?>" alt="Imagen de <?php echo $nombre_producto; ?>"
-                    class="image shadow-lg">
+                <img src="<?php echo $imagenPath . $imagen; ?>" alt="Imagen de <?php echo $nombre_producto; ?>" class="image shadow-lg">
             </div>
-
-            <!-- Detalles del producto -->
             <div class="col-md-6 content mt-4">
                 <h2 class="title"><?php echo $nombre_producto; ?></h2>
                 <p class="description"><?php echo $descripcion; ?></p>
 
-                <!-- Mostrar productos del combo -->
-                <?php if ($tipo_producto == 'combo'): ?>
-                    <h3 class="mt-4">Productos incluidos en este combo:</h3>
-                    <ul class="product-details-list">
-                        <?php if ($productos_combo['hamburguesas']): ?>
-                            <li><strong>Hamburguesas:</strong> <?php echo $productos_combo['hamburguesas']; ?></li>
-                        <?php endif; ?>
-                        <?php if ($productos_combo['acompaniamientos']): ?>
-                            <li><strong>Acompañamientos:</strong> <?php echo $productos_combo['acompaniamientos']; ?></li>
-                        <?php endif; ?>
-                        <?php if ($productos_combo['bebidas']): ?>
-                            <li><strong>Bebidas:</strong> <?php echo $productos_combo['bebidas']; ?></li>
-                        <?php endif; ?>
-                        <?php if ($productos_combo['postres']): ?>
-                            <li><strong>Postres:</strong> <?php echo $productos_combo['postres']; ?></li>
-                        <?php endif; ?>
-                    </ul>
-                <?php endif; ?>
+                <!-- Botón para abrir el modal de reseñas -->
+                <button type="button" class="btn btn-info mt-3" data-bs-toggle="modal" data-bs-target="#resenasModal" id="btnResenas">
+                    Ver Reseñas
+                </button>
 
                 <a href="index-menu.php" class="btn btn-primary back-btn">Volver al Menú</a>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Modal Mejorado para Mostrar las Reseñas -->
+<div class="modal fade" id="resenasModal" tabindex="-1" aria-labelledby="resenasModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <!-- Encabezado del Modal -->
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title d-flex align-items-center" id="resenasModalLabel">
+                    <i class="bi bi-star-fill me-2"></i> Reseñas de <?php echo $nombre_producto; ?>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- Cuerpo del Modal -->
+            <div class="modal-body" id="modalBody" style="max-height: 500px; overflow-y: auto;">
+                <div class="text-center text-muted">Cargando reseñas...</div>
+            </div>
+            <!-- Pie del Modal -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const btnResenas = document.getElementById("btnResenas");
+            btnResenas.addEventListener("click", function () {
+                // Realizar la petición para cargar reseñas
+                fetch('../funciones/gestionar_valoraciones/obtener_resenas.php?nombre=<?php echo urlencode($nombre_producto); ?>&tipo=<?php echo urlencode($tipo_producto); ?>')
+                    .then(response => response.json())
+                    .then(data => {
+                        const modalBody = document.getElementById("modalBody");
+                        if (data.success) {
+                            let html = "";
+                            data.reseñas.forEach(resena => {
+                                html += `<div class="resena">
+                                    <h6>${resena.usuario}</h6>
+                                    <p>${resena.comentario}</p>
+                                    <small class="text-muted">Puntuación: ${resena.puntuacion}/5</small>
+                                    <hr>
+                                </div>`;
+                            });
+                            modalBody.innerHTML = html;
+                        } else {
+                            modalBody.innerHTML = `<p class="text-danger">No se encontraron reseñas para este producto.</p>`;
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById("modalBody").innerHTML = `<p class="text-danger">Error al cargar las reseñas.</p>`;
+                        console.error("Error al cargar las reseñas:", error);
+                    });
+            });
+        });
+        
+    </script>
+    
 </body>
 
 </html>

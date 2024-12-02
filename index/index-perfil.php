@@ -247,7 +247,7 @@ $stmt_direcciones->close();
 
                             <div class="form-group mb-3">
                                 <label for="comentario">Comentario</label>
-                                <textarea class="form-control" name="comentario" rows="3" placeholder="Escribe tu comentario"></textarea>
+                                <textarea class="form-control" name="comentario" rows="3" placeholder="Escribe un comentario (general)"></textarea>
                             </div>
 
                             <button type="submit" class="btn btn-primary">Enviar Valoración</button>
