@@ -108,6 +108,19 @@ foreach ($_SESSION['carrito'] as $categoria => $productos) {
             }
         }
     </script>
+    <style>
+        body {
+            padding-top: 90px; /* Añade un espacio en la parte superior de la página */
+        }
+        .container {
+            margin-top: 30px; /* Añade un espacio adicional solo al contenedor principal */
+        }
+        .header-section h1 {
+            font-weight: bold;
+            font-size: 2.5rem;
+            color: #1a202c;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">

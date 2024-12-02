@@ -412,7 +412,7 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function agregarAlCarrito(idProducto, categoria, nombre, precio, imagen) {
+       function agregarAlCarrito(idProducto, categoria, nombre, precio, imagen) {
     // Enviar una solicitud AJAX para agregar el producto al carrito
     fetch('../funciones/gestionar_carrito/agregar_carrito.php', {
         method: 'POST',
@@ -429,26 +429,50 @@ function obtenerPromocion($productoId, $categoria, $promociones) {
     })
     .then(response => response.json())
     .then(data => {
-        // Actualizar el contador del carrito, si es parte de tu lógica de negocio
-        actualizarContadorCarrito(data.totalProductos);
+        if (data.totalProductos !== undefined) {
+            // Actualizar el contador del carrito
+            actualizarContadorCarrito(data.totalProductos);
 
-        // Mostrar la notificación
-        mostrarNotificacion(`${nombre} ha sido agregado al carrito exitosamente`);
+            // Mostrar la notificación
+            mostrarNotificacion(`${nombre} ha sido agregado al carrito exitosamente`);
+        } else {
+            // Manejar posibles errores que podrían venir en data.error
+            console.error('Error al agregar al carrito:', data.error);
+        }
     })
-    
+    .catch(error => {
+        console.error('Error al procesar la respuesta:', error);
+    });
 }
 
+
 function actualizarContadorCarrito(totalProductos) {
+    // Encontrar el elemento del contador del carrito en la página
     const cartCountElement = document.querySelector('.cart-count');
+
     if (cartCountElement) {
-        cartCountElement.textContent = totalProductos;
-    } else {
+        // Si el contador ya existe, simplemente actualizamos su contenido
+        cartCountElement.textContent = totalProductos > 0 ? totalProductos : '';
+    } else if (totalProductos > 0) {
+        // Si el contador no existe y hay productos, creamos el contador
         const newCartCount = document.createElement('span');
         newCartCount.classList.add('cart-count');
         newCartCount.textContent = totalProductos;
-        document.querySelector('.cart-icon').appendChild(newCartCount);
+
+        // Necesitas asegurarte de que el selector '.cart-icon' apunte al elemento correcto que debe contener el contador
+        const cartIcon = document.querySelector('.cart-icon');
+        if (cartIcon) {
+            cartIcon.appendChild(newCartCount);
+        } else {
+            console.error('El icono del carrito no se encontró en el DOM.');
+        }
+    }
+    // Si el total de productos es 0 y el contador existe, podría considerarse eliminar el span o dejarlo vacío
+    if (totalProductos === 0 && cartCountElement) {
+        cartCountElement.remove(); // Opcional, remover el contador si no hay productos
     }
 }
+
 
 function mostrarNotificacion(mensaje) {
     const container = document.getElementById('notification-container');

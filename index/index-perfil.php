@@ -96,7 +96,7 @@ $stmt_direcciones->close();
 </head>
 
 <body>
-    <div class="container pt-4 my-5">
+    <div class="container pt-5 my-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="text-center">Mi Perfil</h2>
             <div>
