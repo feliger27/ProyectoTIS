@@ -201,13 +201,17 @@ $stmt_direcciones->close();
                                     echo "<td>" . htmlspecialchars($pedido['estado_pedido']) . "</td>";
                                     echo "<td>" . htmlspecialchars($pedido['fecha_pedido']) . "</td>";
                                     echo "<td>" . htmlspecialchars($pedido['monto_total']) . "</td>";
-                                    echo "<td><button class='btn btn-primary btn-sm' data-bs-toggle='modal' data-bs-target='#valorarPedidoModal-{$pedido['id_pedido']}'>Valorar</button></td>";
-                                    echo "</tr>";
+                                    echo "<td>
+                                    <button class='btn btn-primary btn-sm' data-bs-toggle='modal' data-bs-target='#valorarPedidoModal-{$pedido['id_pedido']}'>Valorar</button>
+                                            <button class='btn btn-success btn-sm' data-bs-toggle='modal' data-bs-target='#detallePedidoModal-{$pedido['id_pedido']}'>Ver Detalles</button>
+                                  </td>";
+                            echo "</tr>";                                    echo "</tr>";
                                 }
                                 $stmt_pedidos->close();
                                 ?>
                             </tbody>
                         </table>
+                        
                     </div>
                 </div>
             </div>
@@ -259,7 +263,145 @@ $stmt_direcciones->close();
                 </div>
             </div>
             <?php
+
+             ?>
+            <div class="modal fade" id="detallePedidoModal-<?= $pedido['id_pedido'] ?>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Detalles del Pedido #<?= htmlspecialchars($pedido['id_pedido']); ?></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <?php
+                            // Consulta para obtener detalles del pedido
+                            $query_detalles = "
+                                SELECT 'Hamburguesa' AS tipo, h.nombre_hamburguesa AS producto, ph.cantidad, ph.precio
+                                FROM pedido_hamburguesa ph
+                                JOIN hamburguesa h ON ph.id_hamburguesa = h.id_hamburguesa
+                                WHERE ph.id_pedido = ?
+                                UNION
+                                SELECT 'Bebida', b.nombre_bebida, pb.cantidad, pb.precio
+                                FROM pedido_bebida pb
+                                JOIN bebida b ON pb.id_bebida = b.id_bebida
+                                WHERE pb.id_pedido = ?
+                                UNION
+                                SELECT 'Acompañamiento', a.nombre_acompaniamiento, pa.cantidad, pa.precio
+                                FROM pedido_acompaniamiento pa
+                                JOIN acompaniamiento a ON pa.id_acompaniamiento = a.id_acompaniamiento
+                                WHERE pa.id_pedido = ?
+                                UNION
+                                SELECT 'Postre', p.nombre_postre, pp.cantidad, pp.precio
+                                FROM pedido_postre pp
+                                JOIN postre p ON pp.id_postre = p.id_postre
+                                WHERE pp.id_pedido = ?";
+                            $stmt_detalles = $conexion->prepare($query_detalles);
+                            $stmt_detalles->bind_param("iiii", $pedido['id_pedido'], $pedido['id_pedido'], $pedido['id_pedido'], $pedido['id_pedido']);
+                            $stmt_detalles->execute();
+                            $result_detalles = $stmt_detalles->get_result();
+
+                            echo "<table class='table'>
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Producto</th>
+                                            <th>Cantidad</th>
+                                            <th>Precio</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>";
+                            while ($detalle = $result_detalles->fetch_assoc()) {
+                                echo "<tr>";
+                                echo "<td>" . htmlspecialchars($detalle['tipo']) . "</td>";
+                                echo "<td>" . htmlspecialchars($detalle['producto']) . "</td>";
+                                echo "<td>" . htmlspecialchars($detalle['cantidad']) . "</td>";
+                                echo "<td>$" . htmlspecialchars($detalle['precio']) . "</td>";
+                                echo "</tr>";
+                            }
+                            echo "</tbody>
+                                </table>";
+
+                            $stmt_detalles->close();
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
             }
+            $stmt_pedidos = $conexion->prepare("
+            SELECT id_pedido 
+            FROM pedido 
+            WHERE id_usuario = ?");
+        $stmt_pedidos->bind_param("i", $user_id);
+        $stmt_pedidos->execute();
+        $result_pedidos = $stmt_pedidos->get_result();
+            while ($pedido = $result_pedidos->fetch_assoc()) {
+                ?>
+                <div class="modal fade" id="detallePedidoModal-<?= $pedido['id_pedido'] ?>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Detalles del Pedido #<?= htmlspecialchars($pedido['id_pedido']); ?></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <?php
+                                // Consulta para obtener detalles del pedido
+                                $query_detalles = "
+                                    SELECT 'Hamburguesa' AS tipo, h.nombre_hamburguesa AS producto, ph.cantidad, ph.precio
+                                    FROM pedido_hamburguesa ph
+                                    JOIN hamburguesa h ON ph.id_hamburguesa = h.id_hamburguesa
+                                    WHERE ph.id_pedido = ?
+                                    UNION
+                                    SELECT 'Bebida', b.nombre_bebida, pb.cantidad, pb.precio
+                                    FROM pedido_bebida pb
+                                    JOIN bebida b ON pb.id_bebida = b.id_bebida
+                                    WHERE pb.id_pedido = ?
+                                    UNION
+                                    SELECT 'Acompañamiento', a.nombre_acompaniamiento, pa.cantidad, pa.precio
+                                    FROM pedido_acompaniamiento pa
+                                    JOIN acompaniamiento a ON pa.id_acompaniamiento = a.id_acompaniamiento
+                                    WHERE pa.id_pedido = ?
+                                    UNION
+                                    SELECT 'Postre', p.nombre_postre, pp.cantidad, pp.precio
+                                    FROM pedido_postre pp
+                                    JOIN postre p ON pp.id_postre = p.id_postre
+                                    WHERE pp.id_pedido = ?";
+                                $stmt_detalles = $conexion->prepare($query_detalles);
+                                $stmt_detalles->bind_param("iiii", $pedido['id_pedido'], $pedido['id_pedido'], $pedido['id_pedido'], $pedido['id_pedido']);
+                                $stmt_detalles->execute();
+                                $result_detalles = $stmt_detalles->get_result();
+    
+                                echo "<table class='table'>
+                                        <thead>
+                                            <tr>
+                                                <th>Tipo</th>
+                                                <th>Producto</th>
+                                                <th>Cantidad</th>
+                                                <th>Precio</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>";
+                                while ($detalle = $result_detalles->fetch_assoc()) {
+                                    echo "<tr>";
+                                    echo "<td>" . htmlspecialchars($detalle['tipo']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($detalle['producto']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($detalle['cantidad']) . "</td>";
+                                    echo "<td>$" . htmlspecialchars($detalle['precio']) . "</td>";
+                                    echo "</tr>";
+                                }
+                                echo "</tbody>
+                                    </table>";
+    
+                                $stmt_detalles->close();
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php
+                }
             $stmt_pedidos->close();
             ?>
         </div>
