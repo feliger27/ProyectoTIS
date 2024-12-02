@@ -184,6 +184,100 @@ $stmt_direcciones->close();
                     </div>
                 </div>
             </div>
+             <!-- Gestión de Direcciones -->
+<div class="tab-pane fade" id="manage-addresses" role="tabpanel" aria-labelledby="addresses-tab">
+    <div class="card">
+        <div class="card-body py-4"> 
+            <h4>Gestionar Direcciones</h4>
+            <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addAddressModal">Añadir Nueva Dirección</button>
+            <ul class="list-group">
+                <?php foreach ($direcciones as $direccion): ?>
+                    <li class="list-group-item d-flex justify-content-between align-items-center mb-3">
+                        <div class="flex-grow-1">
+                            <span>
+                                <?= htmlspecialchars($direccion['calle']) . ' ' . htmlspecialchars($direccion['numero']) . ', ' . htmlspecialchars($direccion['ciudad']). ' ' . htmlspecialchars($direccion['depto_oficina_piso']); ?>
+                            </span>
+                        </div>
+                        <div>
+                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editAddressModal-<?= $direccion['id_direccion']; ?>">Editar</button>
+                            <a href="../funciones/gestionar_direcciones/eliminar_direccion.php?id_direccion=<?= $direccion['id_direccion']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta dirección?')">Eliminar</a>
+                        </div>
+                    </li>
+
+                    <!-- Modal para Editar Dirección -->
+                    <div class="modal fade" id="editAddressModal-<?= $direccion['id_direccion']; ?>" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Editar Dirección</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="../funciones/gestionar_direcciones/editar_direccion.php" method="POST">
+                                        <input type="hidden" name="id_direccion" value="<?= $direccion['id_direccion']; ?>">
+                                        <div class="form-group mb-3">
+                                            <label for="calle">Calle</label>
+                                            <input type="text" class="form-control" name="calle" value="<?= htmlspecialchars($direccion['calle']); ?>" required>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="numero">Número</label>
+                                            <input type="text" class="form-control" name="numero" value="<?= htmlspecialchars($direccion['numero']); ?>" required>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="ciudad">Ciudad</label>
+                                            <input type="text" class="form-control" name="ciudad" value="<?= htmlspecialchars($direccion['ciudad']); ?>" required>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="depto_oficina_piso">Depto, Oficina, Piso</label>
+                                            <input type="text" class="form-control" name="depto_oficina_piso" value="<?= htmlspecialchars($direccion['depto_oficina_piso']); ?>" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Añadir Dirección -->
+<div class="modal fade" id="addAddressModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Añadir Nueva Dirección</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="../funciones/gestionar_direcciones/insertar_direccion.php" method="POST">
+                    <div class="form-group mb-3">
+                        <label for="calle">Calle</label>
+                        <input type="text" class="form-control" name="calle" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="numero">Número</label>
+                        <input type="text" class="form-control" name="numero" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="ciudad">Ciudad</label>
+                        <input type="text" class="form-control" name="ciudad" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="depto_oficina_piso">Depto, Oficina, Piso</label>
+                        <input type="text" class="form-control" name="depto_oficina_piso" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Dirección</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+            
+            
 
             <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
                 <div class="card">
