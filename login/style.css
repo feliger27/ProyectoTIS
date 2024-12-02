@@ -5,7 +5,7 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 body {
-    background-image: url('../uploads/lobby.jpg');
+    background-image: url('fondo2.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
