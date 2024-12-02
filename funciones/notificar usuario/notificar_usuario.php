@@ -15,8 +15,8 @@ function enviarCorreoNotificacion($id_pedido, $estado_pedido, $correo)
         $mail->isSMTP();
         $mail->Host = 'sandbox.smtp.mailtrap.io';
         $mail->SMTPAuth = true;
-        $mail->Username = '02508a3a3a9bf5';
-        $mail->Password = '99c3b27d1457ed';
+        $mail->Username = '80f0a7e4d54b79'; // Usuario de Mailtrap
+        $mail->Password = '1961d2c4a89957'; // Contraseña de Mailtrap
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 25;
         $mail->CharSet = 'UTF-8';
@@ -44,8 +44,8 @@ function enviarCorreoRestablecimiento($email, $token) {
         $mail->isSMTP();
         $mail->Host = 'sandbox.smtp.mailtrap.io'; // Cambia a tu servidor SMTP real
         $mail->SMTPAuth = true;
-        $mail->Username = '02508a3a3a9bf5';
-        $mail->Password = '99c3b27d1457ed';  // Tu contraseña de SMTP
+        $mail->Username = '80f0a7e4d54b79'; // Usuario de Mailtrap
+        $mail->Password = '1961d2c4a89957'; // Contraseña de Mailtrap
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 25;
         $mail->CharSet = 'UTF-8';
