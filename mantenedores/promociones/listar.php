@@ -28,6 +28,7 @@ $result = $conexion->query($sql);
     <title>Listado de Promociones</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
 
@@ -87,7 +88,7 @@ $result = $conexion->query($sql);
                             ?>
                         </td>
                         <td>
-                            <a href="editar_promocion.php?id=<?php echo $row['id_promocion']; ?>" class="btn btn-primary btn-sm">Editar</a>
+                            <a href="editar_promocion.php?id=<?php echo $row['id_promocion']; ?>" class="btn btn-primary btn-sm"><i class="bi bi-pencil-square"></i></a>
                             <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#eliminarModal" data-id="<?php echo $row['id_promocion']; ?>">Eliminar</button>
                         </td>
                     </tr>

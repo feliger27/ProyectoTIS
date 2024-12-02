@@ -32,10 +32,12 @@ session_start();
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            
         }
         .logo-container img {
-            max-width: 120%;
-            max-height: 120%;
+            max-width: 100%;
+            max-height: 100%;
+            
         }
         .card {
             background-color: #333;
@@ -61,7 +63,7 @@ session_start();
         <div class="container d-flex justify-content-center align-items-center">
             <div class="logo-container me-3">
                 <a href="../index/index-lobby.php">
-                    <img src="logo-hamburgeeks.png" alt="Logo">
+                    <img src="../uploads/HAMBUR_Mesa3.png" alt="Logo">
                 </a>
             </div>
             <h1 class="m-0">Panel de Administración</h1>

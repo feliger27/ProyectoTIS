@@ -36,6 +36,7 @@ $result = $conexion->query($sql);
     <meta charset="UTF-8">
     <title>Listado de Combos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 
 <body class="container py-5">
@@ -73,10 +74,10 @@ $result = $conexion->query($sql);
                     <td><?= $combo['bebidas'] ?: 'N/A' ?></td>
                     <td><?= $combo['postres'] ?: 'N/A' ?></td>
                     <td>
-                        <a href="editar.php?id_combo=<?= $combo['id_combo'] ?>" class="btn btn-primary btn-sm">Editar</a>
+                        <a href="editar.php?id_combo=<?= $combo['id_combo'] ?>" class="btn btn-primary btn-sm"><i class="bi bi-pencil-square"></i></a>
 
                         <a href="eliminar.php?id=<?= $combo['id_combo'] ?>" class="btn btn-danger btn-sm"
-                            onclick="return confirm('¿Está seguro de que desea eliminar este combo?');">Eliminar</a>
+                            onclick="return confirm('¿Está seguro de que desea eliminar este combo?');"><i class="bi bi-trash"></i></a>
                     </td>
                 </tr>
             <?php endwhile; ?>
